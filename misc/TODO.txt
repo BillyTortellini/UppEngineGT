@@ -1,0 +1,29 @@
+UppEngineGT:
+------------
+Goal: Windows and Linux "GameEngine"-like program.
+
+TODO:
+-----
+Today:
+ - Git repository
+ - Folder structure for the game
+ - Windows drawing pixels
+ - Windows input
+
+ Backlog:
+  - Windows dynamic dll loading
+  - Windows sound
+  - Window options (Fullscreen, Quit, Wait/Poll-Events...)
+  - OpenGL Support
+  - Linux remove SDL
+  - Memory allocators
+    * Stack allocator
+    * Block allocator
+    * Heap allocator
+  - Data Structures with Allocs
+    * List
+    * Dynamic array
+    * Hashmap?
+ 
+
+
