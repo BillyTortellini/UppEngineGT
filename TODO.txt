@@ -16,6 +16,8 @@ Today:
   - Window options (Fullscreen, Quit, Wait/Poll-Events...)
   - OpenGL Support
   - Linux remove SDL
+  - Logging Functionality
+  - Compiler Switches
   - Memory allocators
     * Stack allocator
     * Block allocator
