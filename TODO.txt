@@ -18,6 +18,7 @@ Today:
   - Linux remove SDL
   - Logging Functionality
   - Compiler Switches
+  - Always start program with same working directory
   - Memory allocators
     * Stack allocator
     * Block allocator
