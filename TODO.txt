@@ -5,17 +5,19 @@ Goal: Windows and Linux "GameEngine"-like program.
 TODO:
 -----
 Today:
- - Windows input
+ - Windows input (Keyboard and Mouse)
+ - Windows call game draw
+ - Window options (Fullscreen, Quit, Wait/Poll-Events...)
 
  Backlog:
-  - Windows call game draw
+  - Windows Timing
   - Windows dynamic dll loading
   - Windows sound
-  - Window options (Fullscreen, Quit, Wait/Poll-Events...)
   - OpenGL Support
   - Linux remove SDL
   - Logging Functionality
   - Compiler Switches
+  - Vector Library
   - Always start program with same working directory
   - Memory allocators
     * Stack allocator

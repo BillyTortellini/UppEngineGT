@@ -3,18 +3,18 @@
 
 #include "datatypes.hpp"
 
-struct GameMemory
+struct Memory
 {
     byte* memory;
-    uint32 size;
+    uint64 size;
 };
 
-struct GameInput
+struct Input
 {
-    const byte* keysDown;
-    const byte* keysPressed;
-    const byte* mouseKeyDown;
-    const byte* mouseKeyPressed;
+    const byte* keyDown; // If the key is currently down
+    const byte* keyPressed; // Contains the count how many times the key was pressed between last and current frame
+    const byte* mouseDown;
+    const byte* mousePressed;
     int mouseX, mouseY;
 };
 
@@ -23,19 +23,21 @@ struct WindowState
     int width, height;
     bool fullscreen;
     bool minimized;
-    bool fullscreenTarget;
-    bool quitTarget;
-    bool minimizedTarget;
+    bool quit;
+    bool continuousDraw;
+    bool wasResized;
 };
 
-struct GameVideo
+struct Pixel; // Has to contain bytes r, g, b and a. Is defined by the platform
+
+struct VideoData
 {
-    byte* pixelData;
+    Pixel* pixels;
     int width;
     int height;
 };
 
-struct GameTime
+struct Time
 {
     double now; // In seconds since game start
     double tslf; // In seconds
@@ -51,27 +53,33 @@ struct SoundInfo
 
 typedef void (*lockSoundFunc)();
 typedef void (*unlockSoundFunc)();
+typedef uint32 (*getFileSizeFunc)(const char* filename);
+typedef void (*loadFileFunc)(byte* memory);
+typedef void (*debugPrintFunc)(const char* str);
 
-struct PlatformFunctions
+struct Services
 {
     lockSoundFunc lockSound; 
     unlockSoundFunc unlockSound;
+    getFileSizeFunc getFileSize;
+    loadFileFunc loadFileFunc;
+    debugPrintFunc debugPrint;
 };
 
 struct GameState
 {
-    GameMemory memory;
-    GameInput input;
-    GameTime time;
-    GameVideo video;
+    Memory memory;
+    Input input;
+    Time time;
+    VideoData videoData;
     SoundInfo soundInfo;
-    WindowState winState;
-    PlatformFunctions platformFunctions;
+    WindowState windowState;
+    Services services;
 };
 
-typedef void (*gameInitFunc)(GameMemory* memory);
+typedef void (*gameInitFunc)(GameState* state);
 typedef void (*gameTickFunc)(GameState* state);
-typedef void (*gameShutdownFunc)(GameMemory* memory);
+typedef void (*gameShutdownFunc)(GameState* state);
 typedef void (*gameAudioFunc)(GameState* state, byte* stream, int length);
 
 typedef enum
@@ -141,8 +149,11 @@ typedef enum
     KEY_RALT = 230, /**< alt gr, option */
 } UPP_KEYCODE;
 
-#define MB_LEFT 0
-#define MB_MIDDLE 1
-#define MB_RIGHT 2
+typedef enum
+{
+    MB_LEFT = 0,
+    MB_RIGHT = 3,
+    MB_MIDDLE = 1,
+} UPP_MOUSEKEY;
 
 #endif
