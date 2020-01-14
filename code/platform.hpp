@@ -1,7 +1,11 @@
-#ifndef __GAME_HPP__
+#ifndef j_GAME_HPP__
 #define __GAME_HPP__
 
 #include "datatypes.hpp"
+
+// Defines
+#define NUM_KEYS 256
+#define NUM_MOUSE_KEYS 3
 
 struct Memory
 {
@@ -11,11 +15,13 @@ struct Memory
 
 struct Input
 {
-    const byte* keyDown; // If the key is currently down
-    const byte* keyPressed; // Contains the count how many times the key was pressed between last and current frame
-    const byte* mouseDown;
-    const byte* mousePressed;
-    int mouseX, mouseY;
+    byte keyDown[NUM_KEYS]; // If the key is currently down
+    byte keyPressed[NUM_KEYS]; // Contains the count how many times the key was pressed between last and current frame
+    byte mouseDown[NUM_MOUSE_KEYS];
+    byte mousePressed[NUM_MOUSE_KEYS];
+    float mouseWheel;
+    int mouseX, mouseY; // TODO: Eventually floating point
+    int deltaX, deltaY;
 };
 
 struct WindowState
@@ -84,6 +90,7 @@ typedef void (*gameAudioFunc)(GameState* state, byte* stream, int length);
 
 typedef enum
 {
+    KEY_UNASSIGNED = 0, // Used in keyboard translation tables to indicate that no key mapping exists
     KEY_A = 4,
     KEY_B = 5,
     KEY_C = 6,
@@ -151,9 +158,9 @@ typedef enum
 
 typedef enum
 {
-    MB_LEFT = 0,
-    MB_RIGHT = 3,
-    MB_MIDDLE = 1,
+    MOUSE_LEFT = 0,
+    MOUSE_RIGHT = 1,
+    MOUSE_MIDDLE = 2,
 } UPP_MOUSEKEY;
 
 #endif

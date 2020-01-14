@@ -1,0 +1,12 @@
+Faceless
+--------
+Perma-death dark souls like single player rpg.
+
+Tactical Takeover
+-----------------
+First/3rd person island takeover simulator. 
+Goal: Take over the whole island, island is made of multiple bases.
+A limited amout of weapons, enemies and vehicles.
+First you have to take over lower level bases, since these don't have
+armored vehicles or stuff like that. Then you can take over big bases,
+get better equipment...
