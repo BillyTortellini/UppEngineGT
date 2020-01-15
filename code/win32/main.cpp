@@ -1,6 +1,7 @@
 #include "platformSpecific.cpp"
 #include "..\platform.hpp"
 #include "..\datatypes.hpp"
+#include "..\umath.hpp"
 
 #include <windows.h>
 #include <windowsx.h>
@@ -52,6 +53,22 @@ void debugWaitForConsoleInput() {
         snprintf(buf, 256, format, ##__VA_ARGS__); \
         debugPrint(buf); \
     };
+
+void printLastError() {
+    DWORD error = GetLastError();
+    char* msgBuffer;
+    FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            error,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPSTR) &msgBuffer,
+            0, NULL);
+    debugPrintf("Last error code: %d, Error:\n%s\n", error, msgBuffer);
+    debugWaitForConsoleInput();
+}
 
 void initKeyTranslationTable() 
 {
@@ -120,7 +137,8 @@ void initKeyTranslationTable()
     //keyTranslationTable[] = KEY_RALT;
 }
 
-void resetInputState() {
+void resetInputState() 
+{
     memset(&gameState.input.keyPressed, 0, NUM_KEYS);
     memset(&gameState.input.mousePressed, 0, NUM_MOUSE_KEYS);
     gameState.input.deltaX = 0;
@@ -211,11 +229,18 @@ LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
 
         case WM_SIZE:
             {
+                if (wParam == SIZE_MINIMIZED) {
+                    actualWinState.minimized = true;
+                    gameState.windowState.minimized = true;
+                    return 0;
+                }
                 RECT r;
                 GetClientRect(hwnd, &r);
                 if (actualWinState.width != r.right ||
                         actualWinState.height != r.bottom)  
                 {
+                    actualWinState.minimized = false;
+                    gameState.windowState.minimized = false;
                     actualWinState.width = r.right;
                     actualWinState.height = r.bottom;
                     gameState.windowState.width = r.right;
@@ -270,12 +295,30 @@ void renderToWindow(HDC deviceContext, BITMAPINFO* bitmapInfo, VideoData* videoD
 {
     int width = videoData->width;
     int height = videoData->height;
+    vec2 dim(width, height);
+    vec2 stretch(1);
+    if (dim.x > dim.y) {
+        stretch.x = stretch.x * dim.x/dim.y;
+    }
+    else {
+        stretch.y = stretch.y * dim.y/dim.x;
+    }
+
+    memset(videoData->pixels, 0, width * height * sizeof(Pixel));
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            videoData->pixels[x + y * width].r = 0;
-            videoData->pixels[x + y * width].g = 255;
-            videoData->pixels[x + y * width].b = 255;
+            vec2 p(x, y);
+            p = p / dim;
+            p = p * 2 - 1;
+            p = p * stretch;
+
+            float r = .5f;
+            if (length(p) < r) {
+                videoData->pixels[x + y * width].r = 0;
+                videoData->pixels[x + y * width].g = 255;
+                videoData->pixels[x + y * width].b = 255;
+            }
         }
     }
 
@@ -297,6 +340,9 @@ void gameTick()
         input.deltaY != 0) {
         debugPrintf("Mouse X/Y: %d/%d, delta: %d/%d \n", input.mouseX, input.mouseY, input.deltaX, input.deltaY);
     }
+    if (gameState.windowState.wasResized) {
+        debugPrintf("GAMETICK: resized to %d/%d\n", gameState.windowState.width, gameState.windowState.height);
+    }
     if (input.mouseWheel != 0) {
         debugPrintf("MouseWheel: %f\n", input.mouseWheel);
     }
@@ -304,6 +350,11 @@ void gameTick()
         bool& d = gameState.windowState.continuousDraw;
         d = !d;
         debugPrintf("Continuous draw switched to %s\n", d == true ? "TRUE" : "FALSE");
+    }
+    if (input.keyPressed[KEY_F11]) {
+        bool& f = gameState.windowState.fullscreen;
+        f = !f;
+        debugPrintf("Fullscreen toggled to %s\n", f == true ? "TRUE" : "FALSE");
     }
     if (gameState.input.mousePressed[MOUSE_LEFT]) {
         debugPrint("Mouse Left pressed\n");
@@ -359,7 +410,17 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     // Initialize hwnd
     HWND hwnd;
     WindowState& desiredWinState = gameState.windowState;
+    int windowStyle = WS_OVERLAPPEDWINDOW;
+    int windowStyleEX = WS_EX_OVERLAPPEDWINDOW;
     {
+        // Load cursor
+        HCURSOR cursor = LoadCursor(NULL, IDC_ARROW);
+        if (cursor == NULL) {
+            debugPrint("LoadCursor failed\n");
+            printLastError();
+            return -1;
+        }
+
         const char* CLASS_NAME = "UppEngineGT";
         WNDCLASS wc = {};
         wc.style = CS_HREDRAW  | CS_VREDRAW | CS_OWNDC;
@@ -367,7 +428,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
         wc.cbClsExtra = 0;
         wc.hInstance = instance;
         wc.hIcon = NULL;
-        wc.hCursor = NULL;
+        wc.hCursor = cursor;
         wc.hbrBackground = NULL;
         wc.lpszMenuName = NULL;
         wc.lpszClassName = CLASS_NAME;
@@ -412,70 +473,73 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     // MSG Loop
     MSG msg;
     bool quit = false;
+    RECT savedWindowPos;
+    GetWindowRect(hwnd, &savedWindowPos);
     while (!quit) 
     {
-        if (actualWinState.continuousDraw) 
+        if (!actualWinState.continuousDraw) 
         {
-            // Process all available messages
-            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) 
-            {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-
-                if (msg.message == WM_QUIT) {
-                    quit = true;
-                }
-            }
-
-            // Handle requests
-            if (desiredWinState.quit) {
-                DestroyWindow(hwnd);
-            }
-            if (actualWinState.fullscreen != desiredWinState.fullscreen) {
-                // Switch to fullscreen TODO
-                desiredWinState.fullscreen = actualWinState.fullscreen;
-            }
-            if (actualWinState.minimized != desiredWinState.minimized) {
-                // Switch to minimized TODO
-                desiredWinState.minimized = actualWinState.minimized;
-            }
-            actualWinState.continuousDraw = desiredWinState.continuousDraw;
-
-            // GameTick...
-            gameTick();
-            resetInputState();
-            renderToWindow(deviceContext, &bitmapInfo, &gameState.videoData);
-        }
-        else 
-        {
-            // Get one message and block afterwards
+            // Block until one message is received
             quit = (GetMessage(&msg, NULL, 0, 0) == 0);
             if (quit) { continue; }
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+        }
 
-            // Get remaining messages
-            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) 
+        // Process all available messages
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) 
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+
+            if (msg.message == WM_QUIT) {
+                quit = true;
+            }
+        }
+
+        // GameTick...
+        gameTick();
+        resetInputState();
+        renderToWindow(deviceContext, &bitmapInfo, &gameState.videoData);
+        
+        // Handle requests
+        if (desiredWinState.quit) {
+            DestroyWindow(hwnd);
+        }
+        if (actualWinState.fullscreen != desiredWinState.fullscreen) 
+        {
+            if (desiredWinState.fullscreen) 
             {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
+                // Save current window pos
+                GetWindowRect(hwnd, &savedWindowPos);
 
-                if (msg.message == WM_QUIT) {
-                    quit = true;
+                // Switch to fullscreen 
+                HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+                MONITORINFO info;
+                info.cbSize = sizeof(MONITORINFO);
+                if (GetMonitorInfo(monitor, &info) == 0) {
+                    debugPrint("GetMonitorInfo failed\n");
+                }
+                else {
+                    SetWindowLong(hwnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+                    SetWindowLong(hwnd, GWL_EXSTYLE, NULL);
+                    RECT& r = info.rcMonitor;
+                    if (SetWindowPos(hwnd, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top, NULL) != NULL)  {
+                        actualWinState.fullscreen = true;
+                    }
                 }
             }
-
-            // React to program changes
-            if (desiredWinState.quit) {
-                DestroyWindow(hwnd);
+            else {
+                SetWindowLong(hwnd, GWL_STYLE, windowStyle | WS_VISIBLE);
+                SetWindowLong(hwnd, GWL_EXSTYLE, windowStyleEX);
+                RECT& r = savedWindowPos;
+                if (SetWindowPos(hwnd, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top, NULL) != NULL)  {
+                    actualWinState.fullscreen = false;
+                }
             }
-            actualWinState.continuousDraw = desiredWinState.continuousDraw;
-
-            // GameTick...
-            gameTick();
-            resetInputState();
-            renderToWindow(deviceContext, &bitmapInfo, &gameState.videoData);
         }
+        actualWinState.continuousDraw = desiredWinState.continuousDraw;
+
     }
 
     debugPrint("Program exit\n");
