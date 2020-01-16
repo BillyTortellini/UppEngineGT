@@ -10,3 +10,8 @@ A limited amout of weapons, enemies and vehicles.
 First you have to take over lower level bases, since these don't have
 armored vehicles or stuff like that. Then you can take over big bases,
 get better equipment...
+
+Clones
+------
+Geometry Wars clone
+Bubble Tanks clone

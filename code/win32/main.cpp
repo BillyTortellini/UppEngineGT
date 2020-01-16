@@ -19,6 +19,9 @@ WindowState actualWinState;
 // Input
 byte keyTranslationTable[NUM_KEYS];
 
+// Timing
+int64 performanceFrequency;
+
 // Debug printing
 HANDLE consoleOutHandle;
 HANDLE consoleInHandle;
@@ -332,9 +335,24 @@ void renderToWindow(HDC deviceContext, BITMAPINFO* bitmapInfo, VideoData* videoD
             SRCCOPY);
 }
 
+void initTiming() {
+    bool res = QueryPerformanceFrequency((LARGE_INTEGER*) &performanceFrequency);    
+    if (!res) {
+        printLastError();
+    }
+}
+
+double currentTime()
+{
+    int64 now = 0;
+    QueryPerformanceCounter((LARGE_INTEGER*) &now);
+    double freq = (double) performanceFrequency;
+    return (double) now / performanceFrequency;
+}
+
 void gameTick() 
 {
-    debugPrintf("GameTick!\n");
+    debugPrintf("GameTick!, current time: %f\n", (float)gameState.time.now);
     Input& input = gameState.input;
     if (input.deltaX != 0 ||
         input.deltaY != 0) {
@@ -385,6 +403,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
 {
     memset(&gameState, 0, sizeof(GameState));
     initKeyTranslationTable();
+    initTiming();
 
     // Initialize GameState
     VideoData* videoData = &gameState.videoData;
@@ -496,6 +515,9 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
                 quit = true;
             }
         }
+
+        // Do timing
+        gameState.time.now = currentTime();
 
         // GameTick...
         gameTick();

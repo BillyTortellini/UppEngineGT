@@ -1,0 +1,74 @@
+Language Ideas:
+---------------
+Problems with C/C++:
+ - Includes are fucking ass (Remove includes altogether and use unity builds)
+    Although they will still be needed, since standard library includes and includes
+    from other sources like libraries will still need to be imported correctly.
+
+ - Compiling:
+    The language should be almost the same as C or C++, with some small improvements.
+    The language processor should be able to take in multiple source files, and create
+    one large .c file, which then can be compiled by a c compiler. 
+
+ - Error handling:
+    The language should be able to print errors in a more human readable way than C-compilers do.
+    This may be a hard task, but typos or missing keywords like ;{}() and stuff should be easily reportable.
+
+ - namespaces aren't great, or at least i don't think so. 
+    Some public/private mechanics inside namespaces would be nice i think.
+    The idea is that namespaces are used to prevent name lookup clashes, like
+    two functions that have the same name and same parameters, but they do not cause
+    more code that needs to be written. If a namespace clash occurs, a simple keyword like
+    prefer namespace x over namespace y could then be used to resolve such conflicts.
+    Global variables could also be limited in scope by using such mechanisms.
+
+ - A using keyword like Jonathan Blows Jai would be nice
+    struct vec2 {
+        float x; 
+        float y;
+    }
+    struct GameObject {
+        vec2 pos;
+        using pos;
+        char* attribute; // Whatever
+    }
+    // Now this should work
+    GameObject o;
+    o.x = 15;
+    o.y = 20;
+    // Instead of
+    o.pos.x = 15;
+    o.pos.y = 20;
+    // In block scope, this should also work
+    {
+        GameObject b;
+        using b;
+        x = 20;
+        attribute = "Something";
+    }
+    // This makes it easier to refactor code, because we can put together attributes of existing structs
+    // into new logical, reusable structs, and we do not have to change the usage of the existing struct.
+
+ - Accessing members using two different keywords (. and ->) is fucking stupid
+    vec2 b = vec2(15, 20);
+    vec2* bp = &b;
+    b.x = 20;
+    bp.x = 20; // Should also work
+
+ - Maybe auto casting functions which take pointers
+    void asdf(vec2* a, vec2 b) {//Does something}
+    vec2 a, b;
+    asdf(a, b); // Throws error because we would need to use &a instead of a.
+    // Same with pointers and objects
+    void jkl(vec2 a);
+    vec2* b = //something;
+    jkl(b); // The compiler should figure out that we want to cast here.
+
+ - Nested function declarations, although namespace public and private may solve this problem
+    void main() {
+        void asdf() {
+        // Something
+        }
+        asdf();
+        asdf();
+    }
