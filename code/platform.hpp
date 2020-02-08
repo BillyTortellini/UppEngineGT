@@ -1,4 +1,4 @@
-#ifndef j_GAME_HPP__
+#ifndef __GAME_HPP__
 #define __GAME_HPP__
 
 #include "datatypes.hpp"
@@ -6,6 +6,20 @@
 // Defines
 #define NUM_KEYS 256
 #define NUM_MOUSE_KEYS 3
+
+// Things that need to be defined in the platformSpecifics.hpp
+struct Pixel; // Has to contain bytes r, g, b and a. Is defined by the platform
+#ifndef DECLARE_EXPORT
+#define DECLARE_EXPORT errorerrorerror
+#endif
+
+#ifndef INVALID_CODE_PATH
+#define INVALID_CODE_PATH errorerrorerror
+#endif 
+
+#ifndef ASSERT
+#define ASSERT(x) errorerrorerror
+#endif 
 
 struct Memory
 {
@@ -30,11 +44,10 @@ struct WindowState
     bool fullscreen;
     bool minimized;
     bool quit;
-    bool continuousDraw;
+    int fps;
+    bool continuousDraw; // If true, the window will try to display FPS frame per second
     bool wasResized;
 };
-
-struct Pixel; // Has to contain bytes r, g, b and a. Is defined by the platform
 
 struct VideoData
 {
@@ -47,6 +60,7 @@ struct Time
 {
     double now; // In seconds since game start
     double tslf; // In seconds
+    double lastGameTick;
 };
 
 struct SoundInfo
@@ -60,7 +74,7 @@ struct SoundInfo
 typedef void (*lockSoundFunc)();
 typedef void (*unlockSoundFunc)();
 typedef uint32 (*getFileSizeFunc)(const char* filename);
-typedef void (*loadFileFunc)(byte* memory);
+typedef void (*loadFileFunc)(byte* memory, u64* size);
 typedef void (*debugPrintFunc)(const char* str);
 
 struct Services
@@ -68,7 +82,7 @@ struct Services
     lockSoundFunc lockSound; 
     unlockSoundFunc unlockSound;
     getFileSizeFunc getFileSize;
-    loadFileFunc loadFileFunc;
+    loadFileFunc loadFile;
     debugPrintFunc debugPrint;
 };
 

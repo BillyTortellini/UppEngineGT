@@ -14,6 +14,13 @@ Problems with C/C++:
     The language should be able to print errors in a more human readable way than C-compilers do.
     This may be a hard task, but typos or missing keywords like ;{}() and stuff should be easily reportable.
 
+ - Multiple return types would also be great, instead of using some shit like
+    bool makeVector(vector* output, dataItem* otherOutput, argType arg1, argType2 arg2..)
+    (bool success, vector output1, dataItem* output2) makeVector(argType arg1, argType arg2)
+
+ - Defer Statement:
+    Like Jai, a defer statement that puts the following commands before each end of the block.
+
  - namespaces aren't great, or at least i don't think so. 
     Some public/private mechanics inside namespaces would be nice i think.
     The idea is that namespaces are used to prevent name lookup clashes, like
@@ -72,3 +79,75 @@ Problems with C/C++:
         asdf();
         asdf();
     }
+
+
+
+
+
+
+
+
+
+// Code examples (How i would imagine code)
+
+#file "../**" // Use all *.upp files in this directory recursively
+#file "something something"
+
+namespace win32_platform
+{
+    private GameState gameState;
+
+    private namespace Input
+    {
+        private byte translationTable[MAX_KEY_NUM];
+
+        void resetInput() {
+            using GameState.input;
+            memset(keyPressed, 0, MAX_KEY_NUM);
+            mouseDelta = vec2(0);
+        }
+
+        void handleKeyboardInput(KeyCode keycode, ) {
+            
+        }
+    }
+
+    CALLBACK LPARAM windowCallback(UINT msg, LPARAM lpara, WPARAM wparam) {
+        switch (msg) {
+            case WM_KEYDOWN:
+            case WM_SYSKEYDOWN:
+                handleKeyboardInput(GET_SOMETHING(lparam));
+                break;
+        }
+    }
+}
+
+namespace A
+{
+    int x;
+}
+
+namespace B
+{
+    int x;
+}
+
+void doSmth(int x) {
+    print(x * x);
+}
+
+prefer B over A;
+void main() {
+    x = 15; // Will cause an unresolved namspace error when compiling
+    int a;
+    int b;
+    int* bp = b;
+    int* ap = a;
+    bp = 15; // Pointer does point to location 15
+    *bp = 15; // Sets value 15;
+    doSmth(a);
+    doSmth(*ap);
+    doSmth(ap); // both works
+    doSmth((int)ap); // Does work as well
+}
+

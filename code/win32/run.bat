@@ -1,3 +1,5 @@
 @echo off
 
-start ..\..\build\main.exe
+pushd \
+start build\main.exe
+popd

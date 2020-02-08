@@ -4,187 +4,85 @@
 #include <cstdio>
 
 // Own file includes
-#include "game.hpp"
+#include "platform.hpp"
 #include "umath.hpp"
 #include "datatypes.hpp"
+//#include "sound.hpp"
 
 // What i want to do:
 // * Play sampled sounds at a given time
 // * Play sounds when a key is pressed
 
-struct SoundSample
-{
-    int32 length;
-    int32 sampleFreq;
-    int16* samples;
-};
-
-struct ADSREnvelope
-{
-    double attack;
-    double decay;
-    double sustain;
-    double release;
-    double sustainTime;
-};
-
-namespace Waveform
-{
-    enum ENUM
-    {
-        SINUS = 0,
-        SQUARE = 1,
-        TRIANGLE = 2
-    };
-};
-
-struct Oscillator
-{
-    Waveform::ENUM waveform;   
-    double frequency;
-};
-
-double oscillatorGetAmp(Oscillator* osc, double t) 
-{
-    switch (osc->waveform)
-    {
-        case Waveform::SINUS:
-        {
-            return sin(t * 2 * PI * osc->frequency);
-        }
-        case Waveform::SQUARE:
-        {
-            int q = t * osc->frequency * 2;
-            return q % 2 == 0 ? 1.0 : -1.0;
-        }
-        case Waveform::TRIANGLE:
-        {
-            double help = t * osc->frequency;
-            int whole = help;
-            double rest = help - whole;
-            return whole % 2 == 0 ? rest : 1.0 - rest;
-        }
-    }
-
-    return 0.0;
-}
-
-double envelopeGetAmp(ADSREnvelope* env, double t) 
-{
-    double& a = env->attack;
-    double& d = env->decay;
-    double& s = env->sustain;
-    double& r = env->release;
-    double& st = env->sustainTime;
-
-    if (t < a)
-    {
-        return t / a;
-    }
-    else if (t < a + d)
-    {
-        double alpha = (t - a) / d;
-        return alpha * s + (1.0-alpha) * 1.0;
-    }
-    else if (t < a + d + st)
-    {
-        return s;
-    }
-    else
-    {
-        double alpha = 1.0 - (t-a-d-st) / r;
-        alpha = max(0.0, alpha);
-        return alpha * s;
-    }
-
-    return 0.0;
-}
-
-void fillSoundEnvelope(SoundSample* sound, ADSREnvelope* env, Oscillator* osc)
-{
-    for (int i = 0; i < sound->length; i++)
-    {
-        double t = i / (double)sound->sampleFreq;
-
-        int16* sample = &(sound->samples[i]);
-        *sample = oscillatorGetAmp(osc, t) * envelopeGetAmp(env, t) * (INT16_MAX - 5);
-    }
-}
-
-int envelopeSampleCount(ADSREnvelope* env, int sampleFreq) {
-    int count = ((env->attack + env->decay + env->sustainTime + env->release) * sampleFreq) + 10;
-    return count;
-}
-
-struct QueuedSound
-{
-    SoundSample* sound;
-    uint64 startTick;
-    bool playing;
-};
-
 #define MAX_QUEUED_SOUNDS 16
 struct GameData
 {
     vec2 pos;
-    uint64 runningSampleIndex;
-    QueuedSound queuedSounds[MAX_QUEUED_SOUNDS];
-    SoundSample sample1;
-    SoundSample sample2;
-    int16 sample1Data[48000 * 5];
-    int16 sample2Data[48000 * 5];
 };
 GameState* gameState;
 GameData* gameData;
 
-void playSoundSample(SoundSample* sample) 
+#define print(format, ...) { \
+        char buf[256]; \
+        snprintf(buf, 256, format, ##__VA_ARGS__); \
+        gameState->services.debugPrint(buf); \
+    };
+
+void toScreenCoords(vec2 v, int height, int width, int& x, int& y)
 {
-    gameState->platformFunctions.lockSound();
-
-    for (int i = 0; i < MAX_QUEUED_SOUNDS; i++) {
-        QueuedSound* queuedSound = &gameData->queuedSounds[i];
-        if (!queuedSound->playing)
-        {
-            queuedSound->playing = true;
-            queuedSound->startTick = gameData->runningSampleIndex;
-            queuedSound->sound = sample;
-            break;
-        }
-    }
-
-    gameState->platformFunctions.unlockSound();
+    v = v * 0.5f + 0.5f;
+    x = (int)(v.x * width);
+    y = (int)((1.0f - v.y) * height);
+    return;
 }
 
-void renderScene(byte* pixelData, int width, int height)
+void trim(int& x, int min, int max) {
+    if (x < min) x = min;
+    if (x > max) x = max;
+    return;
+}
+
+void renderScene(VideoData* videoData, float time)
 {
-    vec2 playerPos = gameData->pos;
+    int width = videoData->width;
+    int height = videoData->height;
     vec2 dim(width, height);
+    vec2 stretch(1.0f);
+    if (dim.x > dim.y) {
+        stretch.x = stretch.x * dim.x/dim.y;
+    }
+    else {
+        stretch.y = stretch.y * dim.y/dim.x;
+    }
 
-    memset(pixelData, 0, width * height * 4);
-    for (int yPos = 0; yPos < height; yPos++)
-    {
-        for (int xPos = 0; xPos < width; xPos++)
-        {
-            byte* pixel = pixelData + (xPos + yPos*width)*4;
-            byte* red = pixel + 2;
-            byte* green = pixel + 1;
-            byte* blue = pixel + 0;
+    u8 colRed = (u8) fmodf(time, 0.5);
 
-            vec2 pos = vec2(xPos, yPos) / dim;
-            pos = pos*2-1;
+    memset(videoData->pixels, 0, width * height * sizeof(Pixel));
 
-            if (dim.x > dim.y)
-                pos.x *= dim.x/dim.y;
-            else 
-                pos.y *= dim.y/dim.x;
+    vec2 circlePos = vec2(sinf(time) * 0.5f, 0.0f);
+    float radius = 0.1f;
+    vec2 min = circlePos - radius;
+    vec2 max = circlePos + radius;
+    int minX, minY, maxX, maxY;
+    toScreenCoords(min, width, height, minX, minY);
+    trim(minX, 0, width);
+    trim(minY, 0, height);
+    toScreenCoords(min, width, height, maxX, maxY);
+    trim(maxX, 0, width);
+    trim(maxY, 0, height);
 
-            float d = dist(playerPos, pos);
-            float r = .1f;
-            uint8 i = d < r ? 255 : 0;
+    for (int y = minY; y < maxY; y++) {
+        for (int x = minX; x < maxX; x++) {
+            vec2 p(x, y);
+            p = p / dim;
+            p = p * 2 - 1;
+            p = p * stretch;
 
-            //*blue = i;
-            *red = i;
-            //*green = i;
+            if (dist(p, circlePos) < radius) {
+                videoData->pixels[x + y * width].r = 255;
+                videoData->pixels[x + y * width].g = 255;
+                videoData->pixels[x + y * width].b = 255;
+                videoData->pixels[x + y * width].a = 0;
+            }
         }
     }
 }
@@ -193,145 +91,65 @@ void updatePlayerPos(GameState* state)
 {
     gameData = (GameData*) state->memory.memory;     
     vec2 dir(0.0f);
-    if (state->input.keysDown[KEY_A]) {
+    if (state->input.keyDown[KEY_A]) {
         dir += vec2(-1.0f, 0.0f);
     }
-    if (state->input.keysDown[KEY_D]) {
+    if (state->input.keyDown[KEY_D]) {
         dir += vec2(1.0f, 0.0f);
     }
-    if (state->input.keysDown[KEY_W]) {
+    if (state->input.keyDown[KEY_W]) {
         dir += vec2(0.0f, 1.0f);
     }
-    if (state->input.keysDown[KEY_S]) {
+    if (state->input.keyDown[KEY_S]) {
         dir += vec2(0.0f, -1.0f);
     }
 
     dir.y *= -1;
     float speed = 2.0f;
-    vec2 change = dir * state->time.tslf * speed;
+    vec2 change = dir * (float)state->time.tslf * speed;
     gameData->pos = gameData->pos + change;
 }
 
 extern "C"
 {
-    void gameAudio(GameState* state, byte* stream, int length)
+    DECLARE_EXPORT void gameAudio(GameState* state, byte* stream, int length) {}
+
+    DECLARE_EXPORT void gameInit(GameState* state) 
     {
         gameData = (GameData*) state->memory.memory;
-        uint64& runningIndex = gameData->runningSampleIndex;
-
-        int sampleCount = length / sizeof(int16);
-        int16* samples = (int16*) stream;
-
-        double masterVolume = 0.5;
-        memset(stream, 0, length);
-
-        for (int i = 0; i < MAX_QUEUED_SOUNDS; i++)
-        {
-            QueuedSound* sound = &gameData->queuedSounds[i];
-            if (sound->playing)
-            {
-                int startIndex = sound->startTick - runningIndex;
-                int endIndex = startIndex + sound->sound->length;
-
-                if (endIndex < 0) {
-                    sound->playing = false;
-                    continue;
-                }
-
-                if (endIndex > sampleCount) {
-                    endIndex = sampleCount;
-                }
-
-                int offset = 0;
-                if (startIndex < 0)
-                {
-                    offset = -startIndex;
-                    startIndex = 0;
-                }
-
-                for (int j = startIndex; j < endIndex; j++) {
-                    samples[j] += sound->sound->samples[j + offset] * masterVolume;
-                }
-            }
-        }
-
-        runningIndex += sampleCount;
-    }
-
-    void gameInit(GameMemory* memory) 
-    {
-        gameData = (GameData*) memory->memory;
         gameData->pos = vec2(0.0f);
-        gameData->runningSampleIndex = 0;
     }
 
-    bool restarted = true;
-    float timer = 0.0f;
-    void gameTick(GameState* state) 
+    bool freshLoad = true;
+    DECLARE_EXPORT void gameTick(GameState* state) 
     {
         gameState = state;
         gameData = (GameData*) state->memory.memory;
-        if (restarted) 
-        {
-            SoundInfo* info = &state->soundInfo;
+        gameState->windowState.continuousDraw = true;
+        gameState->windowState.fps = 30;
 
-            ADSREnvelope env;
-            env.attack = 0.2;
-            env.decay = 0.2;
-            env.sustain = 0.7;
-            env.release = 0.1;
-            env.sustainTime = 0.0;
-
-            Oscillator osc;
-            osc.waveform = Waveform::TRIANGLE;
-            osc.frequency = 400;
-
-            gameData->sample1.length = envelopeSampleCount(&env, info->sampleFreq);
-            gameData->sample1.samples = gameData->sample1Data;
-            gameData->sample1.sampleFreq = info->sampleFreq;
-
-            fillSoundEnvelope(&gameData->sample1, &env, &osc);
-
-            restarted = false;
-            timer = 0.0f;
-        }
-        timer += state->time.tslf;
-        if (timer > 1.0f) {
-            playSoundSample(&gameData->sample1);
-
-            timer -= 1.0f;
+        if (freshLoad) {
+            print("Hello there\n");
+            freshLoad = false;
         }
 
-        updatePlayerPos(state);
+        float time = (float) gameState->time.now;
 
-        GameInput* input = &state->input;
-        if (input->keysPressed[KEY_ESCAPE]) {
-            state->winState.quitTarget = true;
-        }
-        if (input->keysPressed[KEY_F11]) {
-            state->winState.fullscreenTarget = 
-                !state->winState.fullscreen;
-        }
+        //updatePlayerPos(state);
 
-        if (input->keysPressed[KEY_X]) {
-            playSoundSample(&gameData->sample1);
+        Input* input = &state->input;
+        if (input->keyPressed[KEY_ESCAPE]) {
+            state->windowState.quit = true;
+        }
+        if (input->keyPressed[KEY_F11]) {
+            state->windowState.fullscreen = !state->windowState.fullscreen;
         }
 
-        int playing = 0;
-        for (int i = 0; i < MAX_QUEUED_SOUNDS; i++)
-        {
-            QueuedSound* s = &gameData->queuedSounds[i];
-            if (s->playing) {
-                playing++;
-            }
-        }
-        printf("Currently playing: %d\n", playing);
-
-        GameVideo* vid = &state->video;
-        renderScene(vid->pixelData, vid->width, vid->height);
+        VideoData* vid = &state->videoData;
+        renderScene(vid, time);
     }
 
-    void gameShutdown(GameMemory* memory)
+    DECLARE_EXPORT void gameShutdown(GameState* state)
     {
 
     }

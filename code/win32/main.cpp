@@ -2,11 +2,70 @@
 #include "..\platform.hpp"
 #include "..\datatypes.hpp"
 #include "..\umath.hpp"
+#include "..\scopedExit.hpp"
 
 #include <windows.h>
 #include <windowsx.h>
+#include <wingdi.h>
 #include <cstring>
 #include <cstdio>
+#include <cstdarg>
+#include <initializer_list>
+#include <intrin.h>
+#include <GL/GL.h>
+#include <GL/glext.h>
+#include <GL/wglext.h>
+
+// Prototypes
+char* load_text_file(const char* filepath);
+void unload_text_file(char* data);
+
+// Define debug macro and prototypes so that they can be used in other win32 files
+#undef INVALID_CODE_PATH
+#define INVALID_CODE_PATH \
+{ \
+    char invalidBuffer[2048]; \
+    snprintf(invalidBuffer, 2048, "Invalid code path: %s\tLine #%d", __FILE__, __LINE__); \
+    MessageBox(hwnd, invalidBuffer, "ERROR", MB_OK); \
+    __debugbreak(); \
+    exit(-1); \
+}
+
+#undef ASSERT
+#define ASSERT(x) \
+if (!(x)) { \
+    char assertBuf[2048]; \
+    snprintf(assertBuf, 2048, "Assertion failed:\nFile: %s\tLine #%d", __FILE__, __LINE__); \
+    MessageBox(hwnd, assertBuf, "ERROR", MB_OK); \
+    __debugbreak(); \
+    exit(-1); \
+}
+
+char _log_buffer[4096];
+#undef log
+#define log(format, ...) { \
+        snprintf(_log_buffer, 4096, format, ##__VA_ARGS__); \
+        debugPrint(_log_buffer); \
+};
+
+#undef debugPrintf
+#define debugPrintf(format, ...) { \
+        char buf[1024]; \
+        snprintf(buf, 1024, format, ##__VA_ARGS__); \
+        debugPrint(buf); \
+};
+
+void debugPrint(const char* str);
+void debugWaitForConsoleInput();
+
+// Undefine near and far macros that are defined in the windows headers
+#undef near
+#undef far
+
+#include "../allocators.hpp"
+#include "win32_glFunctions.hpp"
+#include "../string.hpp"
+#include "../renderer.hpp"
 
 // GLOBALS
 GameState gameState = {};
@@ -15,6 +74,10 @@ GameState gameState = {};
 HDC deviceContext;
 BITMAPINFO bitmapInfo;
 WindowState actualWinState;
+
+// Window State
+RECT savedWindowPos;
+HWND hwnd = NULL;
 
 // Input
 byte keyTranslationTable[NUM_KEYS];
@@ -32,7 +95,7 @@ void initKeyTranslationTable();
 
 void debugPrint(const char* str) {
     DWORD out;
-    WriteConsole(consoleOutHandle, str, strlen(str), &out, NULL);
+    WriteConsole(consoleOutHandle, str, (DWORD)strlen(str), &out, NULL);
 }
 
 void debugRead(char* buffer, uint32 size) {
@@ -51,11 +114,18 @@ void debugWaitForConsoleInput() {
     debugRead(buf, sizeof(buf));
 }
 
-#define debugPrintf(format, ...) { \
-        char buf[256]; \
-        snprintf(buf, 256, format, ##__VA_ARGS__); \
-        debugPrint(buf); \
-    };
+bool initDebugConsole() {
+    if (AllocConsole() == NULL) {
+        return false;
+    }
+    consoleOutHandle= GetStdHandle(STD_OUTPUT_HANDLE);
+    consoleInHandle = GetStdHandle(STD_INPUT_HANDLE);
+    if (consoleOutHandle == INVALID_HANDLE_VALUE || 
+            consoleInHandle == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+    return true;
+}
 
 void printLastError() {
     DWORD error = GetLastError();
@@ -173,21 +243,21 @@ LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
             {
-            int msgType = wParam;
+            int key = (int)wParam;
             int repeatCount = lParam & 0xFFFF;
-            if (gameState.input.keyDown[keyTranslationTable[msgType]] == false &&
+            if (gameState.input.keyDown[keyTranslationTable[key]] == false &&
                 repeatCount == 1) {
-                gameState.input.keyPressed[keyTranslationTable[msgType]]++;
+                gameState.input.keyPressed[keyTranslationTable[key]]++;
             }
-            gameState.input.keyDown[keyTranslationTable[msgType]] = true;
+            gameState.input.keyDown[keyTranslationTable[key]] = true;
             break;
             }
 
         case WM_KEYUP:
         case WM_SYSKEYUP:
             {
-            int msgType = wParam;
-            gameState.input.keyDown[keyTranslationTable[msgType]] = false;
+            int key = (int)wParam;
+            gameState.input.keyDown[keyTranslationTable[key]] = false;
             break;
             }
 
@@ -258,6 +328,143 @@ LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, msgType, wParam, lParam);
 }
 
+// Prototype
+void requestDirectoryChanges();
+
+HANDLE fileHandle;
+char filename[256];
+char path[512];
+void initFileListener(char* pathToFile) 
+{
+    int lastSlash = -15;
+    int len = (int)strlen(pathToFile);
+    for (int i = len-1; i >= 0; i--) {
+        if (pathToFile[i] == '/' || pathToFile[i] == '\\') {
+            lastSlash = i;
+            break;
+        }
+    }
+
+    if (lastSlash == -15) {
+        strcpy(filename, pathToFile);
+        strcpy(path, ".\\");
+    }
+    else {
+        strcpy(filename, &pathToFile[lastSlash+1]);
+        strcpy(path, pathToFile);
+        path[lastSlash] = '\0';
+    }
+
+    fileHandle = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL); 
+    if (fileHandle == INVALID_HANDLE_VALUE) {
+        printLastError();
+        debugPrint("FindFirstChange.. failed, invalid handle!\n");
+        debugWaitForConsoleInput();
+    }
+
+    requestDirectoryChanges();
+}
+
+const int notifyBufferSize = 2;
+DWORD notifyBuffer[2048];
+OVERLAPPED overlapped = {};
+void requestDirectoryChanges() 
+{
+    bool success = ReadDirectoryChangesW(
+            fileHandle,
+            notifyBuffer,
+            sizeof(DWORD) * 2048,
+            FALSE,
+            FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_CREATION,
+            NULL,
+            &overlapped,
+            NULL);
+
+    if (!success) {
+        debugPrint("ReadDirectoryChanges failed! No more file changes will be noticed.\n");
+        printLastError();
+    }
+}
+
+bool checkFileChanged() 
+{
+    bool found = false;
+
+    DWORD bytesReturned;
+    bool result = GetOverlappedResult(fileHandle, &overlapped, &bytesReturned, false);
+    if (!result) 
+    {
+        DWORD error = GetLastError();
+        if (error == ERROR_IO_INCOMPLETE) {
+            //debugPrint("GetOverlappedResult IO_INCOMPLETE\n");
+            return false;
+        }
+        printLastError();
+    }
+    else 
+    {
+        int notificationCount = bytesReturned / sizeof(_FILE_NOTIFY_INFORMATION);
+        bool quit = notificationCount == 0;
+        if (quit) {
+            debugPrintf("Notification count was zero, should not happen\n");
+            quit = true;
+        }
+        int nextEntryOffset = 0;
+        // Loop over all file_notifications
+        while(!quit)
+        {
+            _FILE_NOTIFY_INFORMATION& info = *((_FILE_NOTIFY_INFORMATION*)((byte*)notifyBuffer + nextEntryOffset));
+            if (info.FileNameLength == 0) {
+                debugPrintf("FileNameLength was 0, should not happen\n");
+                quit = true;
+                continue;
+            }
+            char changedName[256];
+            int res = WideCharToMultiByte(CP_UTF8, NULL, info.FileName, info.FileNameLength, changedName, 256, NULL, NULL);
+            if (res == 0) { 
+                debugPrintf("WideCharToMultibyte failed!\n"); 
+                printLastError();
+                quit = true;
+                continue;
+            }
+            changedName[res/2] = 0;
+
+            /*debugPrintf("File changed: %s, ", changedName);
+            switch(info.Action)
+            {
+                case FILE_ACTION_ADDED:
+                    debugPrintf("FILE_ACTION_ADDED\n");
+                    break;
+                case FILE_ACTION_REMOVED:
+                    debugPrintf("FILE_ACTION_REMOVED\n");
+                    break;
+                case FILE_ACTION_MODIFIED:
+                    debugPrintf("FILE_ACTION_MODIFIED\n");
+                    break;
+                case FILE_ACTION_RENAMED_OLD_NAME:
+                    debugPrintf("FILE_ACTION_RENAMED_OLD_NAME\n");
+                    break;
+                case FILE_ACTION_RENAMED_NEW_NAME:
+                    debugPrintf("FILE_ACTION_RENAMED_NEW_NAME\n");
+                    break;
+            }*/
+            if (strcmp(changedName, filename) == 0) 
+            {
+                quit = true;
+                found = true;
+                continue;
+            }
+
+            nextEntryOffset += info.NextEntryOffset;
+            if (info.NextEntryOffset == 0) break;
+        }
+
+        requestDirectoryChanges();
+    }
+
+    return found;
+}
+
 void resizeVideoBuffer() 
 {
     debugPrintf("ResizeVideoBuffer w/h: %d/%d\n", actualWinState.width, actualWinState.height); 
@@ -294,37 +501,112 @@ void resizeVideoBuffer()
     memset(videoData->pixels, 0, imgSize);
 }
 
+void unload_text_file(char* data) {
+    if (data != NULL) {
+        free(data);
+    }
+}
+
+// Allocates memory for the whole file, then reads the file into the specified memory area
+char* load_text_file(const char* filepath) 
+{
+    FILE* file = fopen(filepath, "rb");
+    if (file == NULL) {
+        debugPrintf("File %s could not be openend!\n", filepath);
+        return nullptr;
+    }
+
+    // Get File size
+    fseek(file, 0, SEEK_END); 
+    int fileSize = (int) ftell(file);
+    fseek(file, 0, SEEK_SET); // Put cursor back to start of file
+
+    // Alloc memory for file data
+    char *data = (char*) malloc(fileSize + 1);
+    
+    // Read
+    int readSize = (int) fread(data, 1, fileSize, file); 
+    if (readSize != fileSize) {
+        debugPrintf("fread failed, it returned %d size instead of %d fileSize\n",
+                readSize, fileSize);
+        unload_text_file(data);
+        fclose(file);
+        return nullptr;
+    }
+
+    // Add null terminator
+    data[fileSize] = '\0';
+    fclose(file);
+
+    return data;
+}
+
+gameInitFunc gameInit;
+gameTickFunc gameTick;
+gameShutdownFunc gameShutdown;
+gameAudioFunc gameAudio;
+
+void fallbackGameInit(GameState* g) {}
+void fallbackGameTick(GameState* g) {}
+void fallbackGameShutdown(GameState* g) {}
+void fallbackGameAudio(GameState* g, byte* stream, int length) {}
+
+void setToFallback()
+{
+    gameInit = &fallbackGameInit;
+    gameTick = &fallbackGameTick;
+    gameShutdown = &fallbackGameShutdown;
+    gameAudio = &fallbackGameAudio;
+}
+
+HMODULE gameLibrary = NULL;
+void loadGameFunctions()
+{
+    debugPrintf("LOAD GAME FUNCTIONS\n");
+    if (gameLibrary != NULL) {
+        FreeLibrary(gameLibrary);
+    }
+
+    bool res = CopyFile("build\\game_tmp.dll", "build\\game_inUse.dll", FALSE);
+    if (!res) {
+        debugPrintf("Could not copy file game_tmp.dll\n");
+        setToFallback();
+        return;
+    }
+
+    gameLibrary = LoadLibrary("build\\game_inUse.dll");
+    if (gameLibrary == NULL) {
+        debugPrintf("LoadGameFunctions failed: loadlibrary failed\n");
+        setToFallback();
+        printLastError();
+        return;
+    }
+
+    gameInit = (gameInitFunc) GetProcAddress(gameLibrary, "gameInit");
+    gameTick = (gameTickFunc) GetProcAddress(gameLibrary, "gameTick");
+    gameShutdown = (gameShutdownFunc) GetProcAddress(gameLibrary, "gameShutdown");
+    gameAudio = (gameAudioFunc) GetProcAddress(gameLibrary, "gameAudio");
+    if (gameInit == NULL || gameTick == NULL || gameShutdown == NULL || gameAudio == NULL)
+    {
+        debugPrintf("GetProcAddress failed: One or more functions were not found in dll.\n");
+        setToFallback();
+        return;
+    }
+}
+
+void initDynamicLoading() 
+{
+    gameInit = &fallbackGameInit;
+    gameTick = &fallbackGameTick;
+    gameShutdown = &fallbackGameShutdown;
+    gameAudio = &fallbackGameAudio;
+    loadGameFunctions();
+}
+
 void renderToWindow(HDC deviceContext, BITMAPINFO* bitmapInfo, VideoData* videoData) 
 {
     int width = videoData->width;
     int height = videoData->height;
-    vec2 dim(width, height);
-    vec2 stretch(1);
-    if (dim.x > dim.y) {
-        stretch.x = stretch.x * dim.x/dim.y;
-    }
-    else {
-        stretch.y = stretch.y * dim.y/dim.x;
-    }
-
-    memset(videoData->pixels, 0, width * height * sizeof(Pixel));
-
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            vec2 p(x, y);
-            p = p / dim;
-            p = p * 2 - 1;
-            p = p * stretch;
-
-            float r = .5f;
-            if (length(p) < r) {
-                videoData->pixels[x + y * width].r = 0;
-                videoData->pixels[x + y * width].g = 255;
-                videoData->pixels[x + y * width].b = 255;
-            }
-        }
-    }
-
     StretchDIBits (
             deviceContext,
             0, 0, width, height,
@@ -342,21 +624,58 @@ void initTiming() {
     }
 }
 
+int64 currentTick() {
+    return __rdtsc();
+}
+
 double currentTime()
 {
     int64 now = 0;
     QueryPerformanceCounter((LARGE_INTEGER*) &now);
-    double freq = (double) performanceFrequency;
     return (double) now / performanceFrequency;
 }
 
-void gameTick() 
+void sleepUntil(double until)
 {
-    debugPrintf("GameTick!, current time: %f\n", (float)gameState.time.now);
+    double now = currentTime();
+    double diff = until - now;
+    if (diff <= 0.0) return;
+
+    // Calcuate ms for sleep
+    int ms = (int)(diff*1000);
+    // To make sure that time is as accurate as possible, we sleep one ms less and do busy waiting
+    ms -= 1;
+
+    if (ms > 0) {
+        timeBeginPeriod(1);
+        Sleep(ms);
+        timeEndPeriod(1);
+    }
+
+    do {} while (currentTime() < until);
+}
+
+void initAudio()
+{
+    HMODULE directSoundLib = LoadLibrary("dsound.dll");
+    if (directSoundLib)
+    {
+    }
+    debugPrintf("asdf audio\n");
+    debugWaitForConsoleInput();
+}
+
+void sleepFor(double seconds) {
+    double start = currentTime();
+    sleepUntil(start + seconds);
+}
+
+void debugGameTick() 
+{
     Input& input = gameState.input;
     if (input.deltaX != 0 ||
-        input.deltaY != 0) {
-        debugPrintf("Mouse X/Y: %d/%d, delta: %d/%d \n", input.mouseX, input.mouseY, input.deltaX, input.deltaY);
+            input.deltaY != 0) {
+        //debugPrintf("Mouse X/Y: %d/%d, delta: %d/%d \n", input.mouseX, input.mouseY, input.deltaX, input.deltaY);
     }
     if (gameState.windowState.wasResized) {
         debugPrintf("GAMETICK: resized to %d/%d\n", gameState.windowState.width, gameState.windowState.height);
@@ -396,106 +715,365 @@ void gameTick()
     if (gameState.input.keyPressed[KEY_TAB]) {
         debugPrint("TAB pressed\n");
     }
+    gameState.windowState.continuousDraw = true;
+    gameState.windowState.fps = 60;
+
+    render();
 }
 
-#define CHECK_VALID(cond, msg) if (!(cond)) {debugPrint(msg); return -1;}
+
+
+int windowStyle;
+int windowStyleEX;
+HCURSOR cursor;
+const char* CLASS_NAME = "UppEngineGT";
+HINSTANCE globalInstance;
+bool initWindow()
+{
+    windowStyle = WS_OVERLAPPEDWINDOW;
+    windowStyleEX = WS_EX_OVERLAPPEDWINDOW;
+
+    // Load cursor
+    cursor = LoadCursor(NULL, IDC_ARROW);
+    if (cursor == NULL) {
+        debugPrint("LoadCursor failed\n");
+        printLastError();
+        return false;
+    }
+
+    WNDCLASS wc = {};
+    wc.style = CS_HREDRAW  | CS_VREDRAW | CS_OWNDC;
+    wc.lpfnWndProc = &windowProc;
+    wc.cbClsExtra = 0;
+    wc.hInstance = globalInstance;
+    wc.hIcon = NULL;
+    wc.hCursor = cursor;
+    wc.hbrBackground = NULL;
+    wc.lpszMenuName = NULL;
+    wc.lpszClassName = CLASS_NAME;
+
+    if (RegisterClass(&wc) == 0) {
+        debugPrint("Register class failed!\n");
+        return false;
+    }
+
+    return true;
+}
+
+#define CHECK_VALID(cond, msg) if (!(cond)) {debugPrint(msg); return false;}
+bool createWindow(bool show)
+{
+    hwnd = CreateWindowEx(
+            windowStyleEX,
+            CLASS_NAME,
+            CLASS_NAME,
+            windowStyle,
+            CW_USEDEFAULT, CW_USEDEFAULT,
+            CW_USEDEFAULT, CW_USEDEFAULT,
+            NULL,
+            NULL,
+            globalInstance,
+            NULL);
+    if (hwnd == NULL) {
+        debugPrint("CreateWindowEX failed!\n");
+        return false;
+    }
+
+    if (show) {
+        ShowWindow(hwnd, SW_SHOW);
+    }
+
+    // Init savedWindowPos for toggling fullscreen
+    GetWindowRect(hwnd, &savedWindowPos);
+
+    // Init winState
+    actualWinState.fullscreen = false;
+    actualWinState.minimized = false;
+    actualWinState.continuousDraw = false;
+    actualWinState.fps = 60;
+    WindowState& desiredWinState = gameState.windowState;
+    memcpy(&desiredWinState, &actualWinState, sizeof(WindowState));
+
+    // Initialize Drawing with GDI
+    deviceContext = GetDC(hwnd);
+    CHECK_VALID(deviceContext != 0, "GetDC failed\n");
+
+    resizeVideoBuffer(); // Initializes video memory
+
+    return true;
+}
+
+void destroyWindow()
+{
+    if (hwnd != NULL) {
+        DestroyWindow(hwnd);
+        hwnd = NULL;
+    }
+}
+
+PIXELFORMATDESCRIPTOR getDummyDescriptor()
+{
+    PIXELFORMATDESCRIPTOR pfd;
+    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 32;
+    pfd.cRedBits = 0;
+    pfd.cRedShift = 0;
+    pfd.cGreenBits = 0;
+    pfd.cGreenShift = 0;
+    pfd.cBlueBits = 0;
+    pfd.cBlueShift = 0;
+    pfd.cAlphaBits = 0;
+    pfd.cAlphaShift = 0;
+    pfd.cAccumBits = 0;
+    pfd.cAccumRedBits = 0; 
+    pfd.cAccumGreenBits = 0;
+    pfd.cAccumBlueBits = 0;
+    pfd.cAccumAlphaBits = 0;
+    pfd.cDepthBits = 24;
+    pfd.cStencilBits = 8;
+    pfd.cAuxBuffers = 0;
+    pfd.iLayerType = 0;
+    pfd.bReserved = 0;
+    pfd.dwLayerMask = 0;
+    pfd.dwVisibleMask = 0;
+    pfd.dwDamageMask = 0;
+    return pfd;
+}
+
+HGLRC glContext;
+bool createDummyContext()
+{
+    PIXELFORMATDESCRIPTOR pfd = getDummyDescriptor();
+    int index = ChoosePixelFormat(deviceContext, &pfd);
+    if (index == NULL) {
+        debugPrintf("ChoosePixelFormat failed\n");
+        printLastError();
+        return false;
+    }
+
+    // Check if the closest pixel format supports what we need
+    PIXELFORMATDESCRIPTOR available;
+    int ret = DescribePixelFormat(deviceContext, index, sizeof(PIXELFORMATDESCRIPTOR), &available);
+    if (ret == NULL) {
+        debugPrintf("DescribePixelFormat failed\n");
+        printLastError();
+        return false;
+    }
+
+    // Check if availabe is good enough
+    bool success = true;
+    // PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    success = success && (available.dwFlags | PFD_DRAW_TO_WINDOW); // Opengl, doublebuffer and draw to windos is necessary
+    success = success && (available.dwFlags | PFD_SUPPORT_OPENGL); // Opengl, doublebuffer and draw to windos is necessary
+    success = success && (available.dwFlags | PFD_DOUBLEBUFFER); // Opengl, doublebuffer and draw to windos is necessary
+    success = success && (available.iPixelType == pfd.iPixelType); // RGBA is necessary
+
+    if (!success) {
+        debugPrintf("Available pixelformat does not fullfill the games requirements\n");
+        return false;
+    }
+
+    // Set pixel format
+    if (SetPixelFormat(deviceContext, index, &pfd) == FALSE) {
+        debugPrintf("SetPixelFormat failed\n");
+        printLastError();
+        return false;
+    }
+
+    // Create the OpenGL context
+    glContext = wglCreateContext(deviceContext);
+    if (glContext == NULL) {
+        debugPrintf("wglCreateContext failed\n");
+        printLastError();
+        return false;
+    }
+
+    if (wglMakeCurrent(deviceContext, glContext) == FALSE) {
+        debugPrintf("wglMakeCurrent failed\n");
+        printLastError();
+        return false;
+    }
+
+    return true;
+}
+
+void destroyOpenGLContext()
+{
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(glContext);
+}
+
+
+void customDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, 
+        const GLchar* message, const void* userParam)
+{
+    // Ignore unecessary warniings
+    if (id == 0) return;
+
+    debugPrintf("CustomDebugProc: ERROR ID: %d:, msg: \"%s\"\n", id, message);
+    switch (source)
+    {
+        case GL_DEBUG_SOURCE_API:             debugPrintf("Source: API\t"); break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   debugPrintf("Source: Window System\t"); break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: debugPrintf("Source: Shader Compiler\t"); break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:     debugPrintf("Source: Third Party\t"); break;
+        case GL_DEBUG_SOURCE_APPLICATION:     debugPrintf("Source: Application\t"); break;
+        case GL_DEBUG_SOURCE_OTHER:           debugPrintf("Source: Other\t"); break;
+    } 
+
+    switch (type)
+    {
+        case GL_DEBUG_TYPE_ERROR:               debugPrintf("Type: Error\t"); break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: debugPrintf("Type: Deprecated Behaviour\t"); break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  debugPrintf("Type: Undefined Behaviour\t"); break; 
+        case GL_DEBUG_TYPE_PORTABILITY:         debugPrintf("Type: Portability\t"); break;
+        case GL_DEBUG_TYPE_PERFORMANCE:         debugPrintf("Type: Performance\t"); break;
+        case GL_DEBUG_TYPE_MARKER:              debugPrintf("Type: Marker\t"); break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:          debugPrintf("Type: Push Group\t"); break;
+        case GL_DEBUG_TYPE_POP_GROUP:           debugPrintf("Type: Pop Group\t"); break;
+        case GL_DEBUG_TYPE_OTHER:               debugPrintf("Type: Other\t"); break;
+    } 
+
+    switch (severity)
+    {
+        case GL_DEBUG_SEVERITY_HIGH:         debugPrintf("Severity: high\t"); break;
+        case GL_DEBUG_SEVERITY_MEDIUM:       debugPrintf("Severity: medium\t"); break;
+        case GL_DEBUG_SEVERITY_LOW:          debugPrintf("Severity: low\t"); break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: debugPrintf("Severity: notification\t"); break;
+    }
+    debugPrintf("\n");
+}
+
+PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
+bool createWindowWithOpenGL()
+{
+    debugPrintf("Init window with OpenGL\n");
+
+    if (!createWindow(false)) {
+        debugPrintf("CreateWindow dummy failed\n");
+        return false;
+    }
+
+    if (!createDummyContext()) {
+        debugPrintf("Create dummy context failed\n");
+        return false;
+    }
+
+    debugPrintf("Dummy context creation worked!\n");
+    char* version = (char*)glGetString(GL_VERSION);
+    debugPrintf("dummy context version: \"%s\"\n", version);
+
+    wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) getAnyGLFuncAddress("wglCreateContextAttribsARB");
+    if (wglCreateContextAttribsARB == NULL) {
+        debugPrintf("Get andy func failed for createContextAttribs\n");
+        return false;
+    }
+
+    // Destroy dummy context
+    destroyOpenGLContext();
+
+    // Create real context
+    int attribs[] = {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+        WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+        0
+    };
+
+    glContext = wglCreateContextAttribsARB(deviceContext, NULL, attribs);
+    if (glContext == NULL) {
+        debugPrintf("glContext was null!\n");
+        debugWaitForConsoleInput();
+        return false;
+    }
+
+    // Make context current
+    if (wglMakeCurrent(deviceContext, glContext) == FALSE) {
+        debugPrintf("wglMakeCurrent failed\n");
+        printLastError();
+        return false;
+    }
+
+    debugPrintf("Initializisation version 4.5 worked!!!\n");
+    version = (char*)glGetString(GL_VERSION);
+    debugPrintf("version: \"%s\"\n", version);
+
+    // Load opengl functions
+    if (!loadAllFunctions()) {
+        debugPrintf("Could not load all gl functions!\n");
+        debugWaitForConsoleInput();
+        return false;
+    }
+
+    // Enable debug output
+    {
+        glDebugMessageCallback(&customDebugProc, nullptr);
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    }
+
+    ShowWindow(hwnd, SW_SHOWNORMAL);
+    SetActiveWindow(hwnd);
+    return true;
+}
+
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdShow)
 {
+    globalInstance = instance;
+
+    // Init subsystems
     memset(&gameState, 0, sizeof(GameState));
+    CHECK_VALID(initDebugConsole(), "Console initialization failed\n");
     initKeyTranslationTable();
     initTiming();
+    initFileListener("build\\game_tmp.dll");
+    initDynamicLoading();
+    initAllocators();
+    //initAudio();
 
     // Initialize GameState
-    VideoData* videoData = &gameState.videoData;
     {
         Memory* mem = &gameState.memory;
-        mem->size = 1024L * 1024L * 1024L * 4L;
+        mem->size = 1024L * 1024L * 4L;
+        debugPrintf("Memory size: %lld\n", mem->size);
         mem->memory = (byte*) VirtualAlloc(NULL, mem->size, MEM_COMMIT, PAGE_READWRITE);
-    }
-
-    // Initialize Debug Console
-    {
-        if (AllocConsole() == NULL) {
-            return -1;
-        }
-        consoleOutHandle= GetStdHandle(STD_OUTPUT_HANDLE);
-        consoleInHandle = GetStdHandle(STD_INPUT_HANDLE);
-        if (consoleOutHandle == INVALID_HANDLE_VALUE || 
-                consoleInHandle == INVALID_HANDLE_VALUE) {
-            return -1;
-        }
-    }
-
-    // Initialize hwnd
-    HWND hwnd;
-    WindowState& desiredWinState = gameState.windowState;
-    int windowStyle = WS_OVERLAPPEDWINDOW;
-    int windowStyleEX = WS_EX_OVERLAPPEDWINDOW;
-    {
-        // Load cursor
-        HCURSOR cursor = LoadCursor(NULL, IDC_ARROW);
-        if (cursor == NULL) {
-            debugPrint("LoadCursor failed\n");
+        if (mem->memory == NULL) {
+            debugPrintf("VirtualAlloc failed: null returend\n");
             printLastError();
             return -1;
         }
-
-        const char* CLASS_NAME = "UppEngineGT";
-        WNDCLASS wc = {};
-        wc.style = CS_HREDRAW  | CS_VREDRAW | CS_OWNDC;
-        wc.lpfnWndProc = &windowProc;
-        wc.cbClsExtra = 0;
-        wc.hInstance = instance;
-        wc.hIcon = NULL;
-        wc.hCursor = cursor;
-        wc.hbrBackground = NULL;
-        wc.lpszMenuName = NULL;
-        wc.lpszClassName = CLASS_NAME;
-
-        if (RegisterClass(&wc) == 0) {
-            debugPrint("Register class failed!\n");
-            return -1;
-        }
-
-        hwnd = CreateWindowEx(
-                WS_EX_OVERLAPPEDWINDOW,
-                CLASS_NAME,
-                CLASS_NAME,
-                WS_OVERLAPPEDWINDOW,
-                CW_USEDEFAULT, CW_USEDEFAULT,
-                CW_USEDEFAULT, CW_USEDEFAULT,
-                NULL,
-                NULL,
-                instance,
-                NULL);
-        if (hwnd == NULL) {
-            debugPrint("CreateWindowEX failed!\n");
-            return -1;
-        }
-        ShowWindow(hwnd, cmdShow);
-
-        // Init winState
-        actualWinState.fullscreen = false;
-        actualWinState.minimized = false;
-        actualWinState.continuousDraw = false;
-        memcpy(&desiredWinState, &actualWinState, sizeof(WindowState));
     }
 
-    // Initialize Drawing with GDI
+    // Init services
     {
-        deviceContext = GetDC(hwnd);
-        CHECK_VALID(deviceContext != 0, "GetDC failed\n");
-
-        resizeVideoBuffer(); // Initializes video memory
+        Services* services = &gameState.services;
+        services->debugPrint = &debugPrint;
     }
+
+    // Initialize window with OpenGL
+    CHECK_VALID(initWindow(), "InitWindow failed\n");
+    CHECK_VALID(createWindowWithOpenGL(), "Init opengl failed\n");
+    CHECK_VALID(initRenderer(), "Error initializing renderer\n");
+
+    // Initialize Game
+    gameInit(&gameState);
+
+    // Timing stuff
+    double frameStart = currentTime();
+    double tslf = 0;
+    double gameTickTime = 0.0;
+    double gameStartTime = frameStart;
+    int& fps = actualWinState.fps;
 
     // MSG Loop
     MSG msg;
     bool quit = false;
-    RECT savedWindowPos;
-    GetWindowRect(hwnd, &savedWindowPos);
     while (!quit) 
     {
+        WindowState& desiredWinState = gameState.windowState;
         if (!actualWinState.continuousDraw) 
         {
             // Block until one message is received
@@ -517,13 +1095,16 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
         }
 
         // Do timing
-        gameState.time.now = currentTime();
+        gameState.time.now = frameStart - gameStartTime;
+        gameState.time.tslf = tslf;
+        gameState.time.lastGameTick = gameTickTime;
 
         // GameTick...
-        gameTick();
+        debugGameTick();
+        //gameTick(&gameState);
         resetInputState();
-        renderToWindow(deviceContext, &bitmapInfo, &gameState.videoData);
-        
+        //renderToWindow(deviceContext, &bitmapInfo, &gameState.videoData);
+
         // Handle requests
         if (desiredWinState.quit) {
             DestroyWindow(hwnd);
@@ -561,8 +1142,40 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
             }
         }
         actualWinState.continuousDraw = desiredWinState.continuousDraw;
+        if (desiredWinState.fps != fps) {
+            if (desiredWinState.fps > 1) {
+                fps = desiredWinState.fps;
+            }
+        }
 
+        // Do timing stuff
+        double gameTickEnd = currentTime();
+        double frameTime = 1.0 / fps;
+        gameTickTime = gameTickEnd - frameStart;
+        // Sleep if possible
+        sleepUntil(frameStart + frameTime);
+
+        double frameEnd = currentTime();
+        tslf = frameEnd - frameStart;
+        frameStart = frameEnd;
+
+        if (checkFileChanged()) {
+            loadGameFunctions();
+        }
+
+        // Debug print
+        /*{
+            double sleepFor =  (frameStart + frameTime) - gameTickEnd;
+            if (gameTickTime > frameTime) {
+                debugPrintf("Frame took: %3.2fms, Tick: %3.2fms, OVER TIME\n", tslf * 1000, gameTickTime * 1000);
+            }
+            else {
+                debugPrintf("Frame took: %3.2fms, Tick: %3.2fms\n", tslf * 1000, gameTickTime * 1000);
+            }
+        } */
     }
+
+    gameShutdown(&gameState);
 
     debugPrint("Program exit\n");
     debugWaitForConsoleInput();

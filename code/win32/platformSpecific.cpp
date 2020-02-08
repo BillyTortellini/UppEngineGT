@@ -3,12 +3,14 @@
 
 #include "../datatypes.hpp"
 
+#define DECLARE_EXPORT __declspec(dllexport)
+
 struct Pixel
 {
+    byte a;
+    byte b;
     byte r;
     byte g;
-    byte b;
-    byte a;
 };
 
 #endif

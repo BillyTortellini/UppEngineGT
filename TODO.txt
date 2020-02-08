@@ -1,17 +1,25 @@
 UppEngineGT:
 ------------
 Goal: Windows and Linux "GameEngine"-like program.
+Own programming language
+Reading all structs in a C header file
+
+What is missing:
+----------------
+ * Allocators
+ * Strings
+ * Lists
+ * Dynamic Arrays
 
 TODO:
 -----
 Today:
-  - Windows Timing
+  - Windows dynamic dll loading
+  - Windows sound
 
  Backlog:
   - win32 cursor hiding and capturing
   - Windows call game draw
-  - Windows dynamic dll loading
-  - Windows sound
   - OpenGL Support
   - win32 RawInput, vectors as mousePos
   - Linux remove SDL
@@ -33,6 +41,7 @@ Today:
 DONE:
 -----
  - Window options (Fullscreen, Quit, Wait/Poll-Events...)
+ - Windows Timing
  - Windows set cursor
  - Windows input (Keyboard and Mouse)
  - Git repository
