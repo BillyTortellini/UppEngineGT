@@ -26,7 +26,7 @@ void unload_text_file(char* data);
 { \
     char invalidBuffer[2048]; \
     snprintf(invalidBuffer, 2048, "Invalid code path: %s\tLine #%d", __FILE__, __LINE__); \
-    MessageBox(hwnd, invalidBuffer, "ERROR", MB_OK); \
+    MessageBox(NULL, invalidBuffer, "ERROR", MB_OK); \
     __debugbreak(); \
     exit(-1); \
 }
