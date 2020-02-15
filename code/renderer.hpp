@@ -1,10 +1,20 @@
 #ifndef __RENDERER_HPP__
 #define __RENDERER_HPP__
 
-#include "umath.hpp"
-#include "datatypes.hpp"
+#include "uppLib.hpp"
+#include "tmpAlloc.hpp"
+#include "fileIO.hpp"
+
+// GLOBALS:
+Allocator* renderAlloc;
 
 // Todo:
+// -----
+// View Matrix              X
+// Projection Matrix        O
+// Orthographic Matrix      O
+// Transform (With Quat)    O
+
 //  * Define a mesh
 //  * Define a material
 
@@ -15,29 +25,70 @@ struct Camera3D
     mat4 projectionMatrix;
 };
 
-enum MESH_ATTRIBUTES
+namespace MeshAttrib
 {
-    POS_2D_INDEX = 0,
-    POS_3D_INDEX = 1,
-    NORMALS_INDEX = 2,
-    UV_INDEX = 3,
-    COLOR_INDEX = 4,
+    enum ENUM
+    {
+        POS2 = 0,
+        POS3 = 1,
+        NORMALS = 2,
+        UV = 3,
+        COLOR3 = 4,
+        COLOR4 = 5,
 
-    // This must always stay last
-    MESH_ATTRIB_COUNT
+        // Further:
+        // Multiple UVs?
+        // Floats, vec2s or vec3s for per vertex data?
+        // For skinning an index array and weights
+
+        // This must always stay last
+        COUNT
+    };
+};
+
+u32 attribSizeTable[] = {
+    sizeof(vec2),  //POS2
+    sizeof(vec3),  //POS3
+    sizeof(vec3),  //NORMALS
+    sizeof(vec2),  //UV
+    sizeof(vec3),  
+    sizeof(vec4)
+};                 
+
+GLenum attribTypeTable[] = {
+    GL_FLOAT,  //POS2
+    GL_FLOAT,  //POS3
+    GL_FLOAT,  //NORMALS
+    GL_FLOAT,  //UV
+    GL_FLOAT,  // COLOR3
+    GL_FLOAT   // COLOR4
+};
+
+int attribCountTable[] = {
+    2,  //POS2
+    3,  //POS3
+    3,  //NORMALS
+    2,  //UV
+    3,  // COLOR3
+    4   // COLOR4
+};
+
+u32 attribIndexTable[] = {
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
 };
 
 // TODO: Should be able to do hot code reloading
 // TODO: Get attributes from compiled shader
+// TODO: Should be able to set uniforms from const char*
+// TODO: Automatic uniform detection?
 struct ShaderProgram
 {
     int id;
-    int filenameCount;
-    String* filenames;
-
-    int requiredCount;
-    MESH_ATTRIBUTES requiredAttributes[MESH_ATTRIB_COUNT];
-    int requiredAttribIndices[MESH_ATTRIB_COUNT];
 };
 
 // Mesh:
@@ -53,29 +104,12 @@ struct ShaderProgram
 //  - Check if mesh has all available features for a shader
 //  - Build vertex array object from MeshData
 
-struct MeshData
-{
-    byte* attributes[MESH_ATTRIB_COUNT];
-    bool available[MESH_ATTRIB_COUNT];
-};
-
-#define MAX_MESH_DATA_COUNT 512
-struct Renderer
-{
-    MeshData meshDatas[MAX_MESH_DATA_COUNT]; 
-    // Here will be other shaderprograms,
-    // Material data and stuff like this
-};
-
-// TODO: This is currently a global, lets see if we will change that in the future
-Renderer renderer;
-
 GLuint createShaderFromSource(const char* source, GLenum type)
 {
     // Create shader id
     GLuint id = glCreateShader(type);
     if (id == 0) {
-        INVALID_CODE_PATH;
+        invalid_path("glCreateShader failed\n");
     }
 
     // Compile
@@ -92,10 +126,11 @@ GLuint createShaderFromSource(const char* source, GLenum type)
         GLint maxLength = 0;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &maxLength);
 
-        char buffer[2048];
-        glGetShaderInfoLog(id, 2048, &maxLength, buffer);
-        debugPrintf("Could not compile shader, error msg: \n %s\n", buffer);
-        debugWaitForConsoleInput();
+        SCOPE_EXIT_ROLLBACK;
+        char* msg = (char*) tmpAlloc.alloc(maxLength+1);
+
+        glGetShaderInfoLog(id, maxLength, &maxLength, msg);
+        loggf("Could not compile shader, error msg: \n %s\n", msg);
         glDeleteShader(id);
         id = 0;
     }
@@ -103,8 +138,14 @@ GLuint createShaderFromSource(const char* source, GLenum type)
     return id;
 }
 
-// Creates 
-GLuint createShaderFromFile(String* filepath)
+bool endsWith(const char* str, const char* end) {
+    int endLen = (int) strlen(end);
+    int strLen = (int) strlen(str);
+    if (endLen > strLen) return false;
+    return strcmp(end, &(str[strLen-endLen])) == 0;
+}
+
+GLuint createShaderFromFile(const char* filepath)
 {
     // Check extension (Supported extensions are .frag, .vert)
     GLenum shaderType = 0;
@@ -114,93 +155,90 @@ GLuint createShaderFromFile(String* filepath)
     else if (endsWith(filepath, ".vert")) {
         shaderType = GL_VERTEX_SHADER;
     } 
+    else if (endsWith(filepath, ".geom")) {
+        shaderType = GL_GEOMETRY_SHADER;
+    } 
+    else if (endsWith(filepath, ".tese")) {
+        shaderType = GL_TESS_EVALUATION_SHADER;
+    } 
+    else if (endsWith(filepath, ".tesc")) {
+        shaderType = GL_TESS_CONTROL_SHADER;
+    } 
     else {
-        debugPrintf("CreateShaderFromFile: could not get shadertype from filename: %s\n", c_str(filepath));
-        debugWaitForConsoleInput();
+        loggf("CreateShaderFromFile: could not get shadertype from filename: %s\n", filepath);
+        invalid_path("CreateShaderFromFile");
         return 0;
     }
 
     // Load shader file
-    char* fileContent = load_text_file(c_str(filepath));
-    if (fileContent == nullptr) {
-        debugPrintf("Could not load shaderfile: %s\n", c_str(filepath));
-        debugWaitForConsoleInput();
-        continue;
-    }
-    SCOPE_EXIT(unload_text_file(fileContent));
+    SCOPE_EXIT_ROLLBACK;
+    char* source = load_text_file_tmp(filepath);
 
-    return createShaderFromSource(fileContent, shaderType);
+    return createShaderFromSource(source, shaderType);
 }
 
-bool init(ShaderProgram* p, std::initializer_list<const char*> filenames)
+GLuint createShaderProgram(std::initializer_list<const char*> filenames)
 {
-    // Allocate space for filename count
     int shaderCount = (int)filenames.size();
-    p->filenameCount = shaderCount;
-    p->filenames = (String*) malloc(sizeof(String) * p->filenameCount);
-
-    // Copy filenames from initializer list
-    {
-        int j = 0;
-        for (const char* filename : filenames) {
-            init(p->filenames + j, filename);
-            j++;
-        }
-    }
-
-    // Allocate space for shader ids
-    // TODO use some sort of allocator here
-    int* shaderIDs = (int*) malloc(sizeof(int) * p->filenameCount);
-    SCOPE_EXIT(free(shaderIDs););
+    SCOPE_EXIT_ROLLBACK;
+    int* shaderIDs = (int*) tmpAlloc.alloc(sizeof(int) * shaderCount);
 
     // Create Shaders from all files
-    for (int i = 0; i < p->filenameCount; i++)
     {
-        String* filename = p->filenames + i;
-        shaderIDs[i] = createShaderFromFile(filename);
-        if (shaderIDs[i] == 0) {
-            debugPrintf("Could not compile shaderfile :%s\n", c_str(filename));
-            debugWaitForConsoleInput();
+        int i = 0;
+        for (auto& filename : filenames)
+        {
+            shaderIDs[i] = createShaderFromFile(filename);
+            if (shaderIDs[i] == 0) {
+                loggf("Create shader program failed, could not compile file %s", filename);
+                break;
+            }
+            i++;
         }
     }
 
-    p->id = glCreateProgram();
+    // Create program 
+    GLuint id = glCreateProgram();
+    assert(id != 0, "glCreateProgram failed!");
+
     // Attach all shaders
     for (int i = 0; i < shaderCount; i++) {
-        glAttachShader(p->id, shaderIDs[i]);
+        glAttachShader(id, shaderIDs[i]);
     }
 
     // Link shaders to program and check if errors occured
-    glLinkProgram(p->id);
+    glLinkProgram(id);
     int isLinked = 0;
-    glGetProgramiv(p->id, GL_LINK_STATUS, &isLinked);
+    glGetProgramiv(id, GL_LINK_STATUS, &isLinked);
     if (isLinked == GL_FALSE)
     {
         GLint maxLength = 0;
-        glGetProgramiv(p->id, GL_INFO_LOG_LENGTH, &maxLength);
+        glGetProgramiv(id, GL_INFO_LOG_LENGTH, &maxLength);
 
-        char buffer[2048];
-        glGetProgramInfoLog(p->id, 2048, &maxLength, buffer);
-        debugPrintf("Could not link program, error msg: \n %s\n", buffer);
-        debugWaitForConsoleInput();
+        SCOPE_EXIT_ROLLBACK;
+        char* buffer = (char*) tmpAlloc.alloc(maxLength);
+        glGetProgramInfoLog(id, maxLength, &maxLength, buffer);
+        loggf("Could not link program, error msg: \n %s\n", buffer);
     }
 
     // Cleanup shaders
     for (int i = 0; i < shaderCount; i++) {
-        glDetachShader(p->id, shaderIDs[i]);
+        glDetachShader(id, shaderIDs[i]);
         glDeleteShader(shaderIDs[i]);
     }
 
+    return id;
+}
+
+bool init(ShaderProgram* p, std::initializer_list<const char*> filenames)
+{
+    p->id = createShaderProgram(filenames);
     return true;
 }
 
 void shutdown(ShaderProgram* p)
 {
     glDeleteProgram(p->id);
-    for (int i = 0; i < p->filenameCount; i++) {
-        shutdown(p->filenames + i);
-    }
-    free(p->filenames);
 }
 
 void printAllUniforms(ShaderProgram* p)
@@ -213,137 +251,286 @@ void printAllUniforms(ShaderProgram* p)
         GLint size;
         GLenum type;
         glGetActiveUniform(p->id, (GLuint) i, 256, NULL, &size, &type, (GLchar*) buffer);
-        debugPrintf("\t Uniform #%d: %s\n", i, buffer);
+        loggf("\t Uniform #%d: %s\n", i, buffer);
     }
 }
 
 void print(const vec2& v) {
-    debugPrintf("{%2.3f, %2.3f}", v.x, v.y);
+    loggf("{%2.3f, %2.3f}", v.x, v.y);
 }
 
 void print(const vec3& v) {
-    debugPrintf("{%2.3f, %2.3f, %2.3f}", v.x, v.y, v.z);
+    loggf("{%2.3f, %2.3f, %2.3f}", v.x, v.y, v.z);
 }
 
 void print(const vec4& v) {
-    debugPrintf("{%2.3f, %2.3f, %2.3f, %2.3f}", v.x, v.y, v.z, v.w);
+    loggf("{%2.3f, %2.3f, %2.3f, %2.3f}", v.x, v.y, v.z, v.w);
 }
 
 void print(const mat4& m) {
-    debugPrintf("(%2.3f, %2.3f, %2.3f, %2.3f)\n", m.columns[0].x, m.columns[1].x, m.columns[2].x, m.columns[3].x);
-    debugPrintf("(%2.3f, %2.3f, %2.3f, %2.3f)\n", m.columns[0].y, m.columns[1].y, m.columns[2].y, m.columns[3].y);
-    debugPrintf("(%2.3f, %2.3f, %2.3f, %2.3f)\n", m.columns[0].z, m.columns[1].z, m.columns[2].z, m.columns[3].z);
-    debugPrintf("(%2.3f, %2.3f, %2.3f, %2.3f)\n", m.columns[0].w, m.columns[1].w, m.columns[2].w, m.columns[3].w);
+    loggf("(%2.3f, %2.3f, %2.3f, %2.3f)\n", m.columns[0].x, m.columns[1].x, m.columns[2].x, m.columns[3].x);
+    loggf("(%2.3f, %2.3f, %2.3f, %2.3f)\n", m.columns[0].y, m.columns[1].y, m.columns[2].y, m.columns[3].y);
+    loggf("(%2.3f, %2.3f, %2.3f, %2.3f)\n", m.columns[0].z, m.columns[1].z, m.columns[2].z, m.columns[3].z);
+    loggf("(%2.3f, %2.3f, %2.3f, %2.3f)\n", m.columns[0].w, m.columns[1].w, m.columns[2].w, m.columns[3].w);
+}
+
+struct MeshData
+{
+    int vertexCount;
+    int indexCount;
+    Blk data[MeshAttrib::COUNT];
+    Blk indexData;
+};
+
+void init(MeshData* m) 
+{
+    m->vertexCount = 0;
+    m->indexCount = 0;
+    m->indexData.data = nullptr;
+    m->indexData.size = 0;
+    for (int i = 0; i < MeshAttrib::COUNT; i++) {
+        m->data[i].data = nullptr;
+        m->data[i].size = 0;
+    }
+}
+
+void shutdown (MeshData* m) 
+{
+    for (int i = 0; i < MeshAttrib::COUNT; i++) {
+        if (m->data[i].data != nullptr) {
+            renderAlloc->dealloc(m->data[i]);
+        }
+    }
+    if (m->indexData.data != nullptr) {
+        renderAlloc->dealloc(m->indexData);
+    }
+}
+
+MeshData createMeshData() {
+    MeshData m;
+    init(&m);
+    return m;
+}
+
+void setAttribs(MeshData* m, int count, void* data, std::initializer_list<MeshAttrib::ENUM> attribs)
+{
+    int attrCount = (int)attribs.size();
+    assert(attrCount != 0 && count > 0 && attrCount < MeshAttrib::COUNT, "Attach(Mesh*..) was called wrong!\n");
+    // Put attribs from initializer list into array
+    MeshAttrib::ENUM types[MeshAttrib::COUNT];
+    {
+        int i = 0;
+        for(MeshAttrib::ENUM type : attribs) 
+        {
+            types[i] = type;
+            i++;
+        }
+    }
+
+    // Calculate stride
+    u32 stride = 0;
+    for (int i = 0; i < attrCount; i++) {
+        stride += attribSizeTable[types[i]];
+    }
+
+    // Add each type to the mesh
+    int offset = 0;
+    for (int i = 0; i < attrCount; i++) 
+    {
+        Blk& attrData = m->data[types[i]];
+        int size = attribSizeTable[types[i]];
+        assert(attrData.data == nullptr, "Attach called with already available mesh data");
+
+        // Alloc data
+        attrData = renderAlloc->alloc(size * count);
+        byte* to = (byte*) attrData.data;
+        byte* from = (byte*) data;
+
+        // Copy all vertex data
+        for (int j = 0; j < count; j++) {
+            memcpy(&(to[j*size]), &(from[j*stride + offset]), size);
+        }
+        offset += size;
+    }
+
+    // Set vertex count
+    if (m->vertexCount == 0) {
+        m->vertexCount = count;
+    }
+    else {
+        assert(m->vertexCount == count, "Attach(Mesh*) called with different vertex counts!\n");
+    }
+}
+
+void setIndices(MeshData* m, int count, void* data)
+{
+    assert(m->indexCount == 0, "Indices were already set for this mesth\n!");
+    m->indexCount = count;
+    m->indexData = renderAlloc->alloc(sizeof(u32) * count);
+    memcpy(m->indexData.data, data, sizeof(u32) * count);
+}
+
+struct OpenGLState
+{
+    GLuint currentVao;
+    GLuint currentProgram;
+};
+
+OpenGLState glState;
+
+void bindVao(GLuint vao) {
+    if (glState.currentVao != vao) {
+        glBindVertexArray(vao);
+        glState.currentVao = vao;
+    }
+}
+
+void bindProgram(GLuint id) {
+    if (glState.currentProgram != id) {
+        glUseProgram(id);
+        glState.currentProgram = id;
+    }
+}
+
+void bind(ShaderProgram* p) {
+    bindProgram(p->id);
+}
+
+struct Mesh
+{
+    GLuint vao;
+    GLuint ebo;
+    GLuint vbo[MeshAttrib::COUNT];
+    int elementCount;
+};
+
+void bind(Mesh* m) {
+    bindVao(m->vao);
+}
+
+void init(Mesh* m, MeshData* meshData) 
+{
+    m->ebo = 0;
+    m->vao = 0;
+    for (int i = 0; i < MeshAttrib::COUNT; i++) {
+        m->vbo[i] = 0;
+    }
+
+    glGenVertexArrays(1, &m->vao);
+    assert(m->vao != 0, "glGenVertexArrays failed\n");
+
+    bindVao(m->vao);
+
+    // Create vbos
+    for (int i = 0; i < MeshAttrib::COUNT; i++) 
+    {
+        if (meshData->data[i].data == nullptr) {
+            continue;
+        }
+
+        glGenBuffers(1, (GLuint*) &(m->vbo[i]));
+        assert(m->vbo[i] != 0, "glGenBuffers failed!\n");
+
+        // Copy data
+        int size = attribSizeTable[i];
+        glBindBuffer(GL_ARRAY_BUFFER, m->vbo[i]);
+        glBufferData(GL_ARRAY_BUFFER, size * meshData->vertexCount, meshData->data[i].data, GL_STATIC_DRAW);
+
+        // Set Attrib pointer
+        glVertexAttribPointer(attribIndexTable[i], attribCountTable[i], attribTypeTable[i], GL_FALSE, size, 0);
+        glEnableVertexAttribArray(attribIndexTable[i]);
+    }
+
+    // Create ebo
+    glGenBuffers(1, (GLuint*) &(m->ebo));
+    assert(m->ebo != 0, "glGenBuffers failed on ebo\n");
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * meshData->indexCount, (void*) meshData->indexData, GL_STATIC_DRAW);
+
+    bindVao(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void init(Mesh* m, int indexCount, void* indexData, int vertexCount, void* vertexData, std::initializer_list<MeshAttrib::ENUM> types)
+{
+    // Initialize mesh data
+    MeshData meshData = createMeshData();
+    SCOPE_EXIT(shutdown(&meshData));
+    setAttribs(&meshData, vertexCount, vertexData, types); 
+    setIndices(&meshData, indexCount, indexData);
+    init(m, &meshData);
+}
+
+void shutdown(Mesh* m) 
+{
+    for (int i = 0; i < MeshAttrib::COUNT; i++) {
+        if (m->vbo[i] != 0) {
+            glDeleteBuffers(1, &(m->vbo[i]));
+        }
+    }
+    glDeleteBuffers(1, &(m->ebo));
+    glDeleteVertexArrays(1, &(m->vao));
 }
 
 int vbo, vao, ebo;
 ShaderProgram s;
+Mesh cubeMesh;
 Camera3D camera;
 extern GameState gameState;
-bool initRenderer()
+bool initRenderer(Allocator* alloc)
 {
+    renderAlloc = alloc;
+
+    // Set initial openglState
+    bindProgram(0);
+    bindVao(0);
+
     init(&s, {"ressources/shaders/color.frag", "ressources/shaders/color.vert"});
     printAllUniforms(&s);
-    //shutdown(&s);
+
     camera.projectionMatrix = projection(0.01f, 100.0, d2r(90), (float) gameState.windowState.width / gameState.windowState.height);
 
-    glGenVertexArrays(1, (GLuint*) &vao);
-    glBindVertexArray(vao);
-
-    struct Vertex
-    {
-        Vertex(){};
-        Vertex(vec3 pos, vec3 color) : pos(pos), color(color){}
-        vec3 pos;
-        vec3 color;
-    };
-    // Fill vbo
-
-    Vertex vertexData[] = {
-        Vertex(vec3(-1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3( 1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3(-1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3( 1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3(-1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3( 1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3(-1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3( 1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f))
-    };
-
-    glGenBuffers(1, (GLuint*) &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*) 0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*) (sizeof(float) * 3));
-    glEnableVertexAttribArray(1);
-
-    u32 elementData[] = 
-    {
-        1, 0, 2, 2, 3, 1,
-        6, 5, 4, 6, 7, 5,
-        6, 7, 2, 2, 3, 7,
-        3, 1, 5, 5, 7, 3,
-        5, 1, 0, 4, 5, 0,
-        4, 0, 2 ,4, 2, 6
-    };
-    glGenBuffers(1, (GLuint*) &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elementData), elementData, GL_STATIC_DRAW);
-
-    //wglSwapIntervalExt(1);
+    // Set Opengl State
     wglSwapIntervalExt(-1);
+    glViewport(0, 0, gameState.windowState.width, gameState.windowState.height);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    glEnable(GL_CULL_FACE);
 
-    // TEST
-    camera.viewMatrix = lookAt(vec3(0.0f, 0.0f, 3.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-
-    vec3 points[] = {
-        vec3(0.0f, 0.0f, 0.0f),
-        vec3(1.0f, 0.0f, -1.0f),
-        vec3(1.0f, -1.0f, 1.0f)
-    };
-
-    debugPrintf("View matrix:\n");
-    print(camera.viewMatrix);
-
-    debugPrintf("\nProjection matrix:\n");
-    print(camera.projectionMatrix);
-
-    debugPrintf("\nVP matrix:\n");
-    mat4 vp = camera.projectionMatrix * camera.viewMatrix;
-    print(vp);
-    debugPrintf("\n");
-
-    debugPrintf("Points:\n");
-    for (int i = 0; i < 3; i++) {
-        vec3 p = points[i];
-        debugPrintf("\t");
-        print(p);
-        debugPrintf("\n");
-    }
-
-    debugPrintf("After viewMatrix:\n");
-    for (int i = 0; i < 3; i++) {
-        vec3 p = points[i];
-        debugPrintf("\t");
-        print(camera.viewMatrix * p);
-        debugPrintf("\n");
-    }
-
-    debugPrintf("After projection + view:\n");
-    for (int i = 0; i < 3; i++) {
-        vec4 p = vec4(points[i], 1.0f);
-        debugPrintf("\t");
-        print((vp * p));
-        debugPrintf("\n");
-    }
-
-    debugPrintf("Homogenized\n");
-    for (int i = 0; i < 3; i++) {
-        vec4 p = vec4(points[i], 1.0f);
-        debugPrintf("\t");
-        print(homogenize(vp * p));
-        debugPrintf("\n");
+    // Create mesh data
+    {   
+        struct Vertex
+        {
+            Vertex(){};
+            Vertex(vec3 pos, vec3 color) : pos(pos), color(color){}
+            vec3 pos;
+            vec3 color;
+        };
+        // Fill vbo
+        Vertex vertexData[] = {
+            Vertex(vec3(-1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
+            Vertex(vec3( 1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
+            Vertex(vec3(-1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
+            Vertex(vec3( 1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
+            Vertex(vec3(-1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
+            Vertex(vec3( 1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
+            Vertex(vec3(-1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
+            Vertex(vec3( 1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f))
+        };
+        u32 elementData[] = 
+        {
+            0, 1, 4, 1, 5, 4,
+            6, 3, 2, 6, 7, 3,
+            4, 7, 6, 4, 5, 7, 
+            5, 1, 3, 3, 7, 5,
+            0, 3, 1, 0, 2, 3,
+            4, 6, 2, 4, 2, 0
+        };
+        using namespace MeshAttrib;
+        init(&cubeMesh, 36, elementData, 8, vertexData, {POS3, COLOR3});
     }
 
     return true;
@@ -352,38 +539,34 @@ bool initRenderer()
 vec2 camSphere(0.0f);
 void render()
 {
-    glViewport(0, 0, gameState.windowState.width, gameState.windowState.height);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glBindVertexArray(vao);
-    glUseProgram(s.id);
-
-    //POINT p;
-    vec2 mPos = vec2(gameState.input.mouseX, gameState.input.mouseY);
-    mPos.x /= gameState.windowState.width;
-    mPos.y /= gameState.windowState.height;
-    mPos = mPos * 2.0f - 1.0f;
-    mPos.y *= -1.0f;
-
-    // CAMERA
-    float sensitivity = 0.003f;
-    camSphere += vec2(-gameState.input.deltaX, gameState.input.deltaY) * sensitivity;
-    camSphere = sphericalNorm(camSphere);
-
-    camSphere = vec2(d2r(100.0f*(float)gameState.time.now), sinf((float)gameState.time.now) * d2r(30));
-    vec3 pos = sp2eu(camSphere) * -3.0f;
-
     if (gameState.windowState.wasResized) {
+        glViewport(0, 0, gameState.windowState.width, gameState.windowState.height);
         camera.projectionMatrix = projection(0.01f, 100.0f, d2r(90), (float)gameState.windowState.width/gameState.windowState.height);
     }
 
-    camera.viewMatrix = lookAt(pos, vec3(0));
+    // Update camera
+    {
+        float sensitivity = 0.003f;
+        camSphere += vec2(gameState.input.deltaX, gameState.input.deltaY) * sensitivity;
+        camSphere = sphericalNorm(camSphere);
+        //camSphere = vec2(d2r(100.0f*(float)gameState.time.now), sinf((float)gameState.time.now) * d2r(30));
+
+        vec3 offset(1.5f, 0, 0);
+        vec3 pos = sp2eu(camSphere) * -3.0f + offset;
+        camera.viewMatrix = lookAt(pos, offset);
+    }
+
+    // RENDER
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    bind(&s);
+    bind(&cubeMesh);
+
+    // Set Uniforms
     mat4 vp = camera.projectionMatrix * camera.viewMatrix;
     glUniformMatrix4fv(0, 1, GL_FALSE, (GLfloat*) &vp);
 
-    // CAMERA END
+    // 3 Cubes
     vec3 p = vec3(0.0f);
     glUniform3fv(1, 1, (GLfloat*) &p);
     glDrawElements(GL_TRIANGLES, 6*2*3, GL_UNSIGNED_INT, NULL);

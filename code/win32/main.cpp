@@ -1,14 +1,11 @@
 #include "platformSpecific.cpp"
 #include "..\platform.hpp"
-#include "..\datatypes.hpp"
-#include "..\umath.hpp"
-#include "..\scopedExit.hpp"
 
+#include <uppLib.hpp>
 #include <windows.h>
 #include <windowsx.h>
 #include <wingdi.h>
 #include <cstring>
-#include <cstdio>
 #include <cstdarg>
 #include <initializer_list>
 #include <intrin.h>
@@ -16,55 +13,12 @@
 #include <GL/glext.h>
 #include <GL/wglext.h>
 
-// Prototypes
-char* load_text_file(const char* filepath);
-void unload_text_file(char* data);
-
-// Define debug macro and prototypes so that they can be used in other win32 files
-#undef INVALID_CODE_PATH
-#define INVALID_CODE_PATH \
-{ \
-    char invalidBuffer[2048]; \
-    snprintf(invalidBuffer, 2048, "Invalid code path: %s\tLine #%d", __FILE__, __LINE__); \
-    MessageBox(NULL, invalidBuffer, "ERROR", MB_OK); \
-    __debugbreak(); \
-    exit(-1); \
-}
-
-#undef ASSERT
-#define ASSERT(x) \
-if (!(x)) { \
-    char assertBuf[2048]; \
-    snprintf(assertBuf, 2048, "Assertion failed:\nFile: %s\tLine #%d", __FILE__, __LINE__); \
-    MessageBox(hwnd, assertBuf, "ERROR", MB_OK); \
-    __debugbreak(); \
-    exit(-1); \
-}
-
-char _log_buffer[4096];
-#undef log
-#define log(format, ...) { \
-        snprintf(_log_buffer, 4096, format, ##__VA_ARGS__); \
-        debugPrint(_log_buffer); \
-};
-
-#undef debugPrintf
-#define debugPrintf(format, ...) { \
-        char buf[1024]; \
-        snprintf(buf, 1024, format, ##__VA_ARGS__); \
-        debugPrint(buf); \
-};
-
-void debugPrint(const char* str);
-void debugWaitForConsoleInput();
-
 // Undefine near and far macros that are defined in the windows headers
 #undef near
 #undef far
 
-#include "../allocators.hpp"
 #include "win32_glFunctions.hpp"
-#include "../string.hpp"
+#include "../tmpAlloc.hpp"
 #include "../renderer.hpp"
 
 // GLOBALS
@@ -96,6 +50,12 @@ void initKeyTranslationTable();
 void debugPrint(const char* str) {
     DWORD out;
     WriteConsole(consoleOutHandle, str, (DWORD)strlen(str), &out, NULL);
+}
+
+void win32_invalid_path(const char* str) {
+    MessageBox(NULL, str, "INVALID_PATH", MB_OK);
+    __debugbreak();
+    exit(EXIT_FAILURE);
 }
 
 void debugRead(char* buffer, uint32 size) {
@@ -139,7 +99,7 @@ void printLastError() {
             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
             (LPSTR) &msgBuffer,
             0, NULL);
-    debugPrintf("Last error code: %d, Error:\n%s\n", error, msgBuffer);
+    loggf("Last error code: %d, Error:\n%s\n", error, msgBuffer);
     debugWaitForConsoleInput();
 }
 
@@ -406,7 +366,7 @@ bool checkFileChanged()
         int notificationCount = bytesReturned / sizeof(_FILE_NOTIFY_INFORMATION);
         bool quit = notificationCount == 0;
         if (quit) {
-            debugPrintf("Notification count was zero, should not happen\n");
+            loggf("Notification count was zero, should not happen\n");
             quit = true;
         }
         int nextEntryOffset = 0;
@@ -415,37 +375,37 @@ bool checkFileChanged()
         {
             _FILE_NOTIFY_INFORMATION& info = *((_FILE_NOTIFY_INFORMATION*)((byte*)notifyBuffer + nextEntryOffset));
             if (info.FileNameLength == 0) {
-                debugPrintf("FileNameLength was 0, should not happen\n");
+                loggf("FileNameLength was 0, should not happen\n");
                 quit = true;
                 continue;
             }
             char changedName[256];
             int res = WideCharToMultiByte(CP_UTF8, NULL, info.FileName, info.FileNameLength, changedName, 256, NULL, NULL);
             if (res == 0) { 
-                debugPrintf("WideCharToMultibyte failed!\n"); 
+                loggf("WideCharToMultibyte failed!\n"); 
                 printLastError();
                 quit = true;
                 continue;
             }
             changedName[res/2] = 0;
 
-            /*debugPrintf("File changed: %s, ", changedName);
+            /*loggf("File changed: %s, ", changedName);
             switch(info.Action)
             {
                 case FILE_ACTION_ADDED:
-                    debugPrintf("FILE_ACTION_ADDED\n");
+                    loggf("FILE_ACTION_ADDED\n");
                     break;
                 case FILE_ACTION_REMOVED:
-                    debugPrintf("FILE_ACTION_REMOVED\n");
+                    loggf("FILE_ACTION_REMOVED\n");
                     break;
                 case FILE_ACTION_MODIFIED:
-                    debugPrintf("FILE_ACTION_MODIFIED\n");
+                    loggf("FILE_ACTION_MODIFIED\n");
                     break;
                 case FILE_ACTION_RENAMED_OLD_NAME:
-                    debugPrintf("FILE_ACTION_RENAMED_OLD_NAME\n");
+                    loggf("FILE_ACTION_RENAMED_OLD_NAME\n");
                     break;
                 case FILE_ACTION_RENAMED_NEW_NAME:
-                    debugPrintf("FILE_ACTION_RENAMED_NEW_NAME\n");
+                    loggf("FILE_ACTION_RENAMED_NEW_NAME\n");
                     break;
             }*/
             if (strcmp(changedName, filename) == 0) 
@@ -467,7 +427,7 @@ bool checkFileChanged()
 
 void resizeVideoBuffer() 
 {
-    debugPrintf("ResizeVideoBuffer w/h: %d/%d\n", actualWinState.width, actualWinState.height); 
+    loggf("ResizeVideoBuffer w/h: %d/%d\n", actualWinState.width, actualWinState.height); 
     if (actualWinState.width == 0 || actualWinState.height == 0) {
         return;
     }
@@ -501,46 +461,6 @@ void resizeVideoBuffer()
     memset(videoData->pixels, 0, imgSize);
 }
 
-void unload_text_file(char* data) {
-    if (data != NULL) {
-        free(data);
-    }
-}
-
-// Allocates memory for the whole file, then reads the file into the specified memory area
-char* load_text_file(const char* filepath) 
-{
-    FILE* file = fopen(filepath, "rb");
-    if (file == NULL) {
-        debugPrintf("File %s could not be openend!\n", filepath);
-        return nullptr;
-    }
-
-    // Get File size
-    fseek(file, 0, SEEK_END); 
-    int fileSize = (int) ftell(file);
-    fseek(file, 0, SEEK_SET); // Put cursor back to start of file
-
-    // Alloc memory for file data
-    char *data = (char*) malloc(fileSize + 1);
-    
-    // Read
-    int readSize = (int) fread(data, 1, fileSize, file); 
-    if (readSize != fileSize) {
-        debugPrintf("fread failed, it returned %d size instead of %d fileSize\n",
-                readSize, fileSize);
-        unload_text_file(data);
-        fclose(file);
-        return nullptr;
-    }
-
-    // Add null terminator
-    data[fileSize] = '\0';
-    fclose(file);
-
-    return data;
-}
-
 gameInitFunc gameInit;
 gameTickFunc gameTick;
 gameShutdownFunc gameShutdown;
@@ -562,21 +482,21 @@ void setToFallback()
 HMODULE gameLibrary = NULL;
 void loadGameFunctions()
 {
-    debugPrintf("LOAD GAME FUNCTIONS\n");
+    loggf("LOAD GAME FUNCTIONS\n");
     if (gameLibrary != NULL) {
         FreeLibrary(gameLibrary);
     }
 
     bool res = CopyFile("build\\game_tmp.dll", "build\\game_inUse.dll", FALSE);
     if (!res) {
-        debugPrintf("Could not copy file game_tmp.dll\n");
+        loggf("Could not copy file game_tmp.dll\n");
         setToFallback();
         return;
     }
 
     gameLibrary = LoadLibrary("build\\game_inUse.dll");
     if (gameLibrary == NULL) {
-        debugPrintf("LoadGameFunctions failed: loadlibrary failed\n");
+        loggf("LoadGameFunctions failed: loadlibrary failed\n");
         setToFallback();
         printLastError();
         return;
@@ -588,7 +508,7 @@ void loadGameFunctions()
     gameAudio = (gameAudioFunc) GetProcAddress(gameLibrary, "gameAudio");
     if (gameInit == NULL || gameTick == NULL || gameShutdown == NULL || gameAudio == NULL)
     {
-        debugPrintf("GetProcAddress failed: One or more functions were not found in dll.\n");
+        loggf("GetProcAddress failed: One or more functions were not found in dll.\n");
         setToFallback();
         return;
     }
@@ -661,7 +581,7 @@ void initAudio()
     if (directSoundLib)
     {
     }
-    debugPrintf("asdf audio\n");
+    loggf("asdf audio\n");
     debugWaitForConsoleInput();
 }
 
@@ -675,27 +595,27 @@ void debugGameTick()
     Input& input = gameState.input;
     if (input.deltaX != 0 ||
             input.deltaY != 0) {
-        //debugPrintf("Mouse X/Y: %d/%d, delta: %d/%d \n", input.mouseX, input.mouseY, input.deltaX, input.deltaY);
+        //loggf("Mouse X/Y: %d/%d, delta: %d/%d \n", input.mouseX, input.mouseY, input.deltaX, input.deltaY);
     }
     if (gameState.windowState.wasResized) {
-        debugPrintf("GAMETICK: resized to %d/%d\n", gameState.windowState.width, gameState.windowState.height);
+        loggf("GAMETICK: resized to %d/%d\n", gameState.windowState.width, gameState.windowState.height);
     }
     if (input.mouseWheel != 0) {
-        debugPrintf("MouseWheel: %f\n", input.mouseWheel);
+        loggf("MouseWheel: %f\n", input.mouseWheel);
     }
     if (input.keyPressed[KEY_F5]) {
         bool& d = gameState.windowState.continuousDraw;
         d = !d;
-        debugPrintf("Continuous draw switched to %s\n", d == true ? "TRUE" : "FALSE");
+        loggf("Continuous draw switched to %s\n", d == true ? "TRUE" : "FALSE");
     }
     if (input.keyPressed[KEY_F11]) {
         bool& f = gameState.windowState.fullscreen;
         f = !f;
-        debugPrintf("Fullscreen toggled to %s\n", f == true ? "TRUE" : "FALSE");
+        loggf("Fullscreen toggled to %s\n", f == true ? "TRUE" : "FALSE");
     }
     if (gameState.input.mousePressed[MOUSE_LEFT]) {
         debugPrint("Mouse Left pressed\n");
-        debugPrintf("MB_RIGHT: %d\n", MOUSE_RIGHT);
+        loggf("MB_RIGHT: %d\n", MOUSE_RIGHT);
     }
     if (gameState.input.mousePressed[MOUSE_RIGHT]) {
         debugPrint("Mouse RIGHT pressed\n");
@@ -849,7 +769,7 @@ bool createDummyContext()
     PIXELFORMATDESCRIPTOR pfd = getDummyDescriptor();
     int index = ChoosePixelFormat(deviceContext, &pfd);
     if (index == NULL) {
-        debugPrintf("ChoosePixelFormat failed\n");
+        loggf("ChoosePixelFormat failed\n");
         printLastError();
         return false;
     }
@@ -858,7 +778,7 @@ bool createDummyContext()
     PIXELFORMATDESCRIPTOR available;
     int ret = DescribePixelFormat(deviceContext, index, sizeof(PIXELFORMATDESCRIPTOR), &available);
     if (ret == NULL) {
-        debugPrintf("DescribePixelFormat failed\n");
+        loggf("DescribePixelFormat failed\n");
         printLastError();
         return false;
     }
@@ -872,13 +792,13 @@ bool createDummyContext()
     success = success && (available.iPixelType == pfd.iPixelType); // RGBA is necessary
 
     if (!success) {
-        debugPrintf("Available pixelformat does not fullfill the games requirements\n");
+        loggf("Available pixelformat does not fullfill the games requirements\n");
         return false;
     }
 
     // Set pixel format
     if (SetPixelFormat(deviceContext, index, &pfd) == FALSE) {
-        debugPrintf("SetPixelFormat failed\n");
+        loggf("SetPixelFormat failed\n");
         printLastError();
         return false;
     }
@@ -886,13 +806,13 @@ bool createDummyContext()
     // Create the OpenGL context
     glContext = wglCreateContext(deviceContext);
     if (glContext == NULL) {
-        debugPrintf("wglCreateContext failed\n");
+        loggf("wglCreateContext failed\n");
         printLastError();
         return false;
     }
 
     if (wglMakeCurrent(deviceContext, glContext) == FALSE) {
-        debugPrintf("wglMakeCurrent failed\n");
+        loggf("wglMakeCurrent failed\n");
         printLastError();
         return false;
     }
@@ -913,62 +833,62 @@ void customDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLs
     // Ignore unecessary warniings
     if (id == 0) return;
 
-    debugPrintf("CustomDebugProc: ERROR ID: %d:, msg: \"%s\"\n", id, message);
+    loggf("CustomDebugProc: ERROR ID: %d:, msg: \"%s\"\n", id, message);
     switch (source)
     {
-        case GL_DEBUG_SOURCE_API:             debugPrintf("Source: API\t"); break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   debugPrintf("Source: Window System\t"); break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER: debugPrintf("Source: Shader Compiler\t"); break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:     debugPrintf("Source: Third Party\t"); break;
-        case GL_DEBUG_SOURCE_APPLICATION:     debugPrintf("Source: Application\t"); break;
-        case GL_DEBUG_SOURCE_OTHER:           debugPrintf("Source: Other\t"); break;
+        case GL_DEBUG_SOURCE_API:             loggf("Source: API\t"); break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   loggf("Source: Window System\t"); break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: loggf("Source: Shader Compiler\t"); break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:     loggf("Source: Third Party\t"); break;
+        case GL_DEBUG_SOURCE_APPLICATION:     loggf("Source: Application\t"); break;
+        case GL_DEBUG_SOURCE_OTHER:           loggf("Source: Other\t"); break;
     } 
 
     switch (type)
     {
-        case GL_DEBUG_TYPE_ERROR:               debugPrintf("Type: Error\t"); break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: debugPrintf("Type: Deprecated Behaviour\t"); break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  debugPrintf("Type: Undefined Behaviour\t"); break; 
-        case GL_DEBUG_TYPE_PORTABILITY:         debugPrintf("Type: Portability\t"); break;
-        case GL_DEBUG_TYPE_PERFORMANCE:         debugPrintf("Type: Performance\t"); break;
-        case GL_DEBUG_TYPE_MARKER:              debugPrintf("Type: Marker\t"); break;
-        case GL_DEBUG_TYPE_PUSH_GROUP:          debugPrintf("Type: Push Group\t"); break;
-        case GL_DEBUG_TYPE_POP_GROUP:           debugPrintf("Type: Pop Group\t"); break;
-        case GL_DEBUG_TYPE_OTHER:               debugPrintf("Type: Other\t"); break;
+        case GL_DEBUG_TYPE_ERROR:               loggf("Type: Error\t"); break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: loggf("Type: Deprecated Behaviour\t"); break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  loggf("Type: Undefined Behaviour\t"); break; 
+        case GL_DEBUG_TYPE_PORTABILITY:         loggf("Type: Portability\t"); break;
+        case GL_DEBUG_TYPE_PERFORMANCE:         loggf("Type: Performance\t"); break;
+        case GL_DEBUG_TYPE_MARKER:              loggf("Type: Marker\t"); break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:          loggf("Type: Push Group\t"); break;
+        case GL_DEBUG_TYPE_POP_GROUP:           loggf("Type: Pop Group\t"); break;
+        case GL_DEBUG_TYPE_OTHER:               loggf("Type: Other\t"); break;
     } 
 
     switch (severity)
     {
-        case GL_DEBUG_SEVERITY_HIGH:         debugPrintf("Severity: high\t"); break;
-        case GL_DEBUG_SEVERITY_MEDIUM:       debugPrintf("Severity: medium\t"); break;
-        case GL_DEBUG_SEVERITY_LOW:          debugPrintf("Severity: low\t"); break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION: debugPrintf("Severity: notification\t"); break;
+        case GL_DEBUG_SEVERITY_HIGH:         loggf("Severity: high\t"); break;
+        case GL_DEBUG_SEVERITY_MEDIUM:       loggf("Severity: medium\t"); break;
+        case GL_DEBUG_SEVERITY_LOW:          loggf("Severity: low\t"); break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: loggf("Severity: notification\t"); break;
     }
-    debugPrintf("\n");
+    loggf("\n");
 }
 
 PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 bool createWindowWithOpenGL()
 {
-    debugPrintf("Init window with OpenGL\n");
+    loggf("Init window with OpenGL\n");
 
     if (!createWindow(false)) {
-        debugPrintf("CreateWindow dummy failed\n");
+        loggf("CreateWindow dummy failed\n");
         return false;
     }
 
     if (!createDummyContext()) {
-        debugPrintf("Create dummy context failed\n");
+        loggf("Create dummy context failed\n");
         return false;
     }
 
-    debugPrintf("Dummy context creation worked!\n");
+    loggf("Dummy context creation worked!\n");
     char* version = (char*)glGetString(GL_VERSION);
-    debugPrintf("dummy context version: \"%s\"\n", version);
+    loggf("dummy context version: \"%s\"\n", version);
 
     wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) getAnyGLFuncAddress("wglCreateContextAttribsARB");
     if (wglCreateContextAttribsARB == NULL) {
-        debugPrintf("Get andy func failed for createContextAttribs\n");
+        loggf("Get andy func failed for createContextAttribs\n");
         return false;
     }
 
@@ -985,25 +905,25 @@ bool createWindowWithOpenGL()
 
     glContext = wglCreateContextAttribsARB(deviceContext, NULL, attribs);
     if (glContext == NULL) {
-        debugPrintf("glContext was null!\n");
+        loggf("glContext was null!\n");
         debugWaitForConsoleInput();
         return false;
     }
 
     // Make context current
     if (wglMakeCurrent(deviceContext, glContext) == FALSE) {
-        debugPrintf("wglMakeCurrent failed\n");
+        loggf("wglMakeCurrent failed\n");
         printLastError();
         return false;
     }
 
-    debugPrintf("Initializisation version 4.5 worked!!!\n");
+    loggf("Initializisation version 4.5 worked!!!\n");
     version = (char*)glGetString(GL_VERSION);
-    debugPrintf("version: \"%s\"\n", version);
+    loggf("version: \"%s\"\n", version);
 
     // Load opengl functions
     if (!loadAllFunctions()) {
-        debugPrintf("Could not load all gl functions!\n");
+        loggf("Could not load all gl functions!\n");
         debugWaitForConsoleInput();
         return false;
     }
@@ -1024,24 +944,28 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
 {
     globalInstance = instance;
 
+    // Init allocators
+    SystemAllocator systemAlloc;
+    initTmpAlloc(&systemAlloc);
+    SCOPE_EXIT(shutdownTmpAlloc());
+
     // Init subsystems
     memset(&gameState, 0, sizeof(GameState));
     CHECK_VALID(initDebugConsole(), "Console initialization failed\n");
+    setDebugFunctions(&debugPrint, &win32_invalid_path);
     initKeyTranslationTable();
     initTiming();
     initFileListener("build\\game_tmp.dll");
     initDynamicLoading();
-    initAllocators();
     //initAudio();
 
     // Initialize GameState
     {
-        Memory* mem = &gameState.memory;
-        mem->size = 1024L * 1024L * 4L;
-        debugPrintf("Memory size: %lld\n", mem->size);
+        Memory* mem = &gameState.memory; mem->size = 1024L * 1024L * 4L;
+        loggf("Memory size: %lld\n", mem->size);
         mem->memory = (byte*) VirtualAlloc(NULL, mem->size, MEM_COMMIT, PAGE_READWRITE);
         if (mem->memory == NULL) {
-            debugPrintf("VirtualAlloc failed: null returend\n");
+            loggf("VirtualAlloc failed: null returend\n");
             printLastError();
             return -1;
         }
@@ -1056,7 +980,8 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     // Initialize window with OpenGL
     CHECK_VALID(initWindow(), "InitWindow failed\n");
     CHECK_VALID(createWindowWithOpenGL(), "Init opengl failed\n");
-    CHECK_VALID(initRenderer(), "Error initializing renderer\n");
+    SystemAllocator sysAlloc;
+    CHECK_VALID(initRenderer(&sysAlloc), "Error initializing renderer\n");
 
     // Initialize Game
     gameInit(&gameState);
@@ -1167,10 +1092,10 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
         /*{
             double sleepFor =  (frameStart + frameTime) - gameTickEnd;
             if (gameTickTime > frameTime) {
-                debugPrintf("Frame took: %3.2fms, Tick: %3.2fms, OVER TIME\n", tslf * 1000, gameTickTime * 1000);
+                loggf("Frame took: %3.2fms, Tick: %3.2fms, OVER TIME\n", tslf * 1000, gameTickTime * 1000);
             }
             else {
-                debugPrintf("Frame took: %3.2fms, Tick: %3.2fms\n", tslf * 1000, gameTickTime * 1000);
+                loggf("Frame took: %3.2fms, Tick: %3.2fms\n", tslf * 1000, gameTickTime * 1000);
             }
         } */
     }

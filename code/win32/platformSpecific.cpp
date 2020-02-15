@@ -1,7 +1,7 @@
 #ifndef _PLATFORM_SPECIFIC_
 #define _PLATFORM_SPECIFIC_
 
-#include "../datatypes.hpp"
+#include <uppLib.hpp>
 
 #define DECLARE_EXPORT __declspec(dllexport)
 

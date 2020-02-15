@@ -1,7 +1,7 @@
 #ifndef __GAME_HPP__
 #define __GAME_HPP__
 
-#include "datatypes.hpp"
+#include "uppLib.hpp"
 
 // Defines
 #define NUM_KEYS 256
@@ -12,14 +12,6 @@ struct Pixel; // Has to contain bytes r, g, b and a. Is defined by the platform
 #ifndef DECLARE_EXPORT
 #define DECLARE_EXPORT errorerrorerror
 #endif
-
-#ifndef INVALID_CODE_PATH
-#define INVALID_CODE_PATH errorerrorerror
-#endif 
-
-#ifndef ASSERT
-#define ASSERT(x) errorerrorerror
-#endif 
 
 struct Memory
 {

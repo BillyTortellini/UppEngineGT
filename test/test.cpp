@@ -4,18 +4,69 @@ using std::cout;
 using std::endl;
 using std::cin;
 
-struct alignas(16) vec4
+#define COMB2(x) 
+#define COMB(x) NEXT(TWO(x))
+#define TWO(x) (x+x)
+#define NEXT(x) (x+1)
+#define PRINT(x) cout << #x " is: " << x << endl
+
+
+#include <functional>
+class ScopeExit
 {
-    float x, y, z, w;
+public:
+    ScopeExit(std::function<void()> f) {
+        this->f = f;
+    }
+    ~ScopeExit() {
+        f();
+    }
+    std::function<void()> f;
 };
 
-void printVec(vec4* v) {
-    cout << "X/Y/Z/W:" << v->x << " " <<v->y << " " <<v->y << " " <<v->z << endl;
-}
+#define CONCAT_ARGS_(x, y) x ## y
+#define CONCAT_ARGS(x, y) CONCAT_ARGS_(x, y)
+#define SCOPE_EXIT(code) ScopeExit CONCAT_ARGS(__scope_exit_var_, __LINE__)([&](){code;});
+
+struct Blk
+{
+    Blk(){}
+    Blk(void* data, int size): data(data), size(size) {}
+    void* data;
+    int size;
+    template<typename T>
+    explicit operator T*(){return (T*)data;}
+};
+
+namespace MeshAttrib
+{
+    enum ENUM
+    {
+        SS,
+        AA,
+        DD,
+        FF
+    };
+};
 
 int main(int argc, char** argv)
 {
-    cout << "Hello there" << endl; 
+    {
+        //SCOPE_EXIT(cout << "Hello" << endl;);
+        //SCOPE_EXIT(cout << "something" << endl;);
+        //cout << "Before scope exit" << endl;
+    }
+
+    {
+        using namespace tst;
+    }
+    MeshAttrib::POS3
+
+    cout << "worked" << endl;
+
+    //Blk b(new char[256], 256);
+    //char* test = (char*)b;
+    //cout << "b.data:\t" << b.data << endl << "test:\t" << (void*)test << endl;
 
     cin.ignore();
 

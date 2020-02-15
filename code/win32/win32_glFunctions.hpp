@@ -69,6 +69,9 @@ PFNGLUNIFORMMATRIX2X4FVPROC glUniformMatrix2x4fv;
 PFNGLUNIFORMMATRIX4X2FVPROC glUniformMatrix4x2fv;
 PFNGLUNIFORMMATRIX3X4FVPROC glUniformMatrix3x4fv;
 PFNGLUNIFORMMATRIX4X3FVPROC glUniformMatrix4x3fv;
+// Delete Stuff
+PFNGLDELETEBUFFERSPROC glDeleteBuffers;
+PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 // String stuff
 PFNGLGETSTRINGIPROC glGetStringi;
 
@@ -99,14 +102,14 @@ void printAllExtensions()
 { 
     GLint extCount; 
     glGetIntegerv(GL_NUM_EXTENSIONS, &extCount);
-    debugPrintf("Extensions:\n---------\n");
+    loggf("Extensions:\n---------\n");
     for (int i = 0; i < extCount; i++)
     {
         const char* extension = (const char*) glGetStringi(GL_EXTENSIONS, (GLuint)i);
-        debugPrintf("\t#%d: %s\n", i, extension);
+        loggf("\t#%d: %s\n", i, extension);
 
     }
-    debugPrintf("\n");
+    loggf("\n");
     //const char* wglExtensions = (const char*) wglGetExtensionsStringARB();
     //debugPrintf("WGL Extensions:\n------------------%s\n----------------------\n", wglExtensions);
 }
@@ -123,12 +126,12 @@ bool loadExtensions()
     {
         wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC) wglGetProcAddress("wglGetExtensionsStringARB");
         if (wglGetExtensionsStringARB == NULL) {
-            log("wglGetExtensionsStringARB not supported!\n");
+            logg("wglGetExtensionsStringARB not supported!\n");
         }
         else 
         {
             char* string = (char*) wglGetExtensionsStringARB(deviceContext);
-            log("WGL extensions: \n%s\n", string);
+            loggf("WGL extensions: \n%s\n", string);
         }
     }
 
@@ -198,6 +201,8 @@ bool loadAllFunctions()
     glUniformMatrix3x4fv = (PFNGLUNIFORMMATRIX3X4FVPROC) getAnyGLFuncAddress("glUniformMatrix3x4fv");
     glUniformMatrix4x3fv = (PFNGLUNIFORMMATRIX4X3FVPROC) getAnyGLFuncAddress("glUniformMatrix4x3fv");
     glGetStringi = (PFNGLGETSTRINGIPROC) getAnyGLFuncAddress("glGetStringi");
+    glDeleteBuffers = (PFNGLDELETEBUFFERSPROC) getAnyGLFuncAddress("glDeleteBuffers");
+    glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC) getAnyGLFuncAddress("glDeleteVertexArrays");
 
     bool success = true;
     success = success && 
@@ -258,10 +263,12 @@ bool loadAllFunctions()
         (glUniformMatrix3x4fv != NULL) &&
         (glUniformMatrix4x3fv != NULL) &&
         (glGetStringi != NULL) &&
+        (glDeleteBuffers != NULL) &&
+        (glDeleteVertexArrays != NULL) &&
         //        (glViewport != NULL) &&
         (glGetProgramInfoLog != NULL);
     
-    printAllExtensions();
+    //printAllExtensions();
     success = success && loadExtensions();
 
     return success;

@@ -181,7 +181,6 @@ mat4 lookInDir(const vec3& pos, const vec3& dir, const vec3& up)
     u = cross(r, d);
     view = mat4(transpose(mat3(r, u, d)));
     view = view * translate(pos);
-    //view.columns[3] = vec4(-pos, 1.0f);
     
     return view;
 }

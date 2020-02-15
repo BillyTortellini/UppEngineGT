@@ -110,7 +110,7 @@ float radians2degree(float r) {
     return r / PI * 180.0f;
 }
 // degreeToRadians
-float degreeToRadians(float d) {
+float degree2radians(float d) {
     return d / (180.0f) * PI;
 }
 

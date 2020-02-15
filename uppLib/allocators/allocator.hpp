@@ -45,6 +45,10 @@ struct Blk
     Blk(void* data, u64 size) : data(data), size(size){}
     void* data;    
     u64 size;
+
+    // Allow conversion from Blk to any pointer type
+    template<typename T>
+    explicit operator T*() {return (T*) data;}
 };
 
 bool equals(const Blk& a, const Blk& o) {
@@ -224,7 +228,7 @@ public:
     Allocator* a;
     Blk memory;
 
-    void* getBlockByIndex(int i) {
+    void* getBlockByIndex(u64 i) {
         return (void*)((u64)memory.data + i * blockSize);
     }
 
@@ -232,7 +236,7 @@ public:
         *((void**)block) = pointTo; 
     }
 
-    void setBlockPtr(int i, void* pointTo) {
+    void setBlockPtr(u64 i, void* pointTo) {
         setBlockPtr(getBlockByIndex(i), pointTo);   
     }
 
