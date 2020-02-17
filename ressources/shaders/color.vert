@@ -1,15 +1,16 @@
 #version 430 core
 
-layout (location = 1) in vec3 pos;
-//layout (location = 1) in vec3 color;
+in vec3 a_Pos;
+in vec3 a_Color;
 
-layout (location = 0) uniform mat4 u_VP;
-layout (location = 1) uniform vec3 u_pos;
+uniform mat4 u_MVP;
+uniform float u_time;
 
-out vec3 fColor;
+out vec3 f_Color;
 
 void main()
 {
-    gl_Position = u_VP * vec4(pos*0.3 + u_pos, 1.0); 
-    fColor = vec3(1.0, 0.0, 0.0);
+    gl_Position = u_MVP * vec4(a_Pos*.3, 1.0); 
+    f_Color = a_Color;
+    //f_Color = vec3(sin(u_time)/2+.5, cos(u_time*3.0)/2+.5, sin(u_time*2.5)/2+.5);
 }

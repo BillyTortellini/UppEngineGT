@@ -4,26 +4,85 @@
 #include "uppLib.hpp"
 #include "tmpAlloc.hpp"
 #include "fileIO.hpp"
+#include "fileListener.hpp"
+#include <ctype.h> // for tolower
 
-// GLOBALS:
-Allocator* renderAlloc;
+// Next steps:
+//  - Mesh creation in new file
+//  - Movement in 3d
+//  - Phong shader
+//  - renderer set camera
+//  - Draw with mesh + transform + shaderProgram 
+//  - Use renderer from inside game (Dynamically loaded)
+//  - Debug rendering (2D, text, lines...)
+//  - Texture creation from shader
+
+//  DONE:
+//  -----
+//  - ShaderProgram set important uniforms automatically 
+//  - ShaderProgram detects attributes and sets them automatically
 
 // Todo:
 // -----
 // View Matrix              X
-// Projection Matrix        O
+// Projection Matrix        X
 // Orthographic Matrix      O
 // Transform (With Quat)    O
 
-//  * Define a mesh
-//  * Define a material
+// GLOBALS:
+Allocator* renderAlloc;
+u32 currentFrame;
+extern GameState gameState;
+
+struct OpenGLState
+{
+    GLuint currentVao;
+    GLuint currentProgram;
+};
+
+OpenGLState glState;
+
+void bindVao(GLuint vao) {
+    if (glState.currentVao != vao) {
+        glBindVertexArray(vao);
+        glState.currentVao = vao;
+    }
+}
+
+void bindProgram(GLuint id) {
+    if (glState.currentProgram != id) {
+        glUseProgram(id);
+        glState.currentProgram = id;
+    }
+}
 
 struct Camera3D
 {
     vec3 pos;
-    mat4 viewMatrix;
-    mat4 projectionMatrix;
+    mat4 view;
+    mat4 projection;
+    mat4 vp;
+    u32 lastUpdateFrame;
 };
+
+void init(Camera3D* cam) {
+    cam->projection = projection(0.01f, 100.0, d2r(90), (float) gameState.windowState.width / gameState.windowState.height);
+    cam->lastUpdateFrame = currentFrame-1;
+}
+
+Camera3D* camera;
+
+void setCamera(Camera3D* cam) {
+    camera = cam;
+}
+
+void prepare(Camera3D* cam)
+{
+    if (cam->lastUpdateFrame == currentFrame)
+        return;
+    cam->vp = cam->projection * cam->view;
+    cam->lastUpdateFrame = currentFrame;
+}
 
 namespace MeshAttrib
 {
@@ -36,73 +95,30 @@ namespace MeshAttrib
         COLOR3 = 4,
         COLOR4 = 5,
 
-        // Further:
-        // Multiple UVs?
-        // Floats, vec2s or vec3s for per vertex data?
-        // For skinning an index array and weights
-
         // This must always stay last
         COUNT
     };
 };
 
-u32 attribSizeTable[] = {
-    sizeof(vec2),  //POS2
-    sizeof(vec3),  //POS3
-    sizeof(vec3),  //NORMALS
-    sizeof(vec2),  //UV
-    sizeof(vec3),  
-    sizeof(vec4)
-};                 
-
-GLenum attribTypeTable[] = {
-    GL_FLOAT,  //POS2
-    GL_FLOAT,  //POS3
-    GL_FLOAT,  //NORMALS
-    GL_FLOAT,  //UV
-    GL_FLOAT,  // COLOR3
-    GL_FLOAT   // COLOR4
-};
-
-int attribCountTable[] = {
-    2,  //POS2
-    3,  //POS3
-    3,  //NORMALS
-    2,  //UV
-    3,  // COLOR3
-    4   // COLOR4
-};
-
-u32 attribIndexTable[] = {
-    0,
-    1,
-    2,
-    3,
-    4,
-    5
-};
-
-// TODO: Should be able to do hot code reloading
-// TODO: Get attributes from compiled shader
-// TODO: Should be able to set uniforms from const char*
-// TODO: Automatic uniform detection?
-struct ShaderProgram
+struct AttribInfo
 {
-    int id;
+    AttribInfo(){};
+    AttribInfo(u32 size, GLenum type, GLint count, GLint index)
+        :size(size), type(type), count(count), index(index) {};
+    u32 size;
+    GLenum type;
+    GLint count;
+    GLint index;
 };
 
-// Mesh:
-// Contains all data for a given surface
-// Vertex infos:
-//      - Position (2D or 3D)
-//      - Normals
-//      - UV Coordinates (Maybe multiple)
-//      - Vertex Color
-//      - Indices
-
-// Necessary features
-//  - Check if mesh has all available features for a shader
-//  - Build vertex array object from MeshData
+AttribInfo attribInfoTable[] = {
+    AttribInfo(sizeof(vec2), GL_FLOAT, 2, 0),    
+    AttribInfo(sizeof(vec3), GL_FLOAT, 3, 1),    
+    AttribInfo(sizeof(vec3), GL_FLOAT, 3, 2),    
+    AttribInfo(sizeof(vec2), GL_FLOAT, 2, 3),    
+    AttribInfo(sizeof(vec3), GL_FLOAT, 3, 4),    
+    AttribInfo(sizeof(vec4), GL_FLOAT, 4, 5),    
+};
 
 GLuint createShaderFromSource(const char* source, GLenum type)
 {
@@ -177,23 +193,20 @@ GLuint createShaderFromFile(const char* filepath)
     return createShaderFromSource(source, shaderType);
 }
 
-GLuint createShaderProgram(std::initializer_list<const char*> filenames)
+#define MAX_SHADER_COUNT 6
+GLuint createShaderProgram(int fileCount, const char** filenames)
 {
-    int shaderCount = (int)filenames.size();
-    SCOPE_EXIT_ROLLBACK;
-    int* shaderIDs = (int*) tmpAlloc.alloc(sizeof(int) * shaderCount);
+    assert(fileCount < MAX_SHADER_COUNT, "CreateShaderProgram called with more than max shaders\n");
 
-    // Create Shaders from all files
+    // Compile all shaders
+    int shaderCount = fileCount;
+    int shaderIDs[MAX_SHADER_COUNT];
+    for (int i = 0; i < shaderCount; i++)
     {
-        int i = 0;
-        for (auto& filename : filenames)
-        {
-            shaderIDs[i] = createShaderFromFile(filename);
-            if (shaderIDs[i] == 0) {
-                loggf("Create shader program failed, could not compile file %s", filename);
-                break;
-            }
-            i++;
+        shaderIDs[i] = createShaderFromFile(filenames[i]);
+        if (shaderIDs[i] == 0) {
+            loggf("Create shader program failed, could not compile file %s", filenames[i]);
+            break;
         }
     }
 
@@ -230,15 +243,392 @@ GLuint createShaderProgram(std::initializer_list<const char*> filenames)
     return id;
 }
 
-bool init(ShaderProgram* p, std::initializer_list<const char*> filenames)
+// TODO: Should be able to do hot code reloading X
+// TODO: Get attributes from compiled shader 
+// TODO: Should be able to set uniforms from const char*
+// TODO: Automatic uniform detection?
+
+namespace AutoUniformType
 {
-    p->id = createShaderProgram(filenames);
+    enum ENUM
+    {
+        MODEL_MATRIX = 0,
+        VIEW_MATRIX,
+        PROJECTION_MATRIX,
+        MVP_MATRIX,
+        VP_MATRIX,
+        CAMERA_POS,
+        TIME,
+
+        COUNT // MUST STAY LAST
+    };
+}
+
+struct AutoUniform
+{
+    GLint location;
+    AutoUniformType::ENUM type;
+};
+
+struct AttribLoc
+{
+    AttribLoc(){};
+    AttribLoc(MeshAttrib::ENUM attrib, GLuint location)
+        : attrib(attrib), location(location) {}
+    MeshAttrib::ENUM attrib;
+    GLuint location;
+};
+
+struct ShaderProgram
+{
+    int id;
+    // Hot reloading
+    int tokenCount;
+    ListenerToken tokens[MAX_SHADER_COUNT];
+    const char* filenames[MAX_SHADER_COUNT];
+    // Auto uniform 
+    int perModelCount;
+    int perFrameCount;
+    AutoUniform perModelUniforms[AutoUniformType::COUNT];
+    AutoUniform perFrameUniforms[AutoUniformType::COUNT];
+    // Prepare
+    u32 lastUpdateFrame;
+    // Automatic Attribs
+    int attribLocCount;
+    AttribLoc attribLocs[MeshAttrib::COUNT]; // Sorted by attrib
+};
+
+void bind(ShaderProgram* p) {
+    bindProgram(p->id);
+}
+
+struct SupportedAutoUniform
+{
+    SupportedAutoUniform() {};
+    SupportedAutoUniform(const char* name,
+            AutoUniformType::ENUM type, 
+            GLenum glType, 
+            bool perFrame)
+        : name(name), type(type), glType(glType), perFrame(perFrame) {};
+    const char* name;
+    AutoUniformType::ENUM type;
+    GLenum glType;
+    bool perFrame;
+};
+
+SupportedAutoUniform supportedAutoUniforms[] = {
+    SupportedAutoUniform("u_model", AutoUniformType::MODEL_MATRIX, GL_FLOAT_MAT4, false), 
+    SupportedAutoUniform("u_modelmat", AutoUniformType::MODEL_MATRIX, GL_FLOAT_MAT4, false), 
+    SupportedAutoUniform("u_modelmatrix", AutoUniformType::MODEL_MATRIX, GL_FLOAT_MAT4, false), 
+    SupportedAutoUniform("u_model", AutoUniformType::MODEL_MATRIX, GL_FLOAT_MAT4, false), 
+
+    SupportedAutoUniform("u_view", AutoUniformType::VIEW_MATRIX, GL_FLOAT_MAT4, true), 
+    SupportedAutoUniform("u_v", AutoUniformType::VIEW_MATRIX, GL_FLOAT_MAT4, true), 
+    SupportedAutoUniform("u_viewmat", AutoUniformType::VIEW_MATRIX, GL_FLOAT_MAT4, true), 
+    SupportedAutoUniform("u_viewmatrix", AutoUniformType::VIEW_MATRIX, GL_FLOAT_MAT4, true), 
+
+    SupportedAutoUniform("u_projection", AutoUniformType::PROJECTION_MATRIX, GL_FLOAT_MAT4, true), 
+    SupportedAutoUniform("u_p", AutoUniformType::PROJECTION_MATRIX, GL_FLOAT_MAT4, true), 
+    SupportedAutoUniform("u_projectionmat", AutoUniformType::PROJECTION_MATRIX, GL_FLOAT_MAT4, true), 
+    SupportedAutoUniform("u_projectionmatrix", AutoUniformType::PROJECTION_MATRIX, GL_FLOAT_MAT4, true), 
+
+    SupportedAutoUniform("u_mvp", AutoUniformType::MVP_MATRIX, GL_FLOAT_MAT4, false), 
+    SupportedAutoUniform("u_mvpmat", AutoUniformType::MVP_MATRIX, GL_FLOAT_MAT4, false), 
+    SupportedAutoUniform("u_mvpmatrix", AutoUniformType::MVP_MATRIX, GL_FLOAT_MAT4, false), 
+
+    SupportedAutoUniform("u_vp", AutoUniformType::VP_MATRIX, GL_FLOAT_MAT4, true), 
+    SupportedAutoUniform("u_vpmat", AutoUniformType::VP_MATRIX, GL_FLOAT_MAT4, true), 
+    SupportedAutoUniform("u_vpmatrix", AutoUniformType::VP_MATRIX, GL_FLOAT_MAT4, true), 
+
+    SupportedAutoUniform("u_campos", AutoUniformType::CAMERA_POS, GL_FLOAT_VEC3, true), 
+    SupportedAutoUniform("u_cam", AutoUniformType::CAMERA_POS, GL_FLOAT_VEC3, true), 
+    SupportedAutoUniform("u_camera", AutoUniformType::CAMERA_POS, GL_FLOAT_VEC3, true), 
+    SupportedAutoUniform("u_camerapos", AutoUniformType::CAMERA_POS, GL_FLOAT_VEC3, true), 
+    SupportedAutoUniform("u_cameraposition", AutoUniformType::CAMERA_POS, GL_FLOAT_VEC3, true), 
+
+    SupportedAutoUniform("u_time", AutoUniformType::TIME, GL_FLOAT, true),
+    SupportedAutoUniform("u_t", AutoUniformType::TIME, GL_FLOAT, true),
+    SupportedAutoUniform("u_now", AutoUniformType::TIME, GL_FLOAT, true),
+};
+
+void toLower(char* buf)
+{
+    int len = (int) strlen(buf);
+    for (int i = 0; i < len; i++) {
+        buf[i] = (char)tolower(buf[i]);
+    }
+}
+
+void detectAutoUniforms(ShaderProgram* program)
+{
+    program->perFrameCount = 0;
+    program->perModelCount = 0;
+
+    // Loop over all uniforms
+    int uniformCount;
+    glGetProgramiv(program->id, GL_ACTIVE_UNIFORMS, &uniformCount);
+    for (int i = 0; i < uniformCount; i++) 
+    {
+        char uniformName[256];
+        GLint size;
+        GLenum type;
+        glGetActiveUniform(program->id, (GLuint) i, 256, NULL, &size, &type, (GLchar*) uniformName);
+
+        if (size != 1) {
+            continue;
+        }
+
+        GLint uniformLocation = glGetUniformLocation(program->id, uniformName);
+        assert(uniformLocation != -1, "glGetUniformLocation failed with string: %s\n", uniformName);
+
+        // Set uniform name to all lower charcters
+        toLower(uniformName);
+
+        // Loop over all supported uniforms and check if they match
+        int supportedCount = sizeof(supportedAutoUniforms)/sizeof(SupportedAutoUniform);
+        for (int j = 0; j < supportedCount; j++)
+        { 
+            SupportedAutoUniform& sup = supportedAutoUniforms[j];
+            if (strcmp(sup.name, uniformName) == 0 && sup.glType == type)
+            {
+                AutoUniform* uniform;
+                if (sup.perFrame) {
+                    assert(program->perFrameCount + 1 < AutoUniformType::COUNT, "Max per frame autouniforms reached\n");
+                    uniform = program->perFrameUniforms + program->perFrameCount;
+                    program->perFrameCount++;
+                }
+                else {
+                    assert(program->perModelCount + 1 < AutoUniformType::COUNT, "Max per model autouniforms reached\n");
+                    uniform = program->perModelUniforms + program->perModelCount;
+                    program->perModelCount++;
+                }
+
+                uniform->type = sup.type;
+                uniform->location = uniformLocation;
+                loggf("AutoUniform found: %s\n", uniformName);
+                break;
+            }
+        }
+    }
+}
+
+struct MeshAttribName
+{
+    MeshAttribName();
+    MeshAttribName(const char* name, MeshAttrib::ENUM attrib, GLenum type)
+        : name(name), attrib(attrib), type(type) {}
+    const char* name;
+    MeshAttrib::ENUM attrib;
+    GLenum type;
+};
+
+// All lowercase because search is case insensitive
+MeshAttribName meshAttribNames[] =
+{
+    // Positions
+    MeshAttribName("a_pos", MeshAttrib::POS2, GL_FLOAT_VEC2),
+    MeshAttribName("a_pos", MeshAttrib::POS3, GL_FLOAT_VEC3),
+    MeshAttribName("a_p", MeshAttrib::POS2, GL_FLOAT_VEC2),
+    MeshAttribName("a_p", MeshAttrib::POS3, GL_FLOAT_VEC3),
+    MeshAttribName("a_p2", MeshAttrib::POS2, GL_FLOAT_VEC2),
+    MeshAttribName("a_p3", MeshAttrib::POS3, GL_FLOAT_VEC3),
+    MeshAttribName("a_pos2", MeshAttrib::POS2, GL_FLOAT_VEC2),
+    MeshAttribName("a_pos3", MeshAttrib::POS3, GL_FLOAT_VEC3),
+    // Normals
+    MeshAttribName("a_norm", MeshAttrib::NORMALS, GL_FLOAT_VEC3),
+    MeshAttribName("a_normal", MeshAttrib::NORMALS, GL_FLOAT_VEC3),
+    MeshAttribName("a_normals", MeshAttrib::NORMALS, GL_FLOAT_VEC3),
+    MeshAttribName("a_n", MeshAttrib::NORMALS, GL_FLOAT_VEC3),
+    // UVs
+    MeshAttribName("a_uv", MeshAttrib::UV, GL_FLOAT_VEC2),
+    MeshAttribName("a_uvs", MeshAttrib::UV, GL_FLOAT_VEC2),
+    MeshAttribName("a_texcoord", MeshAttrib::UV, GL_FLOAT_VEC2),
+    MeshAttribName("a_texcoords", MeshAttrib::UV, GL_FLOAT_VEC2),
+    MeshAttribName("a_texturecoordinates", MeshAttrib::UV, GL_FLOAT_VEC2),
+    MeshAttribName("a_coords", MeshAttrib::UV, GL_FLOAT_VEC2),
+    // Colors
+    MeshAttribName("a_colour", MeshAttrib::COLOR3, GL_FLOAT_VEC3),
+    MeshAttribName("a_colour", MeshAttrib::COLOR4, GL_FLOAT_VEC4),
+    MeshAttribName("a_color", MeshAttrib::COLOR3, GL_FLOAT_VEC3),
+    MeshAttribName("a_color", MeshAttrib::COLOR4, GL_FLOAT_VEC4),
+    MeshAttribName("a_col", MeshAttrib::COLOR3, GL_FLOAT_VEC3),
+    MeshAttribName("a_col", MeshAttrib::COLOR4, GL_FLOAT_VEC4),
+    MeshAttribName("a_c", MeshAttrib::COLOR3, GL_FLOAT_VEC3),
+    MeshAttribName("a_c", MeshAttrib::COLOR4, GL_FLOAT_VEC4),
+};
+
+int attribLocComparator(const void* ap, const void* bp)
+{
+    AttribLoc& a = *((AttribLoc*) ap);
+    AttribLoc& b = *((AttribLoc*) bp);
+    if (a.location < b.location) return -1;
+    if (a.location == b.location) return 0;
+    if (a.location > b.location) return 1;
+    return 0;
+}
+
+void detectShaderAttribs(ShaderProgram* p)
+{
+    p->attribLocCount = 0;
+
+    GLint count;
+    glGetProgramiv(p->id, GL_ACTIVE_ATTRIBUTES, &count);
+    for(int i = 0; i < count; i++)
+    {
+        GLchar attribName[256];
+        GLint attribSize;
+        GLenum attribType;
+        GLint attribLocation;
+        // Get Infos
+        glGetActiveAttrib(p->id, (GLuint)i, 
+                256, NULL, &attribSize, &attribType, attribName);
+        attribLocation = glGetAttribLocation(p->id, attribName);
+        assert(attribLocation != -1, "glGetAttribLocation failed\n");
+
+        toLower(attribName);
+        int attribNameCount = sizeof(meshAttribNames)/sizeof(MeshAttribName);
+        for (int j = 0; j < attribNameCount; j++)
+        {
+            MeshAttribName name = meshAttribNames[j];
+            AttribInfo info = attribInfoTable[name.attrib];
+            if (name.type == attribType && 
+                attribSize == 1 &&
+                strcmp(attribName, name.name) == 0)
+            {
+                loggf("AttribName found: %s\n", attribName);
+                assert(p->attribLocCount < MeshAttrib::COUNT,
+                        "attrib count reached\n");
+                p->attribLocs[p->attribLocCount++] = 
+                    AttribLoc(name.attrib, attribLocation);
+                break;
+            }
+        }
+    }
+
+    // Sort attribs
+    qsort(p->attribLocs, p->attribLocCount, 
+            sizeof(AttribLoc), &attribLocComparator);
+}
+
+struct Transform
+{
+    Transform(){}
+    Transform(const vec3& p) : pos(p) {}
+    mat4 toModelMat() const {
+        return translate(pos);
+    }
+
+    vec3 pos;
+};
+
+void prepare(ShaderProgram* program)
+{
+    bind(program);
+    if (program->lastUpdateFrame == currentFrame) 
+        return;
+    program->lastUpdateFrame = currentFrame;
+
+    // Prepare camera
+    if (camera == nullptr) {
+        loggf("Prepare Shaderprogram called with camera not set\n");
+        return;
+    }
+    prepare(camera);
+
+    for (int i = 0; i < program->perFrameCount; i++) 
+    {
+        AutoUniform& u = program->perFrameUniforms[i];
+        switch (u.type)
+        {
+            case AutoUniformType::VIEW_MATRIX:
+                glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &camera->view);
+                break;
+            case AutoUniformType::PROJECTION_MATRIX:
+                glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &camera->projection);
+                break;
+            case AutoUniformType::VP_MATRIX:
+                glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &camera->vp);
+                break;
+            case AutoUniformType::CAMERA_POS:
+                glUniform3fv(u.location, 3, (GLfloat*) &camera->pos);
+                break;
+            case AutoUniformType::TIME:
+                glUniform1f(u.location, (GLfloat) gameState.time.now);
+                break;
+        }
+    }
+}
+
+void prepare(ShaderProgram* program, const Transform& transform)
+{
+    prepare(program);
+    mat4 model = transform.toModelMat();
+    mat4 mvp = camera->vp * model;
+    for (int i = 0; i < program->perModelCount; i++) 
+    {
+        AutoUniform& u = program->perModelUniforms[i];
+        switch (u.type)
+        {
+            case AutoUniformType::MODEL_MATRIX:
+                glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &model);
+                break;
+            case AutoUniformType::MVP_MATRIX:
+                glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &mvp);
+                break;
+        }
+    }
+}
+
+void onShaderFileChanged(const char* filename, void* shaderProgram)
+{
+    ShaderProgram* p = (ShaderProgram*) shaderProgram;
+    p->lastUpdateFrame = currentFrame-1;
+    loggf("On shader file changed: %s, tokenCount: %d\n", 
+            filename, p->tokenCount);
+
+    glDeleteProgram(p->id);
+    p->id = createShaderProgram(p->tokenCount, p->filenames);
+    detectAutoUniforms(p);
+    detectShaderAttribs(p);
+}
+
+bool init(ShaderProgram* p, int fileCount, const char** filenames)
+{
+    assert(fileCount < MAX_SHADER_COUNT, "Max shader count reaached\n");
+
+    p->lastUpdateFrame = currentFrame-1;
+    p->id = createShaderProgram(fileCount, filenames);
+    // Add file listeners
+    for (int i = 0; i < fileCount; i++) {
+        p->filenames[i] = filenames[i];
+        p->tokens[i] = createFileListener(filenames[i], &onShaderFileChanged, p);
+    }
+    p->tokenCount = fileCount;
+
+    detectAutoUniforms(p);
+    detectShaderAttribs(p);
+
     return true;
 }
 
 void shutdown(ShaderProgram* p)
 {
     glDeleteProgram(p->id);
+    for (int i = 0; i < p->tokenCount; i++) {
+        deleteFileListener(p->tokens[i]);
+    }
+}
+
+bool init(ShaderProgram* p, std::initializer_list<const char*> filenames)
+{
+    const char* nameBuffer[MAX_SHADER_COUNT];
+    int i = 0;
+    for (const char* filename : filenames) {
+        nameBuffer[i] = filename;
+        i++;
+    }
+
+    return init(p, (u32)filenames.size(), nameBuffer);
 }
 
 void printAllUniforms(ShaderProgram* p)
@@ -330,7 +720,7 @@ void setAttribs(MeshData* m, int count, void* data, std::initializer_list<MeshAt
     // Calculate stride
     u32 stride = 0;
     for (int i = 0; i < attrCount; i++) {
-        stride += attribSizeTable[types[i]];
+        stride += attribInfoTable[types[i]].size;
     }
 
     // Add each type to the mesh
@@ -338,7 +728,7 @@ void setAttribs(MeshData* m, int count, void* data, std::initializer_list<MeshAt
     for (int i = 0; i < attrCount; i++) 
     {
         Blk& attrData = m->data[types[i]];
-        int size = attribSizeTable[types[i]];
+        int size = attribInfoTable[types[i]].size;
         assert(attrData.data == nullptr, "Attach called with already available mesh data");
 
         // Alloc data
@@ -370,57 +760,130 @@ void setIndices(MeshData* m, int count, void* data)
     memcpy(m->indexData.data, data, sizeof(u32) * count);
 }
 
-struct OpenGLState
-{
-    GLuint currentVao;
-    GLuint currentProgram;
-};
-
-OpenGLState glState;
-
-void bindVao(GLuint vao) {
-    if (glState.currentVao != vao) {
-        glBindVertexArray(vao);
-        glState.currentVao = vao;
-    }
-}
-
-void bindProgram(GLuint id) {
-    if (glState.currentProgram != id) {
-        glUseProgram(id);
-        glState.currentProgram = id;
-    }
-}
-
-void bind(ShaderProgram* p) {
-    bindProgram(p->id);
-}
-
-struct Mesh
+struct MeshRef
 {
     GLuint vao;
-    GLuint ebo;
-    GLuint vbo[MeshAttrib::COUNT];
-    int elementCount;
+    int attribLocCount;
+    AttribLoc attribLocs[MeshAttrib::COUNT];
 };
 
-void bind(Mesh* m) {
-    bindVao(m->vao);
+#define MAX_MESH_REFERENCES 8
+struct Mesh
+{
+    // Attribute information
+    int attribCount;
+    MeshAttrib::ENUM attribs[MeshAttrib::COUNT];
+    // Opengl Information
+    GLuint ebo;
+    GLuint vbo[MeshAttrib::COUNT];
+    int indexCount;
+    // References
+    int referenceCount;
+    MeshRef references[MAX_MESH_REFERENCES];
+};
+
+void prepare(Mesh* m, ShaderProgram* p) 
+{
+    // Loop through references to check if one fits
+    int index = -1;
+    for (int i = 0; i < m->referenceCount; i++)
+    {
+        MeshRef* ref = &(m->references[i]);
+        if (ref->attribLocCount < p->attribLocCount) {
+            continue;
+        }
+        // Loop over all shader attributes
+        int meshIndex = 0;
+        int shaderIndex = 0;
+        bool quit = false;
+        while (!quit)
+        {
+            AttribLoc* meshLoc = &(ref->attribLocs[meshIndex]);
+            AttribLoc* shaderLoc = &(p->attribLocs[shaderIndex]);
+            // If it fits, advance both indices
+            if (meshLoc->location == shaderLoc->location &&
+                meshLoc->attrib == shaderLoc->attrib) {
+                meshIndex++;
+                shaderIndex++;
+            }
+            else { 
+                // Advance mesh index, because meshes can 
+                // have more data then the shader needs
+                meshIndex++; 
+            }
+            if (meshIndex == ref->attribLocCount ||
+                shaderIndex == p->attribLocCount) {
+                quit = true;
+            }
+        }
+        if (shaderIndex == p->attribLocCount) {
+            index = i;
+            break;
+        }
+    }
+
+    // If no reference fits, create new reference
+    if (index == -1)
+    {
+        assert(m->referenceCount != MAX_MESH_REFERENCES, 
+                "Max references reached\n");
+        index = m->referenceCount;
+        m->referenceCount++;
+        MeshRef* ref = &(m->references[index]);
+
+        glGenVertexArrays(1, &(ref->vao));
+        assert(ref->vao != 0, "glGenVertexArrays failed!\n");
+        bindVao(ref->vao);
+
+        for (int i = 0; i < p->attribLocCount; i++)
+        {
+            AttribLoc attribLoc = p->attribLocs[i];
+            bool found = false;
+            for (int j = 0; j < m->attribCount; j++) 
+            {
+                if (attribLoc.attrib == m->attribs[j]) 
+                {
+                    // Add attrib to mesh ref
+                    assert(ref->attribLocCount != MeshAttrib::COUNT,
+                            "Mesh reference contains to many attribs\n");
+                    ref->attribLocs[ref->attribLocCount++] = attribLoc;
+                    
+                    AttribInfo info = attribInfoTable[attribLoc.attrib];
+                    glBindBuffer(GL_ARRAY_BUFFER, m->vbo[j]);
+                    // Set Attrib pointer
+                    glVertexAttribPointer(attribLoc.location, info.count, 
+                            info.type, GL_FALSE, info.size, 0);
+                    glEnableVertexAttribArray(attribLoc.location);
+
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                glDeleteVertexArrays(1, &ref->vao);
+                m->referenceCount--;
+                invalid_path("Mesh and shaderprogram not compatible!\n");
+                return;
+            }
+        }
+
+        // Bind ebo to vao
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ebo);
+    }
+
+    bindVao(m->references[index].vao);
 }
 
 void init(Mesh* m, MeshData* meshData) 
 {
+    m->referenceCount = 0;
     m->ebo = 0;
-    m->vao = 0;
+    m->attribCount = 0;
     for (int i = 0; i < MeshAttrib::COUNT; i++) {
         m->vbo[i] = 0;
     }
 
-    glGenVertexArrays(1, &m->vao);
-    assert(m->vao != 0, "glGenVertexArrays failed\n");
-
-    bindVao(m->vao);
-
+    bindVao(0); // So that binding the element buffer does not screw stuff up
     // Create vbos
     for (int i = 0; i < MeshAttrib::COUNT; i++) 
     {
@@ -428,27 +891,31 @@ void init(Mesh* m, MeshData* meshData)
             continue;
         }
 
-        glGenBuffers(1, (GLuint*) &(m->vbo[i]));
-        assert(m->vbo[i] != 0, "glGenBuffers failed!\n");
+        // Add new attrib
+        assert(m->attribCount < MeshAttrib::COUNT, "init Mesh failed, attr#\n");
+        m->attribs[m->attribCount] = (MeshAttrib::ENUM) i;
+        GLuint& vbo = m->vbo[m->attribCount]; 
+        m->attribCount++;
+
+        // Gen buffer
+        glGenBuffers(1, &vbo);
+        assert(vbo != 0, "glGenBuffers failed!\n");
 
         // Copy data
-        int size = attribSizeTable[i];
-        glBindBuffer(GL_ARRAY_BUFFER, m->vbo[i]);
-        glBufferData(GL_ARRAY_BUFFER, size * meshData->vertexCount, meshData->data[i].data, GL_STATIC_DRAW);
-
-        // Set Attrib pointer
-        glVertexAttribPointer(attribIndexTable[i], attribCountTable[i], attribTypeTable[i], GL_FALSE, size, 0);
-        glEnableVertexAttribArray(attribIndexTable[i]);
+        AttribInfo info = attribInfoTable[i];
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, info.size * meshData->vertexCount, meshData->data[i].data, GL_STATIC_DRAW);
     }
 
     // Create ebo
+    m->indexCount = meshData->indexCount;
     glGenBuffers(1, (GLuint*) &(m->ebo));
     assert(m->ebo != 0, "glGenBuffers failed on ebo\n");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * meshData->indexCount, (void*) meshData->indexData, GL_STATIC_DRAW);
 
-    bindVao(0);
+    // Unbind to make sure nothing messes with our data
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -470,17 +937,26 @@ void shutdown(Mesh* m)
             glDeleteBuffers(1, &(m->vbo[i]));
         }
     }
+    for (int i = 0; i < m->referenceCount; i++) {
+        glDeleteVertexArrays(1, &(m->references[i].vao));
+    }
     glDeleteBuffers(1, &(m->ebo));
-    glDeleteVertexArrays(1, &(m->vao));
 }
 
-int vbo, vao, ebo;
+void draw(ShaderProgram* program, Mesh* mesh, const Transform& transform)
+{
+    prepare(program, transform); // Sets programs uniforms
+    prepare(mesh, program); // binds mesh and makes sure the location match up
+    glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, NULL);
+}
+
 ShaderProgram s;
 Mesh cubeMesh;
-Camera3D camera;
-extern GameState gameState;
+Camera3D testCamera;
 bool initRenderer(Allocator* alloc)
 {
+    camera = nullptr;
+    currentFrame = 0;
     renderAlloc = alloc;
 
     // Set initial openglState
@@ -490,7 +966,8 @@ bool initRenderer(Allocator* alloc)
     init(&s, {"ressources/shaders/color.frag", "ressources/shaders/color.vert"});
     printAllUniforms(&s);
 
-    camera.projectionMatrix = projection(0.01f, 100.0, d2r(90), (float) gameState.windowState.width / gameState.windowState.height);
+    init(&testCamera);
+    setCamera(&testCamera);
 
     // Set Opengl State
     wglSwapIntervalExt(-1);
@@ -541,7 +1018,7 @@ void render()
 {
     if (gameState.windowState.wasResized) {
         glViewport(0, 0, gameState.windowState.width, gameState.windowState.height);
-        camera.projectionMatrix = projection(0.01f, 100.0f, d2r(90), (float)gameState.windowState.width/gameState.windowState.height);
+        camera->projection = projection(0.01f, 100.0f, d2r(90), (float)gameState.windowState.width/gameState.windowState.height);
     }
 
     // Update camera
@@ -549,38 +1026,24 @@ void render()
         float sensitivity = 0.003f;
         camSphere += vec2(gameState.input.deltaX, gameState.input.deltaY) * sensitivity;
         camSphere = sphericalNorm(camSphere);
-        //camSphere = vec2(d2r(100.0f*(float)gameState.time.now), sinf((float)gameState.time.now) * d2r(30));
+
+        camSphere = vec2(d2r(100.0f*(float)gameState.time.now), sinf((float)gameState.time.now) * d2r(30));
 
         vec3 offset(1.5f, 0, 0);
         vec3 pos = sp2eu(camSphere) * -3.0f + offset;
-        camera.viewMatrix = lookAt(pos, offset);
+        camera->view = lookAt(pos, offset);
+        camera->pos = pos;
     }
 
     // RENDER
     glClear(GL_COLOR_BUFFER_BIT);
-
-    bind(&s);
-    bind(&cubeMesh);
-
-    // Set Uniforms
-    mat4 vp = camera.projectionMatrix * camera.viewMatrix;
-    glUniformMatrix4fv(0, 1, GL_FALSE, (GLfloat*) &vp);
-
-    // 3 Cubes
-    vec3 p = vec3(0.0f);
-    glUniform3fv(1, 1, (GLfloat*) &p);
-    glDrawElements(GL_TRIANGLES, 6*2*3, GL_UNSIGNED_INT, NULL);
-
-    p = vec3(1.0f, 0.0f, 0.0f);
-    glUniform3fv(1, 1, (GLfloat*) &p);
-    glDrawElements(GL_TRIANGLES, 6*2*3, GL_UNSIGNED_INT, NULL);
-
-    p = vec3(-1.0f, 0.0f, 0.0f);
-    glUniform3fv(1, 1, (GLfloat*) &p);
-    glDrawElements(GL_TRIANGLES, 6*2*3, GL_UNSIGNED_INT, NULL);
+    draw(&s, &cubeMesh, Transform(vec3(0)));
+    draw(&s, &cubeMesh, Transform(vec3(3.0f)));
+    draw(&s, &cubeMesh, Transform(vec3(-3.0f)));
 
     SwapBuffers(deviceContext);
-    //glFinish();
+
+    currentFrame++;
 }
 
 

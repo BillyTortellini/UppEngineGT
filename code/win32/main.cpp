@@ -20,6 +20,7 @@
 #include "win32_glFunctions.hpp"
 #include "../tmpAlloc.hpp"
 #include "../renderer.hpp"
+#include "win32_fileListener.cpp"
 
 // GLOBALS
 GameState gameState = {};
@@ -288,142 +289,6 @@ LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, msgType, wParam, lParam);
 }
 
-// Prototype
-void requestDirectoryChanges();
-
-HANDLE fileHandle;
-char filename[256];
-char path[512];
-void initFileListener(char* pathToFile) 
-{
-    int lastSlash = -15;
-    int len = (int)strlen(pathToFile);
-    for (int i = len-1; i >= 0; i--) {
-        if (pathToFile[i] == '/' || pathToFile[i] == '\\') {
-            lastSlash = i;
-            break;
-        }
-    }
-
-    if (lastSlash == -15) {
-        strcpy(filename, pathToFile);
-        strcpy(path, ".\\");
-    }
-    else {
-        strcpy(filename, &pathToFile[lastSlash+1]);
-        strcpy(path, pathToFile);
-        path[lastSlash] = '\0';
-    }
-
-    fileHandle = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL); 
-    if (fileHandle == INVALID_HANDLE_VALUE) {
-        printLastError();
-        debugPrint("FindFirstChange.. failed, invalid handle!\n");
-        debugWaitForConsoleInput();
-    }
-
-    requestDirectoryChanges();
-}
-
-const int notifyBufferSize = 2;
-DWORD notifyBuffer[2048];
-OVERLAPPED overlapped = {};
-void requestDirectoryChanges() 
-{
-    bool success = ReadDirectoryChangesW(
-            fileHandle,
-            notifyBuffer,
-            sizeof(DWORD) * 2048,
-            FALSE,
-            FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_CREATION,
-            NULL,
-            &overlapped,
-            NULL);
-
-    if (!success) {
-        debugPrint("ReadDirectoryChanges failed! No more file changes will be noticed.\n");
-        printLastError();
-    }
-}
-
-bool checkFileChanged() 
-{
-    bool found = false;
-
-    DWORD bytesReturned;
-    bool result = GetOverlappedResult(fileHandle, &overlapped, &bytesReturned, false);
-    if (!result) 
-    {
-        DWORD error = GetLastError();
-        if (error == ERROR_IO_INCOMPLETE) {
-            //debugPrint("GetOverlappedResult IO_INCOMPLETE\n");
-            return false;
-        }
-        printLastError();
-    }
-    else 
-    {
-        int notificationCount = bytesReturned / sizeof(_FILE_NOTIFY_INFORMATION);
-        bool quit = notificationCount == 0;
-        if (quit) {
-            loggf("Notification count was zero, should not happen\n");
-            quit = true;
-        }
-        int nextEntryOffset = 0;
-        // Loop over all file_notifications
-        while(!quit)
-        {
-            _FILE_NOTIFY_INFORMATION& info = *((_FILE_NOTIFY_INFORMATION*)((byte*)notifyBuffer + nextEntryOffset));
-            if (info.FileNameLength == 0) {
-                loggf("FileNameLength was 0, should not happen\n");
-                quit = true;
-                continue;
-            }
-            char changedName[256];
-            int res = WideCharToMultiByte(CP_UTF8, NULL, info.FileName, info.FileNameLength, changedName, 256, NULL, NULL);
-            if (res == 0) { 
-                loggf("WideCharToMultibyte failed!\n"); 
-                printLastError();
-                quit = true;
-                continue;
-            }
-            changedName[res/2] = 0;
-
-            /*loggf("File changed: %s, ", changedName);
-            switch(info.Action)
-            {
-                case FILE_ACTION_ADDED:
-                    loggf("FILE_ACTION_ADDED\n");
-                    break;
-                case FILE_ACTION_REMOVED:
-                    loggf("FILE_ACTION_REMOVED\n");
-                    break;
-                case FILE_ACTION_MODIFIED:
-                    loggf("FILE_ACTION_MODIFIED\n");
-                    break;
-                case FILE_ACTION_RENAMED_OLD_NAME:
-                    loggf("FILE_ACTION_RENAMED_OLD_NAME\n");
-                    break;
-                case FILE_ACTION_RENAMED_NEW_NAME:
-                    loggf("FILE_ACTION_RENAMED_NEW_NAME\n");
-                    break;
-            }*/
-            if (strcmp(changedName, filename) == 0) 
-            {
-                quit = true;
-                found = true;
-                continue;
-            }
-
-            nextEntryOffset += info.NextEntryOffset;
-            if (info.NextEntryOffset == 0) break;
-        }
-
-        requestDirectoryChanges();
-    }
-
-    return found;
-}
 
 void resizeVideoBuffer() 
 {
@@ -641,8 +506,6 @@ void debugGameTick()
     render();
 }
 
-
-
 int windowStyle;
 int windowStyleEX;
 HCURSOR cursor;
@@ -831,7 +694,8 @@ void customDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLs
         const GLchar* message, const void* userParam)
 {
     // Ignore unecessary warniings
-    if (id == 0) return;
+    // 131186 Performace warnings with static_draw using video memory
+    if (id == 0 || id == 131185) return;
 
     loggf("CustomDebugProc: ERROR ID: %d:, msg: \"%s\"\n", id, message);
     switch (source)
@@ -940,24 +804,31 @@ bool createWindowWithOpenGL()
     return true;
 }
 
+void onGameDllChanged(const char* filename, void* userData) {
+    loadGameFunctions();
+}
+
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdShow)
 {
     globalInstance = instance;
 
     // Init allocators
-    SystemAllocator systemAlloc;
-    initTmpAlloc(&systemAlloc);
+    SystemAllocator sysAlloc;
+    initTmpAlloc(&sysAlloc);
     SCOPE_EXIT(shutdownTmpAlloc());
 
     // Init subsystems
     memset(&gameState, 0, sizeof(GameState));
-    CHECK_VALID(initDebugConsole(), "Console initialization failed\n");
+    assert(initDebugConsole(), "Console initialization failed\n");
     setDebugFunctions(&debugPrint, &win32_invalid_path);
     initKeyTranslationTable();
     initTiming();
-    initFileListener("build\\game_tmp.dll");
-    initDynamicLoading();
+    initFileListener(&sysAlloc);
     //initAudio();
+
+    // Init dynamic loading
+    ListenerToken dllListener = createFileListener("build\\game_tmp.dll", &onGameDllChanged, nullptr);
+    initDynamicLoading();
 
     // Initialize GameState
     {
@@ -980,7 +851,10 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     // Initialize window with OpenGL
     CHECK_VALID(initWindow(), "InitWindow failed\n");
     CHECK_VALID(createWindowWithOpenGL(), "Init opengl failed\n");
-    SystemAllocator sysAlloc;
+    logg("\n");
+    logg("---------------------\n");
+    logg("--- PROGRAM START ---\n");
+    logg("---------------------\n");
     CHECK_VALID(initRenderer(&sysAlloc), "Error initializing renderer\n");
 
     // Initialize Game
@@ -1084,9 +958,8 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
         tslf = frameEnd - frameStart;
         frameStart = frameEnd;
 
-        if (checkFileChanged()) {
-            loadGameFunctions();
-        }
+        // Check if any files have changed
+        checkFilesChanged();
 
         // Debug print
         /*{

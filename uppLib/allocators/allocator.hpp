@@ -6,6 +6,7 @@
 // ------------------
 // Following allocators are implemented in this file:
 //  - NullAllocator (For testing only)
+//  - PrintAllocator (Used for debugging, prints allocs and mallocs)
 //  - SystemAllocator (Uses malloc and free)
 //
 //  Fixed Size allocators:
@@ -107,16 +108,40 @@ public:
     }
 };
 
+template <typename T, const char* AllocText = "Allocated: ", const char* DeallocText = "Deallocated: ">
+class PrintAllocator : public Allocator
+{
+public:
+    PrintAllocator(T* allocator) {
+        this->allocator = allocator;
+    }
+
+    Blk alloc(u64 size) {
+        Blk b = allocator->alloc(size); 
+        loggf("%sdata: %p\tsize: %ld\n", AllocText, b.data, b.size);
+        return b; 
+    }
+
+    void dealloc(const Blk& b) {
+        loggf("%sdata: %p\tsize: %ld\n", DeallocText, b.data, b.size);
+        allocator->dealloc(b);
+    }
+
+    bool owns(Blk b) {
+        return allocator->owns(b);
+    }
+
+    T* allocator;
+};
+
 class SystemAllocator : public Allocator
 {
 public: 
     Blk alloc(u64 size) {
-        loggf("SystemAllcoator alloc: %ld\n", size);
         return Blk(malloc(size), size);    
     };
 
     void dealloc(const Blk& b) {
-        loggf("SystemAllcoator dealloc: %p %ld\n", b.data, b.size);
         free(b.data);    
     };
 };
