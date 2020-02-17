@@ -1,157 +1,213 @@
-#include <cstring>
-#include <cstdio>
-#include <cmath>
-#include <cstdio>
+#ifndef __GAME_CPP__
+#define __GAME_CPP__
 
 // Own file includes
+#include "uppLib.hpp"
 #include "platform.hpp"
-#include "umath.hpp"
-#include "datatypes.hpp"
-//#include "sound.hpp"
+#include "fileListener.hpp"
+#include "rendering/openGLFunctions.hpp"
+#include "utils/tmpAlloc.hpp"
+#include "utils/arcBallController.hpp"
+#include "rendering/renderer.hpp"
 
-// What i want to do:
-// * Play sampled sounds at a given time
-// * Play sounds when a key is pressed
+GameState* gameState;
 
-#define MAX_QUEUED_SOUNDS 16
 struct GameData
 {
-    vec2 pos;
+    ShaderProgram s;
+    Mesh cubeMesh;
+    ArcBallController controller;
+    Camera3D camera;
 };
-GameState* gameState;
 GameData* gameData;
 
-#define print(format, ...) { \
-        char buf[256]; \
-        snprintf(buf, 256, format, ##__VA_ARGS__); \
-        gameState->services.debugPrint(buf); \
-    };
-
-void toScreenCoords(vec2 v, int height, int width, int& x, int& y)
+void gameAfterReset() 
 {
-    v = v * 0.5f + 0.5f;
-    x = (int)(v.x * width);
-    y = (int)((1.0f - v.y) * height);
-    return;
+    // Init renderer
+    SystemAllocator sysAlloc;
+    initTmpAlloc(&sysAlloc);
+    initRenderer(&sysAlloc);
+    setCamera(&gameData->camera);
 }
 
-void trim(int& x, int min, int max) {
-    if (x < min) x = min;
-    if (x > max) x = max;
-    return;
+void gameBeforeReset() {}
+
+void gameInit() 
+{
+    gameAfterReset();
+
+    // Set game options
+    gameState->windowState.continuousDraw = true;
+    gameState->windowState.fps = 60;
+
+    // Create Shader
+    init(&gameData->s, {"ressources/shaders/color.frag", "ressources/shaders/color.vert"});
+
+    // Create mesh
+    createCubeMesh(&gameData->cubeMesh);
+
+    // Create/set camera and controller
+    init(&gameData->camera);
+    init(&gameData->controller, &gameData->camera, 0.005f, 0.2f); 
 }
 
-void renderScene(VideoData* videoData, float time)
+void gameShutdown() {
+    shutdown(&gameData->s);
+    shutdown(&gameData->cubeMesh);
+    gameBeforeReset();
+}
+
+void gameTick() 
 {
-    int width = videoData->width;
-    int height = videoData->height;
-    vec2 dim(width, height);
-    vec2 stretch(1.0f);
-    if (dim.x > dim.y) {
-        stretch.x = stretch.x * dim.x/dim.y;
+    Input* input = &gameState->input;
+    if (input->keyPressed[KEY_ESCAPE]) {
+        gameState->windowState.quit = true;
     }
-    else {
-        stretch.y = stretch.y * dim.y/dim.x;
+    if (input->keyPressed[KEY_F5]) {
+        gameState->windowState.hideCursor = !gameState->windowState.hideCursor;
+        loggf("Hide cursor set to: %s\n", gameState->windowState.hideCursor ? "TRUE" : "FALSE");
     }
+    if (input->keyPressed[KEY_F11]) {
+        gameState->windowState.fullscreen = !gameState->windowState.fullscreen;
+    }
+    //if (input->keyPressed[KEY_A]) {
+    //    loggf("KEY PRESSED SHIFT\n");
+    //}
 
-    u8 colRed = (u8) fmodf(time, 0.5);
-
-    memset(videoData->pixels, 0, width * height * sizeof(Pixel));
-
-    vec2 circlePos = vec2(sinf(time) * 0.5f, 0.0f);
-    float radius = 0.1f;
-    vec2 min = circlePos - radius;
-    vec2 max = circlePos + radius;
-    int minX, minY, maxX, maxY;
-    toScreenCoords(min, width, height, minX, minY);
-    trim(minX, 0, width);
-    trim(minY, 0, height);
-    toScreenCoords(min, width, height, maxX, maxY);
-    trim(maxX, 0, width);
-    trim(maxY, 0, height);
-
-    for (int y = minY; y < maxY; y++) {
-        for (int x = minX; x < maxX; x++) {
-            vec2 p(x, y);
-            p = p / dim;
-            p = p * 2 - 1;
-            p = p * stretch;
-
-            if (dist(p, circlePos) < radius) {
-                videoData->pixels[x + y * width].r = 255;
-                videoData->pixels[x + y * width].g = 255;
-                videoData->pixels[x + y * width].b = 255;
-                videoData->pixels[x + y * width].a = 0;
-            }
+    // Resize if necessary
+    if (gameState->windowState.wasResized) 
+    {
+        glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
+        if (camera != nullptr) {
+            camera->projection = projection(0.01f, 100.0f, d2r(90), 
+                    (float)gameState->windowState.width/gameState->windowState.height);
         }
     }
+
+    update(&gameData->controller, input);
+    startFrame();
+    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(0)));
+    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(3.0f)));
+    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(-3.0f)));
+    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(-3.0f, -3.0f, 3.0f)));
+    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(3.0f, -3.0f, -3.0f)));
+    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(3.0f, -3.0f, -3.0f)));
 }
 
-void updatePlayerPos(GameState* state) 
-{
-    gameData = (GameData*) state->memory.memory;     
-    vec2 dir(0.0f);
-    if (state->input.keyDown[KEY_A]) {
-        dir += vec2(-1.0f, 0.0f);
-    }
-    if (state->input.keyDown[KEY_D]) {
-        dir += vec2(1.0f, 0.0f);
-    }
-    if (state->input.keyDown[KEY_W]) {
-        dir += vec2(0.0f, 1.0f);
-    }
-    if (state->input.keyDown[KEY_S]) {
-        dir += vec2(0.0f, -1.0f);
-    }
-
-    dir.y *= -1;
-    float speed = 2.0f;
-    vec2 change = dir * (float)state->time.tslf * speed;
-    gameData->pos = gameData->pos + change;
-}
-
+// BINDINGS FOR DLL LOADING
 extern "C"
 {
     DECLARE_EXPORT void gameAudio(GameState* state, byte* stream, int length) {}
-
     DECLARE_EXPORT void gameInit(GameState* state) 
     {
-        gameData = (GameData*) state->memory.memory;
-        gameData->pos = vec2(0.0f);
-    }
-
-    bool freshLoad = true;
-    DECLARE_EXPORT void gameTick(GameState* state) 
-    {
         gameState = state;
-        gameData = (GameData*) state->memory.memory;
-        gameState->windowState.continuousDraw = true;
-        gameState->windowState.fps = 30;
-
-        if (freshLoad) {
-            print("Hello there\n");
-            freshLoad = false;
-        }
-
-        float time = (float) gameState->time.now;
-
-        //updatePlayerPos(state);
-
-        Input* input = &state->input;
-        if (input->keyPressed[KEY_ESCAPE]) {
-            state->windowState.quit = true;
-        }
-        if (input->keyPressed[KEY_F11]) {
-            state->windowState.fullscreen = !state->windowState.fullscreen;
-        }
-
-        VideoData* vid = &state->videoData;
-        renderScene(vid, time);
+        gameData = (GameData*) gameState->memory.memory;
+        gameInit();
     }
 
-    DECLARE_EXPORT void gameShutdown(GameState* state)
-    {
+    DECLARE_EXPORT void gameTick(GameState* state) {
+        gameState = state;
+        gameData = (GameData*) gameState->memory.memory;
+        gameTick();
+    }
 
+    DECLARE_EXPORT void gameShutdown(GameState* state) {
+        gameState = state;
+        gameData = (GameData*) gameState->memory.memory;
+        gameShutdown();
+    }
+
+    DECLARE_EXPORT void gameBeforeReset(GameState* state) {
+        gameState = state;
+        gameData = (GameData*) gameState->memory.memory;
+        gameBeforeReset();
+    }
+
+    DECLARE_EXPORT void gameAfterReset(GameState* state) {
+        gameState = state;
+        gameData = (GameData*) gameState->memory.memory;
+        gameAfterReset();
+    }
+
+    DECLARE_EXPORT void gameLoadFunctionPtrs(void** functions) 
+    {
+        int i = 0;
+        setDebugFunctions((loggFunc)functions[i++], (invalid_pathFunc)functions[i++]);
+        loggf("GameLoadFunctionPtrs\n");
+        i++;
+        i++;
+        createFileListener = (createFileListenerFunc) functions[i++];
+        deleteFileListener = (deleteFileListenerFunc) functions[i++];
+        glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC) functions[i++];
+        glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC) functions[i++];
+        glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC) functions[i++];
+        glGenBuffers = (PFNGLGENBUFFERSPROC) functions[i++];
+        glBindBuffer = (PFNGLBINDBUFFERPROC) functions[i++];
+        glBufferData = (PFNGLBUFFERDATAPROC) functions[i++];
+        glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC) functions[i++];
+        glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC) functions[i++];
+        glUseProgram = (PFNGLUSEPROGRAMPROC) functions[i++];
+        glCreateShader = (PFNGLCREATESHADERPROC) functions[i++];
+        glShaderSource = (PFNGLSHADERSOURCEPROC) functions[i++];
+        glCompileShader = (PFNGLCOMPILESHADERPROC) functions[i++];
+        glDeleteShader = (PFNGLDELETESHADERPROC) functions[i++];
+        glCreateProgram = (PFNGLCREATEPROGRAMPROC) functions[i++];
+        glDeleteProgram = (PFNGLDELETEPROGRAMPROC) functions[i++];
+        glAttachShader = (PFNGLATTACHSHADERPROC) functions[i++];
+        glDetachShader = (PFNGLDETACHSHADERPROC) functions[i++];
+        glLinkProgram = (PFNGLLINKPROGRAMPROC) functions[i++];
+        glGetShaderiv = (PFNGLGETSHADERIVPROC) functions[i++];
+        glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC) functions[i++];
+        glGetProgramiv = (PFNGLGETPROGRAMIVPROC) functions[i++];
+        glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC) functions[i++];
+        glGetActiveUniform = (PFNGLGETACTIVEUNIFORMPROC) functions[i++];
+        glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC) functions[i++];
+        glUniform1f = (PFNGLUNIFORM1FPROC) functions[i++];
+        glUniform2f = (PFNGLUNIFORM2FPROC) functions[i++];
+        glUniform3f = (PFNGLUNIFORM3FPROC) functions[i++];
+        glUniform4f = (PFNGLUNIFORM4FPROC) functions[i++];
+        glUniform1i = (PFNGLUNIFORM1IPROC) functions[i++];
+        glUniform2i = (PFNGLUNIFORM2IPROC) functions[i++];
+        glUniform3i = (PFNGLUNIFORM3IPROC) functions[i++];
+        glUniform4i = (PFNGLUNIFORM4IPROC) functions[i++];
+        glUniform1ui = (PFNGLUNIFORM1UIPROC) functions[i++];
+        glUniform2ui = (PFNGLUNIFORM2UIPROC) functions[i++];
+        glUniform3ui = (PFNGLUNIFORM3UIPROC) functions[i++];
+        glUniform4ui = (PFNGLUNIFORM4UIPROC) functions[i++];
+        glUniform1fv = (PFNGLUNIFORM1FVPROC) functions[i++];
+        glUniform2fv = (PFNGLUNIFORM2FVPROC) functions[i++];
+        glUniform3fv = (PFNGLUNIFORM3FVPROC) functions[i++];
+        glUniform4fv = (PFNGLUNIFORM4FVPROC) functions[i++];
+        glUniform1iv = (PFNGLUNIFORM1IVPROC) functions[i++];
+        glUniform2iv = (PFNGLUNIFORM2IVPROC) functions[i++];
+        glUniform3iv = (PFNGLUNIFORM3IVPROC) functions[i++];
+        glUniform4iv = (PFNGLUNIFORM4IVPROC) functions[i++];
+        glUniform1uiv = (PFNGLUNIFORM1UIVPROC) functions[i++];
+        glUniform2uiv = (PFNGLUNIFORM2UIVPROC) functions[i++];
+        glUniform3uiv = (PFNGLUNIFORM3UIVPROC) functions[i++];
+        glUniform4uiv = (PFNGLUNIFORM4UIVPROC) functions[i++];
+        glUniformMatrix2fv = (PFNGLUNIFORMMATRIX2FVPROC) functions[i++];
+        glUniformMatrix3fv = (PFNGLUNIFORMMATRIX3FVPROC) functions[i++];
+        glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC) functions[i++];
+        glUniformMatrix2x3fv = (PFNGLUNIFORMMATRIX2X3FVPROC) functions[i++];
+        glUniformMatrix3x2fv = (PFNGLUNIFORMMATRIX3X2FVPROC) functions[i++];
+        glUniformMatrix2x4fv = (PFNGLUNIFORMMATRIX2X4FVPROC) functions[i++];
+        glUniformMatrix4x2fv = (PFNGLUNIFORMMATRIX4X2FVPROC) functions[i++];
+        glUniformMatrix3x4fv = (PFNGLUNIFORMMATRIX3X4FVPROC) functions[i++];
+        glUniformMatrix4x3fv = (PFNGLUNIFORMMATRIX4X3FVPROC) functions[i++];
+        glGetActiveAttrib = (PFNGLGETACTIVEATTRIBPROC) functions[i++];
+        glGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC) functions[i++];
+        glDeleteBuffers = (PFNGLDELETEBUFFERSPROC) functions[i++];
+        glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC) functions[i++];
+        glGetStringi = (PFNGLGETSTRINGIPROC) functions[i++];
+        wglSwapIntervalExt = (PFNWGLSWAPINTERVALEXTPROC) functions[i++];
+        wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC) functions[i++];
     }
 }
 
+
+
+
+
+
+#endif

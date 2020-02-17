@@ -10,6 +10,10 @@ StackAllocator tmpAlloc;
     u64 CONCAT_ARGS(_checkpoint_, __LINE__) = tmpAlloc.createCheckpoint(); \
     SCOPE_EXIT(tmpAlloc.rollback(CONCAT_ARGS(_checkpoint_, __LINE__));)
 
+void initTmpAlloc(const Blk& b) {
+    tmpAlloc.init(b);
+}
+
 void initTmpAlloc(Allocator* alloc) {
     tmpAlloc.init(alloc, TMP_ALLOC_SIZE);
 }

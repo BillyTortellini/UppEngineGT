@@ -37,6 +37,7 @@ struct WindowState
     bool minimized;
     bool quit;
     int fps;
+    bool hideCursor;
     bool continuousDraw; // If true, the window will try to display FPS frame per second
     bool wasResized;
 };
@@ -89,10 +90,13 @@ struct GameState
     Services services;
 };
 
-typedef void (*gameInitFunc)(GameState* state);
-typedef void (*gameTickFunc)(GameState* state);
-typedef void (*gameShutdownFunc)(GameState* state);
-typedef void (*gameAudioFunc)(GameState* state, byte* stream, int length);
+typedef void (*gameInitFunc)(GameState* state); // Gets called once at program startup
+typedef void (*gameTickFunc)(GameState* state); // Gets called every tick 
+typedef void (*gameShutdownFunc)(GameState* state); // Gets called at program end
+typedef void (*gameAudioFunc)(GameState* state, byte* stream, int length); // Gets called on each audio stream
+typedef void (*gameBeforeResetFunc)(GameState* state); // Gets called before each reset
+typedef void (*gameAfterResetFunc)(GameState* state); // Gets called after each reset
+typedef void (*gameLoadFunctionPtrsFunc)(void** functions); // Gets called each time game loads
 
 typedef enum
 {
@@ -140,6 +144,9 @@ typedef enum
     KEY_BACKSPACE = 42,
     KEY_TAB = 43,
     KEY_SPACE = 44,
+    KEY_SHIFT = 45,
+    KEY_CTRL = 46,
+    KEY_ALT = 47,
 
     KEY_F1 = 58,
     KEY_F2 = 59,

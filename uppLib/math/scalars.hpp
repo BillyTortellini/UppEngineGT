@@ -8,7 +8,7 @@
 
 // Basic functions
 template<typename T>
-inline T max(T a, T b) {
+T max(T a, T b) {
     return a > b ? a : b;
 }
 

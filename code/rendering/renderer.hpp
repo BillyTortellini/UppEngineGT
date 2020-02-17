@@ -2,10 +2,10 @@
 #define __RENDERER_HPP__
 
 #include "uppLib.hpp"
-#include "tmpAlloc.hpp"
-#include "fileIO.hpp"
-#include "fileListener.hpp"
-#include <ctype.h> // for tolower
+#include "../utils/tmpAlloc.hpp"
+#include "../fileIO.hpp"
+#include "../fileListener.hpp"
+#include "../utils/string.hpp"
 
 // Next steps:
 //  - Mesh creation in new file
@@ -32,7 +32,7 @@
 // GLOBALS:
 Allocator* renderAlloc;
 u32 currentFrame;
-extern GameState gameState;
+extern GameState* gameState;
 
 struct OpenGLState
 {
@@ -59,6 +59,7 @@ void bindProgram(GLuint id) {
 struct Camera3D
 {
     vec3 pos;
+    vec3 dir;
     mat4 view;
     mat4 projection;
     mat4 vp;
@@ -66,8 +67,10 @@ struct Camera3D
 };
 
 void init(Camera3D* cam) {
-    cam->projection = projection(0.01f, 100.0, d2r(90), (float) gameState.windowState.width / gameState.windowState.height);
+    cam->projection = projection(0.01f, 100.0, d2r(90), (float) gameState->windowState.width / gameState->windowState.height);
     cam->lastUpdateFrame = currentFrame-1;
+    cam->pos = vec3(0);
+    cam->dir = vec3(0);
 }
 
 Camera3D* camera;
@@ -152,13 +155,6 @@ GLuint createShaderFromSource(const char* source, GLenum type)
     }
 
     return id;
-}
-
-bool endsWith(const char* str, const char* end) {
-    int endLen = (int) strlen(end);
-    int strLen = (int) strlen(str);
-    if (endLen > strLen) return false;
-    return strcmp(end, &(str[strLen-endLen])) == 0;
 }
 
 GLuint createShaderFromFile(const char* filepath)
@@ -351,14 +347,6 @@ SupportedAutoUniform supportedAutoUniforms[] = {
     SupportedAutoUniform("u_now", AutoUniformType::TIME, GL_FLOAT, true),
 };
 
-void toLower(char* buf)
-{
-    int len = (int) strlen(buf);
-    for (int i = 0; i < len; i++) {
-        buf[i] = (char)tolower(buf[i]);
-    }
-}
-
 void detectAutoUniforms(ShaderProgram* program)
 {
     program->perFrameCount = 0;
@@ -492,8 +480,8 @@ void detectShaderAttribs(ShaderProgram* p)
             MeshAttribName name = meshAttribNames[j];
             AttribInfo info = attribInfoTable[name.attrib];
             if (name.type == attribType && 
-                attribSize == 1 &&
-                strcmp(attribName, name.name) == 0)
+                    attribSize == 1 &&
+                    strcmp(attribName, name.name) == 0)
             {
                 loggf("AttribName found: %s\n", attribName);
                 assert(p->attribLocCount < MeshAttrib::COUNT,
@@ -553,7 +541,7 @@ void prepare(ShaderProgram* program)
                 glUniform3fv(u.location, 3, (GLfloat*) &camera->pos);
                 break;
             case AutoUniformType::TIME:
-                glUniform1f(u.location, (GLfloat) gameState.time.now);
+                glUniform1f(u.location, (GLfloat) gameState->time.now);
                 break;
         }
     }
@@ -802,7 +790,7 @@ void prepare(Mesh* m, ShaderProgram* p)
             AttribLoc* shaderLoc = &(p->attribLocs[shaderIndex]);
             // If it fits, advance both indices
             if (meshLoc->location == shaderLoc->location &&
-                meshLoc->attrib == shaderLoc->attrib) {
+                    meshLoc->attrib == shaderLoc->attrib) {
                 meshIndex++;
                 shaderIndex++;
             }
@@ -812,7 +800,7 @@ void prepare(Mesh* m, ShaderProgram* p)
                 meshIndex++; 
             }
             if (meshIndex == ref->attribLocCount ||
-                shaderIndex == p->attribLocCount) {
+                    shaderIndex == p->attribLocCount) {
                 quit = true;
             }
         }
@@ -847,7 +835,7 @@ void prepare(Mesh* m, ShaderProgram* p)
                     assert(ref->attribLocCount != MeshAttrib::COUNT,
                             "Mesh reference contains to many attribs\n");
                     ref->attribLocs[ref->attribLocCount++] = attribLoc;
-                    
+
                     AttribInfo info = attribInfoTable[attribLoc.attrib];
                     glBindBuffer(GL_ARRAY_BUFFER, m->vbo[j]);
                     // Set Attrib pointer
@@ -950,102 +938,66 @@ void draw(ShaderProgram* program, Mesh* mesh, const Transform& transform)
     glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, NULL);
 }
 
-ShaderProgram s;
-Mesh cubeMesh;
-Camera3D testCamera;
+void createCubeMesh(Mesh* m)
+{
+    struct Vertex
+    {
+        Vertex(){};
+        Vertex(vec3 pos, vec3 color) : pos(pos), color(color){}
+        vec3 pos;
+        vec3 color;
+    };
+    // Fill vbo
+    Vertex vertexData[] = {
+        Vertex(vec3(-1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
+        Vertex(vec3( 1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
+        Vertex(vec3(-1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
+        Vertex(vec3( 1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
+        Vertex(vec3(-1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
+        Vertex(vec3( 1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
+        Vertex(vec3(-1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
+        Vertex(vec3( 1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f))
+    };
+    u32 elementData[] = 
+    {
+        0, 1, 4, 1, 5, 4,
+        6, 3, 2, 6, 7, 3,
+        4, 7, 6, 4, 5, 7, 
+        5, 1, 3, 3, 7, 5,
+        0, 3, 1, 0, 2, 3,
+        4, 6, 2, 4, 2, 0
+    };
+    using namespace MeshAttrib;
+    init(m, 36, elementData, 8, vertexData, {POS3, COLOR3});
+}
+
 bool initRenderer(Allocator* alloc)
 {
+    // Init Renderer
     camera = nullptr;
     currentFrame = 0;
     renderAlloc = alloc;
 
-    // Set initial openglState
-    bindProgram(0);
-    bindVao(0);
-
-    init(&s, {"ressources/shaders/color.frag", "ressources/shaders/color.vert"});
-    printAllUniforms(&s);
-
-    init(&testCamera);
-    setCamera(&testCamera);
-
     // Set Opengl State
     wglSwapIntervalExt(-1);
-    glViewport(0, 0, gameState.windowState.width, gameState.windowState.height);
+    glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
     glEnable(GL_CULL_FACE);
 
-    // Create mesh data
-    {   
-        struct Vertex
-        {
-            Vertex(){};
-            Vertex(vec3 pos, vec3 color) : pos(pos), color(color){}
-            vec3 pos;
-            vec3 color;
-        };
-        // Fill vbo
-        Vertex vertexData[] = {
-            Vertex(vec3(-1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-            Vertex(vec3( 1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-            Vertex(vec3(-1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-            Vertex(vec3( 1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-            Vertex(vec3(-1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-            Vertex(vec3( 1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-            Vertex(vec3(-1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-            Vertex(vec3( 1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f))
-        };
-        u32 elementData[] = 
-        {
-            0, 1, 4, 1, 5, 4,
-            6, 3, 2, 6, 7, 3,
-            4, 7, 6, 4, 5, 7, 
-            5, 1, 3, 3, 7, 5,
-            0, 3, 1, 0, 2, 3,
-            4, 6, 2, 4, 2, 0
-        };
-        using namespace MeshAttrib;
-        init(&cubeMesh, 36, elementData, 8, vertexData, {POS3, COLOR3});
-    }
+    // Set initial openglState
+    bindProgram(0);
+    bindVao(0);
 
     return true;
 }
 
-vec2 camSphere(0.0f);
-void render()
+void startFrame()
 {
-    if (gameState.windowState.wasResized) {
-        glViewport(0, 0, gameState.windowState.width, gameState.windowState.height);
-        camera->projection = projection(0.01f, 100.0f, d2r(90), (float)gameState.windowState.width/gameState.windowState.height);
-    }
-
-    // Update camera
-    {
-        float sensitivity = 0.003f;
-        camSphere += vec2(gameState.input.deltaX, gameState.input.deltaY) * sensitivity;
-        camSphere = sphericalNorm(camSphere);
-
-        camSphere = vec2(d2r(100.0f*(float)gameState.time.now), sinf((float)gameState.time.now) * d2r(30));
-
-        vec3 offset(1.5f, 0, 0);
-        vec3 pos = sp2eu(camSphere) * -3.0f + offset;
-        camera->view = lookAt(pos, offset);
-        camera->pos = pos;
-    }
-
-    // RENDER
     glClear(GL_COLOR_BUFFER_BIT);
-    draw(&s, &cubeMesh, Transform(vec3(0)));
-    draw(&s, &cubeMesh, Transform(vec3(3.0f)));
-    draw(&s, &cubeMesh, Transform(vec3(-3.0f)));
-
-    SwapBuffers(deviceContext);
-
     currentFrame++;
 }
-
 
 
 

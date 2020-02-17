@@ -10,8 +10,8 @@
 //     - Use GetOverlappedResults to check if files have changed
 
 // INCLUDES
-#include "..\fileListener.hpp"
-#include "../tmpAlloc.hpp"
+#include "../fileListener.hpp"
+#include "../utils/tmpAlloc.hpp"
 #include <cstdlib>
 
 // MAKROS

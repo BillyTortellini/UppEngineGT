@@ -18,8 +18,7 @@
 #undef far
 
 #include "win32_glFunctions.hpp"
-#include "../tmpAlloc.hpp"
-#include "../renderer.hpp"
+#include "../utils/tmpAlloc.hpp"
 #include "win32_fileListener.cpp"
 
 // GLOBALS
@@ -165,6 +164,8 @@ void initKeyTranslationTable()
 
     keyTranslationTable[VK_LCONTROL] = KEY_LCTRL;
     keyTranslationTable[VK_LSHIFT] = KEY_LSHIFT;
+    keyTranslationTable[VK_SHIFT] = KEY_SHIFT;
+    keyTranslationTable[VK_CONTROL] = KEY_CTRL;
     //keyTranslationTable[] = KEY_LALT;
     keyTranslationTable[VK_RCONTROL] = KEY_RCTRL;
     keyTranslationTable[VK_RSHIFT] = KEY_RSHIFT;
@@ -330,18 +331,104 @@ gameInitFunc gameInit;
 gameTickFunc gameTick;
 gameShutdownFunc gameShutdown;
 gameAudioFunc gameAudio;
+gameLoadFunctionPtrsFunc gameLoadFunctionPtrs;
+gameBeforeResetFunc gameBeforeReset;
+gameAfterResetFunc gameAfterReset;
 
-void fallbackGameInit(GameState* g) {}
-void fallbackGameTick(GameState* g) {}
-void fallbackGameShutdown(GameState* g) {}
+void fallbackFunction(GameState* g) {}
 void fallbackGameAudio(GameState* g, byte* stream, int length) {}
+void fallbackGameLoadFunctionPtrs(void**) {}
 
 void setToFallback()
 {
-    gameInit = &fallbackGameInit;
-    gameTick = &fallbackGameTick;
-    gameShutdown = &fallbackGameShutdown;
+    gameInit = &fallbackFunction;
+    gameTick = &fallbackFunction;
+    gameShutdown = &fallbackFunction;
+    gameBeforeReset = &fallbackFunction;
+    gameAfterReset = &fallbackFunction;
     gameAudio = &fallbackGameAudio;
+    gameLoadFunctionPtrs = &fallbackGameLoadFunctionPtrs;
+}
+
+void setGameFunctionPtrs()
+{
+    void* functionPtrs[] = {
+        // Debug functions (For uppLib)
+        &debugPrint,
+        &win32_invalid_path,
+        // FileListener functions
+        &initFileListener,
+        &checkFilesChanged,
+        &createFileListener,
+        &deleteFileListener,
+        // OpenGL functions
+        glDebugMessageCallback,
+        glGenVertexArrays,
+        glBindVertexArray,
+        glGenBuffers,
+        glBindBuffer,
+        glBufferData,
+        glVertexAttribPointer,
+        glEnableVertexAttribArray,
+        glUseProgram,
+        glCreateShader,
+        glShaderSource,
+        glCompileShader,
+        glDeleteShader,
+        glCreateProgram,
+        glDeleteProgram,
+        glAttachShader,
+        glDetachShader,
+        glLinkProgram,
+        glGetShaderiv,
+        glGetShaderInfoLog,
+        glGetProgramiv,
+        glGetProgramInfoLog,
+        glGetActiveUniform,
+        glGetUniformLocation,
+        glUniform1f,
+        glUniform2f,
+        glUniform3f,
+        glUniform4f,
+        glUniform1i,
+        glUniform2i,
+        glUniform3i,
+        glUniform4i,
+        glUniform1ui,
+        glUniform2ui,
+        glUniform3ui,
+        glUniform4ui,
+        glUniform1fv,
+        glUniform2fv,
+        glUniform3fv,
+        glUniform4fv,
+        glUniform1iv,
+        glUniform2iv,
+        glUniform3iv,
+        glUniform4iv,
+        glUniform1uiv,
+        glUniform2uiv,
+        glUniform3uiv,
+        glUniform4uiv,
+        glUniformMatrix2fv,
+        glUniformMatrix3fv,
+        glUniformMatrix4fv,
+        glUniformMatrix2x3fv,
+        glUniformMatrix3x2fv,
+        glUniformMatrix2x4fv,
+        glUniformMatrix4x2fv,
+        glUniformMatrix3x4fv,
+        glUniformMatrix4x3fv,
+        glGetActiveAttrib,
+        glGetAttribLocation,
+        glDeleteBuffers,
+        glDeleteVertexArrays,
+        glGetStringi,
+        wglSwapIntervalExt,
+        wglGetExtensionsStringARB,
+    };
+
+    gameLoadFunctionPtrs(functionPtrs);
 }
 
 HMODULE gameLibrary = NULL;
@@ -371,7 +458,11 @@ void loadGameFunctions()
     gameTick = (gameTickFunc) GetProcAddress(gameLibrary, "gameTick");
     gameShutdown = (gameShutdownFunc) GetProcAddress(gameLibrary, "gameShutdown");
     gameAudio = (gameAudioFunc) GetProcAddress(gameLibrary, "gameAudio");
-    if (gameInit == NULL || gameTick == NULL || gameShutdown == NULL || gameAudio == NULL)
+    gameLoadFunctionPtrs = (gameLoadFunctionPtrsFunc) GetProcAddress(gameLibrary, "gameLoadFunctionPtrs");
+    gameBeforeReset = (gameBeforeResetFunc) GetProcAddress(gameLibrary, "gameBeforeReset");
+    gameAfterReset = (gameAfterResetFunc) GetProcAddress(gameLibrary, "gameAfterReset");
+    if (gameInit == NULL || gameTick == NULL || gameShutdown == NULL 
+            || gameAudio == NULL || gameLoadFunctionPtrs == NULL || gameBeforeReset == NULL || gameAfterReset == NULL)
     {
         loggf("GetProcAddress failed: One or more functions were not found in dll.\n");
         setToFallback();
@@ -381,10 +472,7 @@ void loadGameFunctions()
 
 void initDynamicLoading() 
 {
-    gameInit = &fallbackGameInit;
-    gameTick = &fallbackGameTick;
-    gameShutdown = &fallbackGameShutdown;
-    gameAudio = &fallbackGameAudio;
+    setToFallback();
     loadGameFunctions();
 }
 
@@ -502,8 +590,6 @@ void debugGameTick()
     }
     gameState.windowState.continuousDraw = true;
     gameState.windowState.fps = 60;
-
-    render();
 }
 
 int windowStyle;
@@ -530,7 +616,7 @@ bool initWindow()
     wc.cbClsExtra = 0;
     wc.hInstance = globalInstance;
     wc.hIcon = NULL;
-    wc.hCursor = cursor;
+    wc.hCursor = NULL;
     wc.hbrBackground = NULL;
     wc.lpszMenuName = NULL;
     wc.lpszClassName = CLASS_NAME;
@@ -564,6 +650,7 @@ bool createWindow(bool show)
 
     if (show) {
         ShowWindow(hwnd, SW_SHOW);
+        SetCursor(cursor);
     }
 
     // Init savedWindowPos for toggling fullscreen
@@ -574,6 +661,7 @@ bool createWindow(bool show)
     actualWinState.minimized = false;
     actualWinState.continuousDraw = false;
     actualWinState.fps = 60;
+    actualWinState.hideCursor = false;
     WindowState& desiredWinState = gameState.windowState;
     memcpy(&desiredWinState, &actualWinState, sizeof(WindowState));
 
@@ -805,7 +893,10 @@ bool createWindowWithOpenGL()
 }
 
 void onGameDllChanged(const char* filename, void* userData) {
+    gameBeforeReset(&gameState);
     loadGameFunctions();
+    setGameFunctionPtrs();
+    gameAfterReset(&gameState);
 }
 
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdShow)
@@ -825,10 +916,6 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     initTiming();
     initFileListener(&sysAlloc);
     //initAudio();
-
-    // Init dynamic loading
-    ListenerToken dllListener = createFileListener("build\\game_tmp.dll", &onGameDllChanged, nullptr);
-    initDynamicLoading();
 
     // Initialize GameState
     {
@@ -855,9 +942,14 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     logg("---------------------\n");
     logg("--- PROGRAM START ---\n");
     logg("---------------------\n");
-    CHECK_VALID(initRenderer(&sysAlloc), "Error initializing renderer\n");
+    //CHECK_VALID(initRenderer(&sysAlloc), "Error initializing renderer\n");
+    
+    // Init dynamic loading
+    ListenerToken dllListener = createFileListener("build\\game_tmp.dll", &onGameDllChanged, nullptr);
+    initDynamicLoading();
 
     // Initialize Game
+    setGameFunctionPtrs();
     gameInit(&gameState);
 
     // Timing stuff
@@ -899,9 +991,10 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
         gameState.time.lastGameTick = gameTickTime;
 
         // GameTick...
-        debugGameTick();
-        //gameTick(&gameState);
+        //debugGameTick();
+        gameTick(&gameState);
         resetInputState();
+        SwapBuffers(deviceContext);
         //renderToWindow(deviceContext, &bitmapInfo, &gameState.videoData);
 
         // Handle requests
@@ -946,6 +1039,39 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
                 fps = desiredWinState.fps;
             }
         }
+        if (actualWinState.hideCursor != desiredWinState.hideCursor) {
+            actualWinState.hideCursor = desiredWinState.hideCursor;
+            if (actualWinState.hideCursor) {
+                ShowCursor(FALSE);
+                // Confine cursor
+                RECT clip;
+                GetWindowRect(hwnd, &clip);
+                ClipCursor(&clip);
+            }
+            else {
+                ShowCursor(TRUE);
+                //SetCursor(cursor);
+                ClipCursor(NULL);
+            }
+        }
+        if (actualWinState.hideCursor && desiredWinState.wasResized) {
+            RECT clip;
+            GetWindowRect(hwnd, &clip);
+            ClipCursor(&clip);
+        }
+        if (actualWinState.hideCursor) {
+            RECT window;
+            GetWindowRect(hwnd, &window);
+            POINT p;
+            p.x = window.left + window.right/2;
+            p.y = window.top + window.bottom/2;
+            ClientToScreen(hwnd, &p);
+            POINT oldPos;
+            GetCursorPos(&oldPos);
+            gameState.input.deltaX += oldPos.x - p.x;
+            gameState.input.deltaY += oldPos.y - p.y;
+            SetCursorPos(p.x, p.y);
+        }
 
         // Do timing stuff
         double gameTickEnd = currentTime();
@@ -963,14 +1089,14 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
 
         // Debug print
         /*{
-            double sleepFor =  (frameStart + frameTime) - gameTickEnd;
-            if (gameTickTime > frameTime) {
-                loggf("Frame took: %3.2fms, Tick: %3.2fms, OVER TIME\n", tslf * 1000, gameTickTime * 1000);
-            }
-            else {
-                loggf("Frame took: %3.2fms, Tick: %3.2fms\n", tslf * 1000, gameTickTime * 1000);
-            }
-        } */
+          double sleepFor =  (frameStart + frameTime) - gameTickEnd;
+          if (gameTickTime > frameTime) {
+          loggf("Frame took: %3.2fms, Tick: %3.2fms, OVER TIME\n", tslf * 1000, gameTickTime * 1000);
+          }
+          else {
+          loggf("Frame took: %3.2fms, Tick: %3.2fms\n", tslf * 1000, gameTickTime * 1000);
+          }
+          } */
     }
 
     gameShutdown(&gameState);
