@@ -184,7 +184,10 @@ GLuint createShaderFromFile(const char* filepath)
 
     // Load shader file
     SCOPE_EXIT_ROLLBACK;
-    char* source = load_text_file_tmp(filepath);
+    char buffer[256];
+    strcpy(buffer, "ressources/shaders/");
+    strcat(buffer, filepath);
+    char* source = load_text_file_tmp(buffer);
 
     return createShaderFromSource(source, shaderType);
 }
@@ -224,8 +227,9 @@ GLuint createShaderProgram(int fileCount, const char** filenames)
         GLint maxLength = 0;
         glGetProgramiv(id, GL_INFO_LOG_LENGTH, &maxLength);
 
-        SCOPE_EXIT_ROLLBACK;
-        char* buffer = (char*) tmpAlloc.alloc(maxLength);
+        //SCOPE_EXIT_ROLLBACK;
+        //char* buffer = (char*) tmpAlloc.alloc(maxLength);
+        char buffer[2048];
         glGetProgramInfoLog(id, maxLength, &maxLength, buffer);
         loggf("Could not link program, error msg: \n %s\n", buffer);
     }
@@ -349,6 +353,10 @@ SupportedAutoUniform supportedAutoUniforms[] = {
 
 void detectAutoUniforms(ShaderProgram* program)
 {
+    if (program->id == 0) {
+        return;
+    }
+
     program->perFrameCount = 0;
     program->perModelCount = 0;
 
@@ -457,6 +465,10 @@ int attribLocComparator(const void* ap, const void* bp)
 
 void detectShaderAttribs(ShaderProgram* p)
 {
+    if (p->id == 0) {
+        return;
+    }
+
     p->attribLocCount = 0;
 
     GLint count;
@@ -511,6 +523,11 @@ struct Transform
 
 void prepare(ShaderProgram* program)
 {
+    if (program->id == 0) {
+        bindVao(0);
+        return;
+    }
+
     bind(program);
     if (program->lastUpdateFrame == currentFrame) 
         return;
@@ -549,6 +566,11 @@ void prepare(ShaderProgram* program)
 
 void prepare(ShaderProgram* program, const Transform& transform)
 {
+    if (program->id == 0) {
+        bindVao(0);
+        return;
+    }
+
     prepare(program);
     mat4 model = transform.toModelMat();
     mat4 mvp = camera->vp * model;
@@ -589,7 +611,11 @@ bool init(ShaderProgram* p, int fileCount, const char** filenames)
     // Add file listeners
     for (int i = 0; i < fileCount; i++) {
         p->filenames[i] = filenames[i];
-        p->tokens[i] = createFileListener(filenames[i], &onShaderFileChanged, p);
+        char buffer[256];
+        strcpy(buffer, "ressources/shaders/");
+        strcat(buffer, filenames[i]);
+        p->tokens[i] = createFileListener(buffer, &onShaderFileChanged, p);
+        assert(p->tokens[i] != INVALID_TOKEN, "createFileListener failed!\n");
     }
     p->tokenCount = fileCount;
 
@@ -772,6 +798,11 @@ struct Mesh
 
 void prepare(Mesh* m, ShaderProgram* p) 
 {
+    if (p->id == 0) {
+        bindVao(0);
+        return;
+    }
+
     // Loop through references to check if one fits
     int index = -1;
     for (int i = 0; i < m->referenceCount; i++)
@@ -931,6 +962,12 @@ void shutdown(Mesh* m)
     glDeleteBuffers(1, &(m->ebo));
 }
 
+void draw(ShaderProgram* program, Mesh* mesh)
+{
+    prepare(mesh, program);
+    glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, NULL);
+}
+
 void draw(ShaderProgram* program, Mesh* mesh, const Transform& transform)
 {
     prepare(program, transform); // Sets programs uniforms
@@ -983,7 +1020,7 @@ bool initRenderer(Allocator* alloc)
     glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    glFrontFace(GL_CW);
     glEnable(GL_CULL_FACE);
 
     // Set initial openglState
@@ -995,7 +1032,7 @@ bool initRenderer(Allocator* alloc)
 
 void startFrame()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     currentFrame++;
 }
 

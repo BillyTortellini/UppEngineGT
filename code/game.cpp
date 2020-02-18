@@ -10,27 +10,56 @@
 #include "utils/arcBallController.hpp"
 #include "rendering/renderer.hpp"
 
+// TODO:
+// -----
+//  - Replace System allocator with a list allocator
+//      + block allocator for small allocations
+//  - Something like std::vector (Dynamic array)
+//  - In tmpAlloc replace the stackAlloc with a pointer
+//  - Texture loading and saving (bmp-files)
+//  - What would be nice:
+//    - An easy way to set up a rendering pipeline
+//    - Rendering to framebuffers
+//    - HDR framebuffers
+//    - Blur (Maybe compute buffers)
+//    - Tone mapping
+//    - Deferred shading
+//    - Ambient occlusion
+//    - Baked light maps
+//    - Add Gamma correction
+//    - Shadow mapping
+//    - Normal mapping
+//    - Multisampling 
+//    - Texture loading/saving and stuff (header stuff)
+
 GameState* gameState;
 
 struct GameData
 {
+    SystemAllocator sysAlloc;
     ShaderProgram s;
     Mesh cubeMesh;
     ArcBallController controller;
     Camera3D camera;
+    ShaderProgram sky;
 };
 GameData* gameData;
 
 void gameAfterReset() 
 {
     // Init renderer
-    SystemAllocator sysAlloc;
-    initTmpAlloc(&sysAlloc);
-    initRenderer(&sysAlloc);
+    new(&gameData->sysAlloc) SystemAllocator;
+    initTmpAlloc(&gameData->sysAlloc);
+    initRenderer(&gameData->sysAlloc);
     setCamera(&gameData->camera);
+    
+    init(&gameData->sky, {"sky.vert", "sky.frag"});
 }
 
-void gameBeforeReset() {}
+void gameBeforeReset() {
+    shutdownTmpAlloc();
+    shutdown(&gameData->sky);
+}
 
 void gameInit() 
 {
@@ -41,7 +70,7 @@ void gameInit()
     gameState->windowState.fps = 60;
 
     // Create Shader
-    init(&gameData->s, {"ressources/shaders/color.frag", "ressources/shaders/color.vert"});
+    init(&gameData->s, {"color.frag", "color.vert"});
 
     // Create mesh
     createCubeMesh(&gameData->cubeMesh);
@@ -83,9 +112,14 @@ void gameTick()
                     (float)gameState->windowState.width/gameState->windowState.height);
         }
     }
-
     update(&gameData->controller, input);
     startFrame();
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    draw(&gameData->sky, &gameData->cubeMesh, Transform(vec3(5.0f)));
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(0)));
     draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(3.0f)));
     draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(-3.0f)));
@@ -132,10 +166,12 @@ extern "C"
     DECLARE_EXPORT void gameLoadFunctionPtrs(void** functions) 
     {
         int i = 0;
-        setDebugFunctions((loggFunc)functions[i++], (invalid_pathFunc)functions[i++]);
+        loggFunc loggFuncPtr = (loggFunc)functions[i++];
+        invalid_pathFunc invalid_pathPtr = (invalid_pathFunc) functions[i++];
+        setDebugFunctions(loggFuncPtr, invalid_pathPtr);
         loggf("GameLoadFunctionPtrs\n");
-        i++;
-        i++;
+        i++; // Init file listener
+        i++; // check file changed
         createFileListener = (createFileListenerFunc) functions[i++];
         deleteFileListener = (deleteFileListenerFunc) functions[i++];
         glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC) functions[i++];

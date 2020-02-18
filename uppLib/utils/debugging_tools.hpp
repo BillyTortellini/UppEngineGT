@@ -49,6 +49,7 @@ void default_invalid_path(const char* msg) {
 
 loggFunc logg = &default_logg;
 invalid_pathFunc invalid_path = &default_invalid_path;
+
 void setDebugFunctions(loggFunc l, invalid_pathFunc i) {
     logg = l;
     invalid_path = i;

@@ -11,23 +11,77 @@
 # hlsearch on (H) or off (h):
 ~h
 # Last Search Pattern:
-~MSle0~/SHIFT PRE
+~MSle0~/spheri
 
 # Command Line History (newest to oldest):
-:q
-|2,0,1581969743,,"q"
-:wq
-|2,0,1581969536,,"wq"
+:wqa
+|2,0,1581988731,,"wqa"
 :w
-|2,0,1581969524,,"w"
+|2,0,1581988670,,"w"
+:q
+|2,0,1581987928,,"q"
+:wq
+|2,0,1581985991,,"wq"
 :q!
 |2,0,1581967264,,"q!"
 :qa
 |2,0,1581967249,,"qa"
 
 # Search String History (newest to oldest):
+?/spheri
+|2,1,1581987940,47,"spheri"
+?/draw
+|2,1,1581986313,47,"draw"
+?/prepare(Mesh*
+|2,1,1581986283,47,"prepare(Mesh*"
+?/draw(
+|2,1,1581986273,47,"draw("
+?/init(Shader
+|2,1,1581986107,47,"init(Shader"
+?/createShader
+|2,1,1581986102,47,"createShader"
+?/ressou
+|2,1,1581986091,47,"ressou"
+?/init(ShaderP
+|2,1,1581986005,47,"init(ShaderP"
+?/startF
+|2,1,1581985851,47,"startF"
+?/k
+|2,1,1581984410,47,"k"
+?/setDe
+|2,1,1581984403,47,"setDe"
+?/setGameF
+|2,1,1581984356,47,"setGameF"
+?/uppL
+|2,1,1581984234,47,"uppL"
+? \<setDebugFunctions\>
+|2,1,1581984216,,"\\<setDebugFunctions\\>"
+? \<load_text_file_tmp\>
+|2,1,1581984146,,"\\<load_text_file_tmp\\>"
+? \<createShaderFromFile\>
+|2,1,1581983898,,"\\<createShaderFromFile\\>"
+? \<createShaderProgram\>
+|2,1,1581983891,,"\\<createShaderProgram\\>"
+?/init(Sh
+|2,1,1581983876,47,"init(Sh"
+?/initRen
+|2,1,1581971334,47,"initRen"
+?/prepare
+|2,1,1581971052,47,"prepare"
+? \<detectShaderAttribs\>
+|2,1,1581970977,,"\\<detectShaderAttribs\\>"
+? \<detectAutoUniforms\>
+|2,1,1581970964,,"\\<detectAutoUniforms\\>"
+?/init(Shad
+|2,1,1581970943,47,"init(Shad"
+?/struct Shader
+|2,1,1581970926,47,"struct Shader"
+?/ShaderPro
+|2,1,1581970913,47,"ShaderPro"
+?/Could not link
+|2,1,1581970645,47,"Could not link"
 ?/SHIFT PRE
-|2,1,1581969214,47,"SHIFT PRE"
+|2,1,1581970505,47,"SHIFT PRE"
 ?/VK_L
 |2,1,1581969003,47,"VK_L"
 ?/SHIFT
@@ -58,385 +112,703 @@
 # Expression History (newest to oldest):
 
 # Input Line History (newest to oldest):
+@O:\ressources\shaders\sky.frag
+|2,3,1581983775,,"O:\\ressources\\shaders\\sky.frag"
+@O:\ressources\shaders\sky.vert
+|2,3,1581983767,,"O:\\ressources\\shaders\\sky.vert"
+@O:\code\utils\
+|2,3,1581983721,,"O:\\code\\utils\\"
 
 # Debug Line History (newest to oldest):
 
 # Registers:
 "0	LINE	0
-	    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(3.0f, -3.0f, -3.0f)));
-|3,0,0,1,1,0,1581969508,"    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(3.0f, -3.0f, -3.0f)));"
+	    vec2 sp = vec2(atan(f_dir.x, -f_dir.z), atan(f_dir.y, -f_dir.z));
+|3,0,0,1,1,0,1581987688,"    vec2 sp = vec2(atan(f_dir.x, -f_dir.z), atan(f_dir.y, -f_dir.z));"
 ""1	LINE	0
-	}
-|3,1,1,1,1,0,1581969519,"}"
+	    col = col 
+|3,1,1,1,1,0,1581988669,"    col = col "
 "2	LINE	0
-	    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(5.0f, -3.0f, -3.0f)));
-|3,0,2,1,1,0,1581969519,"    draw(&gameData->s, &gameData->cubeMesh, Transform(vec3(5.0f, -3.0f, -3.0f)));"
+	    float val = 
+|3,0,2,1,1,0,1581988330,"    float val = "
 "3	LINE	0
-	    init(&gameData->controller, 
-|3,0,3,1,1,0,1581969335,"    init(&gameData->controller, "
+	    val = step(1.0, dir.y);
+|3,0,3,1,1,0,1581988266,"    val = step(1.0, dir.y);"
 "4	LINE	0
-	
-|3,0,4,1,1,0,1581969323,""
+	    //if (sp.x < -d2r(90)) 
+	    //    val = .5;
+|3,0,4,1,2,0,1581987539,"    //if (sp.x < -d2r(90)) ","    //    val = .5;"
 "5	LINE	0
-	            if (key == VK_SHIFT) {
-	                loggf("SHIFT PRESSED\n");
-	            }
-	            if (key == 'A') {
-	                loggf("A PRESSED\n");
-	            }
-|3,0,5,1,6,0,1581969216,"            if (key == VK_SHIFT) {","                loggf(\"SHIFT PRESSED\\n\");","            }","            if (key == 'A') {","                loggf(\"A PRESSED\\n\");","            }"
+	    if (sp.x > 0) {
+	        o_color = vec4(1, 0, 0, 1);
+	    }
+	    else {
+	        o_color = vec4(0, 0, 1, 1);
+	    }
+|3,0,5,1,6,0,1581987382,"    if (sp.x > 0) {","        o_color = vec4(1, 0, 0, 1);","    }","    else {","        o_color = vec4(0, 0, 1, 1);","    }"
 "6	LINE	0
-	    keyTranslationTable[VK_SHIFT] = KEY_SHIFT;
-|3,0,6,1,1,0,1581969188,"    keyTranslationTable[VK_SHIFT] = KEY_SHIFT;"
+	    if (sp
+|3,0,6,1,1,0,1581987302,"    if (sp"
 "7	LINE	0
-	    keyTranslationTable[VK_ALT] = KEY_SHIFT;
-|3,0,7,1,1,0,1581969187,"    keyTranslationTable[VK_ALT] = KEY_SHIFT;"
+	    if (sp > 
+|3,0,7,1,1,0,1581987289,"    if (sp > "
 "8	LINE	0
-	    KEY_RSHIFT = 46,
-|3,0,8,1,1,0,1581969130,"    KEY_RSHIFT = 46,"
+	
+|3,0,8,1,1,0,1581987211,""
 "9	LINE	0
-	            if (key == VK_LSHIFT) {
-	                loggf("SHIFT PRESSED\n");
-	            }
-	            if (key == 'A') {
-	                loggf("A PRESSED\n");
-	            }
-|3,0,9,1,6,0,1581968928,"            if (key == VK_LSHIFT) {","                loggf(\"SHIFT PRESSED\\n\");","            }","            if (key == 'A') {","                loggf(\"A PRESSED\\n\");","            }"
+	    if (f_dir.z
+|3,0,9,1,1,0,1581986609,"    if (f_dir.z"
 "-	CHAR	0
-	-
-|3,0,36,0,1,0,1581969488,"-"
+	5
+|3,0,36,0,1,0,1581988637,"5"
 
 # File marks:
-'0  3  0  ~\.gitconfig
-|4,48,3,0,1581969743,"~\\.gitconfig"
-'1  82  44  O:\code\game.cpp
-|4,49,82,44,1581969536,"O:\\code\\game.cpp"
-'2  3  8  O:\build\run.bat
-|4,50,3,8,1581968819,"O:\\build\\run.bat"
-'3  16  34  O:\build\buildMain.bat
-|4,51,16,34,1581968806,"O:\\build\\buildMain.bat"
-'4  222  40  O:\code\win32\main.cpp
-|4,52,222,40,1581968787,"O:\\code\\win32\\main.cpp"
-'5  221  40  O:\code\win32\main.cpp
-|4,53,221,40,1581968787,"O:\\code\\win32\\main.cpp"
-'6  1  0  O:\code\win32\main.cpp
-|4,54,1,0,1581968674,"O:\\code\\win32\\main.cpp"
-'7  1  0  O:\code\win32\main.cpp
-|4,55,1,0,1581968674,"O:\\code\\win32\\main.cpp"
-'8  1  0  O:\code\win32\main.cpp
-|4,56,1,0,1581968674,"O:\\code\\win32\\main.cpp"
-'9  1  0  O:\code\win32\main.cpp
-|4,57,1,0,1581968674,"O:\\code\\win32\\main.cpp"
+'0  18  4  O:\ressources\shaders\sky.frag
+|4,48,18,4,1581988731,"O:\\ressources\\shaders\\sky.frag"
+'1  175  33  O:\code\game.cpp
+|4,49,175,33,1581984514,"O:\\code\\game.cpp"
+'2  170  33  O:\code\game.cpp
+|4,50,170,33,1581984514,"O:\\code\\game.cpp"
+'3  1025  0  O:\code\rendering\renderer.hpp
+|4,51,1025,0,1581971475,"O:\\code\\rendering\\renderer.hpp"
+'4  1022  0  O:\code\rendering\renderer.hpp
+|4,52,1022,0,1581971475,"O:\\code\\rendering\\renderer.hpp"
+'5  1015  0  O:\code\rendering\renderer.hpp
+|4,53,1015,0,1581971475,"O:\\code\\rendering\\renderer.hpp"
+'6  1012  0  O:\code\rendering\renderer.hpp
+|4,54,1012,0,1581971475,"O:\\code\\rendering\\renderer.hpp"
+'7  973  4  O:\code\rendering\renderer.hpp
+|4,55,973,4,1581971087,"O:\\code\\rendering\\renderer.hpp"
+'8  973  4  O:\code\rendering\renderer.hpp
+|4,56,973,4,1581971087,"O:\\code\\rendering\\renderer.hpp"
+'9  970  4  O:\code\rendering\renderer.hpp
+|4,57,970,4,1581971087,"O:\\code\\rendering\\renderer.hpp"
 
 # Jumplist (newest first):
--'  3  0  ~\.gitconfig
-|4,39,3,0,1581969743,"~\\.gitconfig"
--'  1  0  ~\.gitconfig
-|4,39,1,0,1581969739,"~\\.gitconfig"
--'  82  44  O:\code\game.cpp
-|4,39,82,44,1581969536,"O:\\code\\game.cpp"
--'  82  44  O:\code\game.cpp
-|4,39,82,44,1581969536,"O:\\code\\game.cpp"
--'  93  77  O:\code\game.cpp
-|4,39,93,77,1581969523,"O:\\code\\game.cpp"
--'  93  77  O:\code\game.cpp
-|4,39,93,77,1581969523,"O:\\code\\game.cpp"
--'  95  59  O:\code\game.cpp
-|4,39,95,59,1581969521,"O:\\code\\game.cpp"
--'  96  0  O:\code\game.cpp
-|4,39,96,0,1581969521,"O:\\code\\game.cpp"
--'  95  59  O:\code\game.cpp
-|4,39,95,59,1581969521,"O:\\code\\game.cpp"
--'  96  0  O:\code\game.cpp
-|4,39,96,0,1581969521,"O:\\code\\game.cpp"
--'  50  26  O:\code\utils\arcBallController.hpp
-|4,39,50,26,1581969316,"O:\\code\\utils\\arcBallController.hpp"
--'  50  26  O:\code\utils\arcBallController.hpp
-|4,39,50,26,1581969316,"O:\\code\\utils\\arcBallController.hpp"
--'  47  4  O:\code\game.cpp
-|4,39,47,4,1581969242,"O:\\code\\game.cpp"
--'  47  4  O:\code\game.cpp
-|4,39,47,4,1581969242,"O:\\code\\game.cpp"
--'  209  12  O:\code\win32\main.cpp
-|4,39,209,12,1581969221,"O:\\code\\win32\\main.cpp"
--'  209  12  O:\code\win32\main.cpp
-|4,39,209,12,1581969221,"O:\\code\\win32\\main.cpp"
--'  168  45  O:\code\win32\main.cpp
-|4,39,168,45,1581969214,"O:\\code\\win32\\main.cpp"
--'  168  45  O:\code\win32\main.cpp
-|4,39,168,45,1581969214,"O:\\code\\win32\\main.cpp"
--'  169  4  O:\code\win32\main.cpp
-|4,39,169,4,1581969016,"O:\\code\\win32\\main.cpp"
--'  169  4  O:\code\win32\main.cpp
-|4,39,169,4,1581969016,"O:\\code\\win32\\main.cpp"
--'  216  12  O:\code\win32\main.cpp
-|4,39,216,12,1581969003,"O:\\code\\win32\\main.cpp"
--'  216  12  O:\code\win32\main.cpp
-|4,39,216,12,1581969003,"O:\\code\\win32\\main.cpp"
--'  1  0  O:\code\win32\main.cpp
-|4,39,1,0,1581968833,"O:\\code\\win32\\main.cpp"
--'  1  0  O:\code\win32\main.cpp
-|4,39,1,0,1581968833,"O:\\code\\win32\\main.cpp"
--'  3  8  O:\build\run.bat
-|4,39,3,8,1581968819,"O:\\build\\run.bat"
--'  3  8  O:\build\run.bat
-|4,39,3,8,1581968819,"O:\\build\\run.bat"
--'  3  8  O:\build\run.bat
-|4,39,3,8,1581968819,"O:\\build\\run.bat"
--'  3  8  O:\build\run.bat
-|4,39,3,8,1581968819,"O:\\build\\run.bat"
--'  1  0  O:\build\run.bat
-|4,39,1,0,1581968810,"O:\\build\\run.bat"
--'  1  0  O:\build\run.bat
-|4,39,1,0,1581968810,"O:\\build\\run.bat"
--'  1  0  O:\build\run.bat
-|4,39,1,0,1581968810,"O:\\build\\run.bat"
--'  1  0  O:\build\run.bat
-|4,39,1,0,1581968810,"O:\\build\\run.bat"
--'  16  34  O:\build\buildMain.bat
-|4,39,16,34,1581968806,"O:\\build\\buildMain.bat"
--'  16  34  O:\build\buildMain.bat
-|4,39,16,34,1581968806,"O:\\build\\buildMain.bat"
--'  16  34  O:\build\buildMain.bat
-|4,39,16,34,1581968806,"O:\\build\\buildMain.bat"
--'  16  34  O:\build\buildMain.bat
-|4,39,16,34,1581968806,"O:\\build\\buildMain.bat"
--'  16  34  O:\build\buildMain.bat
-|4,39,16,34,1581968806,"O:\\build\\buildMain.bat"
--'  16  34  O:\build\buildMain.bat
-|4,39,16,34,1581968806,"O:\\build\\buildMain.bat"
--'  16  34  O:\build\buildMain.bat
-|4,39,16,34,1581968806,"O:\\build\\buildMain.bat"
--'  16  34  O:\build\buildMain.bat
-|4,39,16,34,1581968806,"O:\\build\\buildMain.bat"
--'  1  0  O:\build\buildMain.bat
-|4,39,1,0,1581968799,"O:\\build\\buildMain.bat"
--'  1  0  O:\build\buildMain.bat
-|4,39,1,0,1581968799,"O:\\build\\buildMain.bat"
--'  1  0  O:\build\buildMain.bat
-|4,39,1,0,1581968799,"O:\\build\\buildMain.bat"
--'  1  0  O:\build\buildMain.bat
-|4,39,1,0,1581968799,"O:\\build\\buildMain.bat"
--'  1  0  O:\build\buildMain.bat
-|4,39,1,0,1581968799,"O:\\build\\buildMain.bat"
--'  1  0  O:\build\buildMain.bat
-|4,39,1,0,1581968799,"O:\\build\\buildMain.bat"
--'  1  0  O:\build\buildMain.bat
-|4,39,1,0,1581968799,"O:\\build\\buildMain.bat"
--'  1  0  O:\build\buildMain.bat
-|4,39,1,0,1581968799,"O:\\build\\buildMain.bat"
--'  222  40  O:\code\win32\main.cpp
-|4,39,222,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  221  40  O:\code\win32\main.cpp
-|4,39,221,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  221  40  O:\code\win32\main.cpp
-|4,39,221,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  221  40  O:\code\win32\main.cpp
-|4,39,221,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  221  40  O:\code\win32\main.cpp
-|4,39,221,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  222  40  O:\code\win32\main.cpp
-|4,39,222,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  221  40  O:\code\win32\main.cpp
-|4,39,221,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  221  40  O:\code\win32\main.cpp
-|4,39,221,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  221  40  O:\code\win32\main.cpp
-|4,39,221,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  221  40  O:\code\win32\main.cpp
-|4,39,221,40,1581968787,"O:\\code\\win32\\main.cpp"
--'  173  0  O:\code\win32\main.cpp
-|4,39,173,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  171  0  O:\code\win32\main.cpp
-|4,39,171,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  171  0  O:\code\win32\main.cpp
-|4,39,171,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  171  0  O:\code\win32\main.cpp
-|4,39,171,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  171  0  O:\code\win32\main.cpp
-|4,39,171,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  173  0  O:\code\win32\main.cpp
-|4,39,173,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  171  0  O:\code\win32\main.cpp
-|4,39,171,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  171  0  O:\code\win32\main.cpp
-|4,39,171,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  171  0  O:\code\win32\main.cpp
-|4,39,171,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  171  0  O:\code\win32\main.cpp
-|4,39,171,0,1581968739,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  107  0  O:\code\win32\main.cpp
-|4,39,107,0,1581968733,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  108  4  O:\code\win32\main.cpp
-|4,39,108,4,1581968716,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  37  5  O:\code\win32\main.cpp
-|4,39,37,5,1581968715,"O:\\code\\win32\\main.cpp"
--'  223  36  O:\code\win32\main.cpp
-|4,39,223,36,1581968714,"O:\\code\\win32\\main.cpp"
--'  223  36  O:\code\win32\main.cpp
-|4,39,223,36,1581968714,"O:\\code\\win32\\main.cpp"
+-'  18  4  O:\ressources\shaders\sky.frag
+|4,39,18,4,1581988731,"O:\\ressources\\shaders\\sky.frag"
+-'  19  38  O:\ressources\shaders\sky.frag
+|4,39,19,38,1581988304,"O:\\ressources\\shaders\\sky.frag"
+-'  20  0  O:\ressources\shaders\sky.frag
+|4,39,20,0,1581987995,"O:\\ressources\\shaders\\sky.frag"
+-'  15  17  O:\ressources\shaders\sky.frag
+|4,39,15,17,1581987722,"O:\\ressources\\shaders\\sky.frag"
+-'  14  27  O:\ressources\shaders\sky.frag
+|4,39,14,27,1581987687,"O:\\ressources\\shaders\\sky.frag"
+-'  8  16  O:\ressources\shaders\sky.frag
+|4,39,8,16,1581987285,"O:\\ressources\\shaders\\sky.frag"
+-'  1  0  O:\ressources\shaders\sky.frag
+|4,39,1,0,1581984562,"O:\\ressources\\shaders\\sky.frag"
+-'  1  0  O:\code\NERD_tree_1
+|4,39,1,0,1581984562,"O:\\code\\NERD_tree_1"
+-'  170  33  O:\code\game.cpp
+|4,39,170,33,1581984514,"O:\\code\\game.cpp"
+-'  166  25  O:\code\game.cpp
+|4,39,166,25,1581984468,"O:\\code\\game.cpp"
+-'  89  13  O:\code\game.cpp
+|4,39,89,13,1581984210,"O:\\code\\game.cpp"
+-'  33  54  O:\code\game.cpp
+|4,39,33,54,1581983639,"O:\\code\\game.cpp"
+-'  17  33  O:\code\game.cpp
+|4,39,17,33,1581983348,"O:\\code\\game.cpp"
+-'  38  0  O:\code\game.cpp
+|4,39,38,0,1581983041,"O:\\code\\game.cpp"
+-'  43  0  O:\code\game.cpp
+|4,39,43,0,1581983041,"O:\\code\\game.cpp"
+-'  1  0  O:\code\game.cpp
+|4,39,1,0,1581982889,"O:\\code\\game.cpp"
+-'  1012  0  O:\code\rendering\renderer.hpp
+|4,39,1012,0,1581971475,"O:\\code\\rendering\\renderer.hpp"
+-'  1012  0  O:\code\rendering\renderer.hpp
+|4,39,1012,0,1581971475,"O:\\code\\rendering\\renderer.hpp"
+-'  2  0  O:\code\rendering\renderer.hpp
+|4,39,2,0,1581971444,"O:\\code\\rendering\\renderer.hpp"
+-'  2  0  O:\code\rendering\renderer.hpp
+|4,39,2,0,1581971444,"O:\\code\\rendering\\renderer.hpp"
+-'  1  0  O:\code\game.cpp
+|4,39,1,0,1581971443,"O:\\code\\game.cpp"
+-'  1022  52  O:\code\rendering\renderer.hpp
+|4,39,1022,52,1581971439,"O:\\code\\rendering\\renderer.hpp"
+-'  1022  52  O:\code\rendering\renderer.hpp
+|4,39,1022,52,1581971439,"O:\\code\\rendering\\renderer.hpp"
+-'  1  0  O:\code\rendering\renderer.hpp
+|4,39,1,0,1581971411,"O:\\code\\rendering\\renderer.hpp"
+-'  1  0  O:\code\rendering\renderer.hpp
+|4,39,1,0,1581971411,"O:\\code\\rendering\\renderer.hpp"
+-'  115  27  O:\code\game.cpp
+|4,39,115,27,1581971408,"O:\\code\\game.cpp"
+-'  87  27  O:\code\game.cpp
+|4,39,87,27,1581971408,"O:\\code\\game.cpp"
+-'  1010  20  O:\code\rendering\renderer.hpp
+|4,39,1010,20,1581971390,"O:\\code\\rendering\\renderer.hpp"
+-'  1010  20  O:\code\rendering\renderer.hpp
+|4,39,1010,20,1581971390,"O:\\code\\rendering\\renderer.hpp"
+-'  999  0  O:\code\rendering\renderer.hpp
+|4,39,999,0,1581971334,"O:\\code\\rendering\\renderer.hpp"
+-'  3  0  O:\code\rendering\renderer.hpp
+|4,39,3,0,1581971334,"O:\\code\\rendering\\renderer.hpp"
+-'  999  0  O:\code\rendering\renderer.hpp
+|4,39,999,0,1581971334,"O:\\code\\rendering\\renderer.hpp"
+-'  3  0  O:\code\rendering\renderer.hpp
+|4,39,3,0,1581971334,"O:\\code\\rendering\\renderer.hpp"
+-'  8  0  O:\code\NERD_tree_2
+|4,39,8,0,1581971332,"O:\\code\\NERD_tree_2"
+-'  8  0  O:\code\NERD_tree_2
+|4,39,8,0,1581971332,"O:\\code\\NERD_tree_2"
+-'  15  2  O:\code\NERD_tree_2
+|4,39,15,2,1581971331,"O:\\code\\NERD_tree_2"
+-'  1  0  O:\code\NERD_tree_2
+|4,39,1,0,1581971331,"O:\\code\\NERD_tree_2"
+-'  15  2  O:\code\NERD_tree_2
+|4,39,15,2,1581971331,"O:\\code\\NERD_tree_2"
+-'  1  0  O:\code\NERD_tree_2
+|4,39,1,0,1581971331,"O:\\code\\NERD_tree_2"
+-'  960  4  O:\code\rendering\renderer.hpp
+|4,39,960,4,1581971087,"O:\\code\\rendering\\renderer.hpp"
+-'  960  4  O:\code\rendering\renderer.hpp
+|4,39,960,4,1581971087,"O:\\code\\rendering\\renderer.hpp"
+-'  798  3  O:\code\rendering\renderer.hpp
+|4,39,798,3,1581971072,"O:\\code\\rendering\\renderer.hpp"
+-'  798  3  O:\code\rendering\renderer.hpp
+|4,39,798,3,1581971072,"O:\\code\\rendering\\renderer.hpp"
+-'  571  4  O:\code\rendering\renderer.hpp
+|4,39,571,4,1581971055,"O:\\code\\rendering\\renderer.hpp"
+-'  564  5  O:\code\rendering\renderer.hpp
+|4,39,564,5,1581971055,"O:\\code\\rendering\\renderer.hpp"
+-'  571  4  O:\code\rendering\renderer.hpp
+|4,39,571,4,1581971055,"O:\\code\\rendering\\renderer.hpp"
+-'  564  5  O:\code\rendering\renderer.hpp
+|4,39,564,5,1581971055,"O:\\code\\rendering\\renderer.hpp"
+-'  538  4  O:\code\rendering\renderer.hpp
+|4,39,538,4,1581971052,"O:\\code\\rendering\\renderer.hpp"
+-'  570  0  O:\code\rendering\renderer.hpp
+|4,39,570,0,1581971052,"O:\\code\\rendering\\renderer.hpp"
+-'  538  4  O:\code\rendering\renderer.hpp
+|4,39,538,4,1581971052,"O:\\code\\rendering\\renderer.hpp"
+-'  570  0  O:\code\rendering\renderer.hpp
+|4,39,570,0,1581971052,"O:\\code\\rendering\\renderer.hpp"
+-'  566  26  O:\code\rendering\renderer.hpp
+|4,39,566,26,1581971048,"O:\\code\\rendering\\renderer.hpp"
+-'  569  4  O:\code\rendering\renderer.hpp
+|4,39,569,4,1581971048,"O:\\code\\rendering\\renderer.hpp"
+-'  566  26  O:\code\rendering\renderer.hpp
+|4,39,566,26,1581971048,"O:\\code\\rendering\\renderer.hpp"
+-'  569  4  O:\code\rendering\renderer.hpp
+|4,39,569,4,1581971048,"O:\\code\\rendering\\renderer.hpp"
+-'  525  14  O:\code\rendering\renderer.hpp
+|4,39,525,14,1581971033,"O:\\code\\rendering\\renderer.hpp"
+-'  525  14  O:\code\rendering\renderer.hpp
+|4,39,525,14,1581971033,"O:\\code\\rendering\\renderer.hpp"
+-'  523  26  O:\code\rendering\renderer.hpp
+|4,39,523,26,1581971026,"O:\\code\\rendering\\renderer.hpp"
+-'  526  4  O:\code\rendering\renderer.hpp
+|4,39,526,4,1581971026,"O:\\code\\rendering\\renderer.hpp"
+-'  523  26  O:\code\rendering\renderer.hpp
+|4,39,523,26,1581971026,"O:\\code\\rendering\\renderer.hpp"
+-'  526  4  O:\code\rendering\renderer.hpp
+|4,39,526,4,1581971026,"O:\\code\\rendering\\renderer.hpp"
+-'  521  5  O:\code\rendering\renderer.hpp
+|4,39,521,5,1581970996,"O:\\code\\rendering\\renderer.hpp"
+-'  521  5  O:\code\rendering\renderer.hpp
+|4,39,521,5,1581970996,"O:\\code\\rendering\\renderer.hpp"
+-'  464  0  O:\code\rendering\renderer.hpp
+|4,39,464,0,1581970994,"O:\\code\\rendering\\renderer.hpp"
+-'  464  0  O:\code\rendering\renderer.hpp
+|4,39,464,0,1581970994,"O:\\code\\rendering\\renderer.hpp"
+-'  508  0  O:\code\rendering\renderer.hpp
+|4,39,508,0,1581970990,"O:\\code\\rendering\\renderer.hpp"
+-'  508  0  O:\code\rendering\renderer.hpp
+|4,39,508,0,1581970990,"O:\\code\\rendering\\renderer.hpp"
+-'  616  5  O:\code\rendering\renderer.hpp
+|4,39,616,5,1581970977,"O:\\code\\rendering\\renderer.hpp"
+-'  616  5  O:\code\rendering\renderer.hpp
+|4,39,616,5,1581970977,"O:\\code\\rendering\\renderer.hpp"
+-'  356  0  O:\code\rendering\renderer.hpp
+|4,39,356,0,1581970976,"O:\\code\\rendering\\renderer.hpp"
+-'  356  0  O:\code\rendering\renderer.hpp
+|4,39,356,0,1581970976,"O:\\code\\rendering\\renderer.hpp"
+-'  615  5  O:\code\rendering\renderer.hpp
+|4,39,615,5,1581970964,"O:\\code\\rendering\\renderer.hpp"
+-'  615  5  O:\code\rendering\renderer.hpp
+|4,39,615,5,1581970964,"O:\\code\\rendering\\renderer.hpp"
+-'  462  0  O:\code\rendering\renderer.hpp
+|4,39,462,0,1581970943,"O:\\code\\rendering\\renderer.hpp"
+-'  462  0  O:\code\rendering\renderer.hpp
+|4,39,462,0,1581970943,"O:\\code\\rendering\\renderer.hpp"
+-'  298  28  O:\code\rendering\renderer.hpp
+|4,39,298,28,1581970929,"O:\\code\\rendering\\renderer.hpp"
+-'  300  0  O:\code\rendering\renderer.hpp
+|4,39,300,0,1581970929,"O:\\code\\rendering\\renderer.hpp"
+-'  298  28  O:\code\rendering\renderer.hpp
+|4,39,298,28,1581970929,"O:\\code\\rendering\\renderer.hpp"
+-'  300  0  O:\code\rendering\renderer.hpp
+|4,39,300,0,1581970929,"O:\\code\\rendering\\renderer.hpp"
+-'  279  0  O:\code\rendering\renderer.hpp
+|4,39,279,0,1581970926,"O:\\code\\rendering\\renderer.hpp"
+-'  194  0  O:\code\rendering\renderer.hpp
+|4,39,194,0,1581970926,"O:\\code\\rendering\\renderer.hpp"
+-'  279  0  O:\code\rendering\renderer.hpp
+|4,39,279,0,1581970926,"O:\\code\\rendering\\renderer.hpp"
+-'  194  0  O:\code\rendering\renderer.hpp
+|4,39,194,0,1581970926,"O:\\code\\rendering\\renderer.hpp"
+-'  241  0  O:\code\rendering\renderer.hpp
+|4,39,241,0,1581970914,"O:\\code\\rendering\\renderer.hpp"
+-'  241  0  O:\code\rendering\renderer.hpp
+|4,39,241,0,1581970914,"O:\\code\\rendering\\renderer.hpp"
+-'  49  4  O:\code\rendering\renderer.hpp
+|4,39,49,4,1581970913,"O:\\code\\rendering\\renderer.hpp"
+-'  49  4  O:\code\rendering\renderer.hpp
+|4,39,49,4,1581970913,"O:\\code\\rendering\\renderer.hpp"
+-'  1  0  O:\code\rendering\renderer.hpp
+|4,39,1,0,1581970909,"O:\\code\\rendering\\renderer.hpp"
+-'  18  5  O:\ressources\shaders\color.vert
+|4,39,18,5,1581970896,"O:\\ressources\\shaders\\color.vert"
+-'  18  5  O:\ressources\shaders\color.vert
+|4,39,18,5,1581970896,"O:\\ressources\\shaders\\color.vert"
+-'  18  5  O:\ressources\shaders\color.vert
+|4,39,18,5,1581970896,"O:\\ressources\\shaders\\color.vert"
+-'  18  5  O:\ressources\shaders\color.vert
+|4,39,18,5,1581970896,"O:\\ressources\\shaders\\color.vert"
+-'  5  0  O:\ressources\shaders\color.frag
+|4,39,5,0,1581970830,"O:\\ressources\\shaders\\color.frag"
+-'  5  0  O:\ressources\shaders\color.frag
+|4,39,5,0,1581970830,"O:\\ressources\\shaders\\color.frag"
+-'  5  0  O:\ressources\shaders\color.frag
+|4,39,5,0,1581970830,"O:\\ressources\\shaders\\color.frag"
+-'  5  0  O:\ressources\shaders\color.frag
+|4,39,5,0,1581970830,"O:\\ressources\\shaders\\color.frag"
+-'  10  52  O:\ressources\shaders\color.frag
+|4,39,10,52,1581970458,"O:\\ressources\\shaders\\color.frag"
+-'  10  52  O:\ressources\shaders\color.frag
+|4,39,10,52,1581970458,"O:\\ressources\\shaders\\color.frag"
+-'  10  52  O:\ressources\shaders\color.frag
+|4,39,10,52,1581970458,"O:\\ressources\\shaders\\color.frag"
+-'  10  52  O:\ressources\shaders\color.frag
+|4,39,10,52,1581970458,"O:\\ressources\\shaders\\color.frag"
 
 # History of marks within files (newest to oldest):
+
+> O:\ressources\shaders\sky.frag
+	*	1581988730	0
+	"	18	4
+	.	19	0
+	+	1	10
+	+	2	0
+	+	3	1
+	+	4	16
+	+	20	0
+	+	20	25
+	+	20	14
+	+	13	31
+	+	20	0
+	+	20	34
+	+	20	0
+	+	20	29
+	+	20	12
+	+	20	29
+	+	14	33
+	+	20	12
+	+	11	0
+	+	9	0
+	+	10	0
+	+	11	0
+	+	8	16
+	+	7	16
+	+	8	19
+	+	6	43
+	+	8	16
+	+	20	0
+	+	20	11
+	+	19	45
+	+	19	32
+	+	20	0
+	+	19	44
+	+	19	16
+	+	19	48
+	+	19	5
+	+	19	0
+	+	19	47
+	+	14	0
+	+	19	47
+	+	14	0
+	+	15	5
+	+	19	47
+	+	14	47
+	+	19	17
+	+	14	47
+	+	19	0
+	+	19	37
+	+	17	14
+	+	19	15
+	+	17	69
+	+	19	19
+	+	17	33
+	+	18	57
+	+	16	22
+	+	17	5
+	+	18	56
+	+	17	4
+	+	18	30
+	+	19	0
+
+> O:\ressources\shaders\sky.vert
+	*	1581987959	0
+	"	15	26
+	^	15	27
+	.	15	26
+	+	1	10
+	+	3	13
+	+	6	28
+	+	18	0
+	+	17	0
+	+	4	14
+	+	17	36
+	+	16	28
+	+	6	18
+	+	13	71
+	+	16	18
+	+	7	25
+	+	17	18
+	+	8	17
+	+	13	5
+	+	16	4
+	+	17	22
+	+	16	5
+	+	16	25
+	+	9	18
+	+	17	22
+	+	13	4
+	+	16	0
+	+	17	32
+	+	17	5
+	+	17	33
+	+	16	0
+	+	16	29
+	+	16	3
+	+	17	33
+	+	16	0
+	+	14	0
+	+	17	34
+	+	14	39
+	+	13	40
+	+	14	16
+	+	17	29
+	+	14	5
+	+	15	26
+
+> O:\uppLib\math\spherical.hpp
+	*	1581987959	0
+	"	12	4
+
+> O:\code\NERD_tree_1
+	*	1581987945	0
+	"	18	0
+	.	1	0
+	+	1	0
+
+> O:\uppLib\math\scalars.hpp
+	*	1581987943	0
+	"	62	0
+
+> O:\ressources\shaders\color.frag
+	*	1581987928	0
+	"	15	4
+	^	17	6
+	.	15	4
+	+	12	0
+	+	6	2
+	+	12	0
+	+	4	1
+	+	11	0
+	+	10	20
+	+	8	7
+	+	10	54
+	+	17	18
+	+	16	23
+	+	5	0
+	+	16	12
+	+	17	5
+	+	16	5
+	+	5	0
+	+	9	0
+	+	4	2
+	+	8	0
+	+	9	0
+	+	10	0
+	+	11	0
+	+	8	4
+	+	16	4
+	+	4	0
+	+	17	4
+	+	17	11
+	+	17	0
+	+	18	5
+	+	15	5
+	+	16	5
+	+	17	5
+	+	15	4
+
+> O:\code\rendering\renderer.hpp
+	*	1581987925	0
+	"	968	0
+	^	617	48
+	.	617	47
+	+	5	18
+	+	6	12
+	+	7	12
+	+	8	18
+	+	1037	0
+	+	1035	0
+	+	1036	0
+	+	232	12
+	+	231	9
+	+	230	9
+	+	232	25
+	+	234	0
+	+	358	0
+	+	357	14
+	+	359	0
+	+	470	0
+	+	471	0
+	+	529	0
+	+	527	18
+	+	530	0
+	+	528	14
+	+	572	0
+	+	570	18
+	+	571	14
+	+	573	0
+	+	804	0
+	+	803	14
+	+	802	18
+	+	805	4
+	+	1023	20
+	+	1035	52
+	+	1023	20
+	+	187	20
+	+	188	42
+	+	189	28
+	+	190	43
+	+	188	26
+	+	965	0
+	+	964	0
+	+	965	44
+	+	969	0
+	+	967	26
+	+	968	0
+	+	618	77
+	+	619	0
+	+	614	0
+	+	616	34
+	+	617	47
+
+> O:\code\NERD_tree_2
+	*	1581987924	0
+	"	13	0
+	.	1	0
+	+	1	0
+
+> O:\code\game.cpp
+	*	1581987570	0
+	"	115	4
+	.	115	0
+	+	124	33
+	+	125	33
+	+	73	0
+	+	81	0
+	+	73	0
+	+	68	0
+	+	73	0
+	+	72	0
+	+	104	0
+	+	103	34
+	+	102	5
+	+	103	0
+	+	81	0
+	+	54	0
+	+	80	55
+	+	126	0
+	+	127	0
+	+	126	76
+	+	127	77
+	+	130	0
+	+	128	0
+	+	121	27
+	+	13	2
+	+	20	2
+	+	14	8
+	+	18	54
+	+	62	0
+	+	60	22
+	+	21	49
+	+	22	33
+	+	33	54
+	+	17	48
+	+	24	11
+	+	32	0
+	+	24	35
+	+	29	27
+	+	30	21
+	+	31	21
+	+	25	19
+	+	26	23
+	+	28	23
+	+	19	43
+	+	34	0
+	+	41	0
+	+	45	0
+	+	47	0
+	+	57	3
+	+	61	18
+	+	57	0
+	+	73	39
+	+	91	13
+	+	169	30
+	+	171	26
+	+	169	27
+	+	171	0
+	+	169	55
+	+	170	18
+	+	171	36
+	+	170	39
+	+	169	27
+	+	170	76
+	+	171	53
+	+	173	33
+	+	174	33
+	+	91	0
+	+	56	40
+	+	47	1
+	+	56	5
+	+	61	5
+	+	52	0
+	+	39	0
+	+	52	17
+	+	53	27
+	+	51	44
+	+	47	0
+	+	44	0
+	+	47	0
+	+	56	19
+	+	61	23
+	+	123	0
+	+	129	28
+	+	129	45
+	+	129	12
+	+	122	26
+	+	129	22
+	+	129	5
+	+	129	22
+	+	129	4
+	+	129	0
+	+	117	0
+	+	129	0
+	+	123	0
+	+	116	0
+	+	123	0
+	+	117	0
+	+	115	0
+
+> O:\code\NERD_tree_3
+	*	1581987569	0
+	"	4	0
+	.	1	0
+	+	1	0
+
+> O:\ressources\shaders\color.vert
+	*	1581984583	0
+	"	1	0
+	^	20	36
+	.	20	35
+	+	21	4
+	+	20	20
+	+	20	35
+	+	21	0
+	+	20	0
+	+	20	35
+	+	12	0
+	+	12	56
+	+	20	67
+	+	20	0
+	+	12	0
+	+	20	42
+	+	12	13
+	+	14	33
+	+	12	0
+	+	9	0
+	+	17	0
+	+	20	0
+	+	21	0
+	+	15	0
+	+	21	0
+	+	10	1
+	+	14	5
+	+	10	0
+	+	14	4
+	+	20	0
+	+	19	0
+	+	20	35
+
+> O:\code\win32\main.cpp
+	*	1581984476	0
+	"	360	16
+	^	168	46
+	.	209	0
+	+	21	18
+	+	16	0
+	+	222	0
+	+	222	40
+	+	222	26
+	+	222	23
+	+	222	0
+	+	209	30
+	+	167	40
+	+	168	0
+	+	169	0
+	+	168	29
+	+	168	0
+	+	169	0
+	+	168	45
+	+	209	0
+
+> O:\uppLib\utils\debugging_tools.hpp
+	*	1581984411	0
+	"	56	0
+	^	52	0
+	.	52	0
+	+	52	0
+
+> O:\uppLib\uppLib.hpp
+	*	1581984393	0
+	"	7	0
+
+> O:\code\fileIO.hpp
+	*	1581984161	0
+	"	23	52
+	^	23	53
+	.	23	52
+	+	6	15
+	+	23	52
+
+> O:\code\utils\tmpAlloc.hpp
+	*	1581982973	0
+	"	19	0
+
+> O:\ressources\shaders\NERD_tree_2
+	*	1581970830	0
+	"	6	0
+	.	1	0
+	+	1	0
+
+> O:\ressources\shaders\NERD_tree_1
+	*	1581970509	0
+	"	11	0
+	.	1	0
+	+	1	0
 
 > ~\.gitconfig
 	*	1581969743	0
 	"	3	0
-
-> O:\code\game.cpp
-	*	1581969535	0
-	"	82	44
-	^	93	77
-	.	94	0
-	+	8	18
-	+	9	15
-	+	11	20
-	+	12	0
-	+	10	38
-	+	23	0
-	+	31	0
-	+	59	0
-	+	87	0
-	+	96	0
-	+	87	16
-	+	96	0
-	+	87	0
-	+	87	15
-	+	87	0
-	+	88	0
-	+	96	0
-	+	10	37
-	+	87	40
-	+	72	0
-	+	71	78
-	+	59	0
-	+	21	1
-	+	22	0
-	+	24	0
-	+	17	0
-	+	22	18
-	+	26	49
-	+	26	0
-	+	104	0
-	+	110	0
-	+	116	0
-	+	122	0
-	+	128	0
-	+	26	0
-	+	96	0
-	+	34	0
-	+	30	35
-	+	20	18
-	+	30	12
-	+	31	0
-	+	39	0
-	+	52	0
-	+	35	16
-	+	45	0
-	+	30	0
-	+	33	24
-	+	55	0
-	+	34	0
-	+	44	20
-	+	47	29
-	+	50	25
-	+	51	32
-	+	50	25
-	+	51	38
-	+	30	30
-	+	104	54
-	+	110	54
-	+	116	54
-	+	122	54
-	+	128	54
-	+	51	19
-	+	55	23
-	+	56	23
-	+	87	38
-	+	89	19
-	+	90	19
-	+	91	19
-	+	89	33
-	+	90	33
-	+	91	33
-	+	44	0
-	+	52	0
-	+	44	0
-	+	39	0
-	+	44	0
-	+	43	0
-	+	75	0
-	+	74	34
-	+	73	5
-	+	74	0
-	+	52	0
-	+	30	0
-	+	51	55
-	+	92	0
-	+	93	0
-	+	92	76
-	+	93	77
-	+	96	0
-	+	94	0
-
-> O:\code\NERD_tree_1
-	*	1581969318	0
-	"	8	0
-	.	1	0
-	+	1	0
 
 > O:\code\utils\arcBallController.hpp
 	*	1581969267	0
@@ -471,28 +843,6 @@
 	+	148	18
 	+	149	16
 
-> O:\code\win32\main.cpp
-	*	1581969217	0
-	"	209	12
-	^	168	46
-	.	209	0
-	+	21	18
-	+	16	0
-	+	222	0
-	+	222	40
-	+	222	26
-	+	222	23
-	+	222	0
-	+	209	30
-	+	167	40
-	+	168	0
-	+	169	0
-	+	168	29
-	+	168	0
-	+	169	0
-	+	168	45
-	+	209	0
-
 > O:\build\run.bat
 	*	1581968818	0
 	"	3	8
@@ -503,42 +853,6 @@
 > O:\build\buildMain.bat
 	*	1581968803	0
 	"	16	34
-
-> O:\code\rendering\renderer.hpp
-	*	1581967804	0
-	"	1000	0
-	^	1000	1
-	.	999	0
-	+	5	18
-	+	6	12
-	+	7	12
-	+	8	18
-	+	1000	0
-	+	998	0
-	+	999	0
-
-> O:\code\NERD_tree_3
-	*	1581967799	0
-	"	14	0
-	.	1	0
-	+	1	0
-
-> O:\ressources\shaders\color.vert
-	*	1581967798	0
-	"	14	0
-	^	15	5
-	.	15	4
-	+	15	4
-
-> O:\ressources\shaders\color.frag
-	*	1581967765	0
-	"	1	0
-
-> O:\code\NERD_tree_2
-	*	1581967624	0
-	"	4	0
-	.	1	0
-	+	1	0
 
 > O:\code\win32\win32_fileListener.cpp
 	*	1581967368	0
@@ -554,13 +868,6 @@
 	^	4	31
 	.	4	0
 	+	4	0
-
-> O:\code\fileIO.hpp
-	*	1581967284	0
-	"	6	15
-	^	6	16
-	.	6	15
-	+	6	15
 
 > ~\.vimrc
 	*	1581967137	0

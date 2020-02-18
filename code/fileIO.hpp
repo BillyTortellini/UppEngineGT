@@ -20,7 +20,7 @@ u64 get_file_size(const char* filepath)
 char* load_text_file_tmp(const char* filepath) 
 {
     FILE* file = fopen(filepath, "rb");
-    assert(file != NULL, "File %s could not be opnened!\n", filepath);
+    assert(file != NULL, "File %s could not be opened!\n", filepath);
     SCOPE_EXIT(fclose(file));
 
     // Get File size
