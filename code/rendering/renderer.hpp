@@ -34,25 +34,61 @@ Allocator* renderAlloc;
 u32 currentFrame;
 extern GameState* gameState;
 
+#define TEXTURE_UNIT_COUNT 16
 struct OpenGLState
 {
-    GLuint currentVao;
-    GLuint currentProgram;
+    GLuint vao;
+    GLuint program;
+    GLuint textureUnit[TEXTURE_UNIT_COUNT];
+    int nextTextureUnit;
 };
 
 OpenGLState glState;
 
 void bindVao(GLuint vao) {
-    if (glState.currentVao != vao) {
+    if (glState.vao != vao) {
         glBindVertexArray(vao);
-        glState.currentVao = vao;
+        glState.vao = vao;
     }
 }
 
 void bindProgram(GLuint id) {
-    if (glState.currentProgram != id) {
+    if (glState.program != id) {
         glUseProgram(id);
-        glState.currentProgram = id;
+        glState.program = id;
+    }
+}
+
+// Returns bound texture unit
+GLint bindTexture2D(GLuint id) 
+{
+    // Check if it is already bound
+    for (int i = 0; i < TEXTURE_UNIT_COUNT; i++) {
+        if (glState.textureUnit[i] == id) {
+            return i;
+        }
+    }
+    
+    // Bind to unit
+    GLint unit = glState.nextTextureUnit;
+    glState.nextTextureUnit = (glState.nextTextureUnit + 1) % TEXTURE_UNIT_COUNT;
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return unit;
+}
+
+void init(OpenGLState* state) 
+{
+    state->nextTextureUnit = 0;
+    state->vao = 0;
+    state->program = 0;
+    glUseProgram(0);
+    glBindVertexArray(0);
+    for (int i = 0; i < TEXTURE_UNIT_COUNT; i++) {
+        state->textureUnit[i] = 0;
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
 
@@ -401,7 +437,7 @@ void detectAutoUniforms(ShaderProgram* program)
 
                 uniform->type = sup.type;
                 uniform->location = uniformLocation;
-                loggf("AutoUniform found: %s\n", uniformName);
+                //loggf("AutoUniform found: %s\n", uniformName);
                 break;
             }
         }
@@ -495,7 +531,7 @@ void detectShaderAttribs(ShaderProgram* p)
                     attribSize == 1 &&
                     strcmp(attribName, name.name) == 0)
             {
-                loggf("AttribName found: %s\n", attribName);
+                //loggf("AttribName found: %s\n", attribName);
                 assert(p->attribLocCount < MeshAttrib::COUNT,
                         "attrib count reached\n");
                 p->attribLocs[p->attribLocCount++] = 
@@ -893,6 +929,11 @@ void prepare(Mesh* m, ShaderProgram* p)
     bindVao(m->references[index].vao);
 }
 
+void prepare(ShaderProgram* p, Mesh* m, const Transform& t) {
+    prepare(p, t); // Prepares ALL uniforms
+    prepare(m, p); // Prepares mesh
+}
+
 void init(Mesh* m, MeshData* meshData) 
 {
     m->referenceCount = 0;
@@ -962,17 +1003,46 @@ void shutdown(Mesh* m)
     glDeleteBuffers(1, &(m->ebo));
 }
 
+void draw(Mesh* mesh) {
+    glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, NULL);
+}
+
 void draw(ShaderProgram* program, Mesh* mesh)
 {
     prepare(mesh, program);
-    glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, NULL);
+    draw(mesh);
 }
 
 void draw(ShaderProgram* program, Mesh* mesh, const Transform& transform)
 {
     prepare(program, transform); // Sets programs uniforms
     prepare(mesh, program); // binds mesh and makes sure the location match up
-    glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, NULL);
+    draw(mesh);
+}
+
+void createPlaneMesh(Mesh* m) 
+{
+    struct Vertex
+    {
+        Vertex(vec3 pos, vec3 normal, vec2 uv) : pos(pos), normal(normal), uv(uv){}
+        vec3 pos;
+        vec3 normal;
+        vec2 uv;
+    };
+
+    Vertex vertexData[] = {
+        Vertex(vec3(-1, 0, -1), vec3(0, 1, 0), vec2(-1, -1)),
+        Vertex(vec3(-1, 0, 1), vec3(0, 1, 0), vec2(-1, 1)),
+        Vertex(vec3(1, 0, 1), vec3(0, 1, 0), vec2(1, 1)),
+        Vertex(vec3(1, 0, -1), vec3(0, 1, 0), vec2(1, -1))
+    };
+    u32 indexData[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+
+    using namespace MeshAttrib;
+    init(m, 6, indexData, 4, vertexData, {POS3, NORMALS, UV});
 }
 
 void createCubeMesh(Mesh* m)
@@ -980,20 +1050,21 @@ void createCubeMesh(Mesh* m)
     struct Vertex
     {
         Vertex(){};
-        Vertex(vec3 pos, vec3 color) : pos(pos), color(color){}
+        Vertex(vec3 pos, vec3 color, vec2 uv) : pos(pos), color(color), uv(uv){}
         vec3 pos;
         vec3 color;
+        vec2 uv;
     };
     // Fill vbo
     Vertex vertexData[] = {
-        Vertex(vec3(-1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3( 1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3(-1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3( 1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3(-1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3( 1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3(-1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f)),
-        Vertex(vec3( 1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f))
+        Vertex(vec3(-1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f), vec2(1, 1)),
+        Vertex(vec3( 1.0f, -1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f), vec2(0, 0)),
+        Vertex(vec3(-1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f), vec2(0, 0)),
+        Vertex(vec3( 1.0f,  1.0f, -1.0f), vec3(1.0f, 0.0f, 0.0f), vec2(1, 0)),
+        Vertex(vec3(-1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f), vec2(0, 0)),
+        Vertex(vec3( 1.0f, -1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f), vec2(1, 0)),
+        Vertex(vec3(-1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f), vec2(0, 1)),
+        Vertex(vec3( 1.0f,  1.0f,  1.0f), vec3(1.0f, 0.0f, 0.0f), vec2(1, 1))
     };
     u32 elementData[] = 
     {
@@ -1005,7 +1076,22 @@ void createCubeMesh(Mesh* m)
         4, 6, 2, 4, 2, 0
     };
     using namespace MeshAttrib;
-    init(m, 36, elementData, 8, vertexData, {POS3, COLOR3});
+    init(m, 36, elementData, 8, vertexData, {POS3, COLOR3, UV});
+}
+
+void createPlane2DMesh(Mesh* m) 
+{
+    vec2 vertexData[] = {
+        vec2(-1, -1),
+        vec2(1, -1),
+        vec2(1, 1),
+        vec2(-1, 1),
+    };
+    u32 indexData[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+    init(m, 6, indexData, 4, vertexData, {MeshAttrib::POS2});
 }
 
 bool initRenderer(Allocator* alloc)
@@ -1020,12 +1106,11 @@ bool initRenderer(Allocator* alloc)
     glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glCullFace(GL_BACK);
-    glFrontFace(GL_CW);
+    glFrontFace(GL_CCW);
     glEnable(GL_CULL_FACE);
 
     // Set initial openglState
-    bindProgram(0);
-    bindVao(0);
+    init(&glState);
 
     return true;
 }

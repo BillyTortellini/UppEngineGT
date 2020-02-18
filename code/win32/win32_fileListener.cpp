@@ -27,8 +27,6 @@ struct FileListener
     void* userData;
     char* dir;
     char* filename;
-    bool deleteFlag;
-    bool overlapActive;
     OVERLAPPED* overlap;
     DWORD* notifyBuffer;
     Blk dirBlk, filenameBlk;
@@ -40,14 +38,19 @@ struct FileListenerTracker
 {
     int count;
     FileListener listeners[MAX_FILE_LISTENERS];
-    int deleteCount = 0;
-    int deleteIndices[MAX_FILE_LISTENERS];
     ListenerToken tokenCounter;
 };
 
 // GLOBALS
 FileListenerTracker tracker;
 Allocator* listenerAlloc;
+
+void printFileListenerCount() {
+    loggf("FileListenerCount: %d\n", tracker.count);
+    for (int i = 0; i < tracker.count; i++) {
+        loggf("\t#%d: %s", i, tracker.listeners[i].filename);
+    }
+}
 
 void initFileListener(Allocator* alloc)
 {
@@ -58,6 +61,7 @@ void initFileListener(Allocator* alloc)
 
 void requestDirectoryChanges(FileListener* listener) 
 {
+    *(listener->overlap) = {};
     bool success = ReadDirectoryChangesW(
             listener->file,
             listener->notifyBuffer,
@@ -72,8 +76,6 @@ void requestDirectoryChanges(FileListener* listener)
     if (!success) {
         invalid_path("ReadDirectoryChanges failed!");
     }
-
-    listener->overlapActive = true;
 }
 
 ListenerToken createFileListener(
@@ -131,11 +133,8 @@ ListenerToken createFileListener(
         listener->userData = userData;
         listener->overlapBlk = listenerAlloc->alloc(sizeof(OVERLAPPED));
         listener->overlap = (OVERLAPPED*) listener->overlapBlk;
-        *(listener->overlap) = {}; // TODO: CHekc if works
         listener->notifyBufferBlk = listenerAlloc->alloc(NOTIFYBUFFER_SIZE);
         listener->notifyBuffer = (DWORD*) listener->notifyBufferBlk.data;
-        listener->deleteFlag = false;
-        listener->overlapActive = false;
         // Copy filename and dir
         listener->filenameBlk = listenerAlloc->alloc(strlen(filename)+1);
         listener->dirBlk = listenerAlloc->alloc(strlen(directory)+1);
@@ -179,7 +178,18 @@ void deleteFileListener(ListenerToken token)
     }
     assert(index != -1, "DeleteFileListener called with invalid value\n");
 
-    tracker.listeners[index].deleteFlag = true;
+    // Delete file request
+    CancelIo(tracker.listeners[index].file);
+
+    // Special case
+    if (tracker.count == 1) {
+        tracker.count = 0;
+        return;
+    }
+
+    int from = tracker.count-1;
+    tracker.listeners[index] = tracker.listeners[from];
+    tracker.count = tracker.count - 1;
 }
 
 bool checkFileChanged(FileListener* listener)
@@ -202,7 +212,6 @@ bool checkFileChanged(FileListener* listener)
             invalid_path("GetOverlappedResult returned invalid error\n");
         }
         assert(bytesReturned != 0, "GetoverlappedResult returned 0\n");
-        listener->overlapActive = false;
     }
 
     bool quit = false;
@@ -249,23 +258,9 @@ bool checkFileChanged(FileListener* listener)
         nextEntryOffset += info.NextEntryOffset;
         if (info.NextEntryOffset == 0) break;
     }
-
-    *(listener->overlap) = {};
-    if (!listener->deleteFlag) {
-        requestDirectoryChanges(listener);
-    }
+    requestDirectoryChanges(listener);
 
     return found;
-}
-
-int compareIntDesc(const void* ap, const void* bp)
-{
-    int a = *((int*)ap);
-    int b = *((int*)bp);
-    if (a == b) return 0;
-    if (a > b) return -1;
-    if (a < b) return 1;
-    return 0;
 }
 
 void checkFilesChanged()
@@ -274,38 +269,11 @@ void checkFilesChanged()
     for (int i = 0; i < tracker.count; i++)
     {
         FileListener* listener = &(tracker.listeners[i]);
-        if (checkFileChanged(listener) && !listener->deleteFlag) {
+        if (checkFileChanged(listener)) {
+            //loggf("Calling callback of file: %s\n", listener->filename);
             listener->callback(listener->filename, listener->userData);
         }
-
-        if (listener->deleteFlag && !listener->overlapActive)
-        {
-            tracker.deleteIndices[tracker.deleteCount] = i;
-            tracker.deleteCount++;
-        }
     }
-
-    // Shutdown all flagged listeners
-    for (int i = 0; i < tracker.deleteCount; i++)
-    {
-        int index = tracker.deleteIndices[i];
-        FileListener* listener = &(tracker.listeners[index]);
-        listenerAlloc->dealloc(listener->dirBlk);
-        listenerAlloc->dealloc(listener->filenameBlk);
-        listenerAlloc->dealloc(listener->notifyBufferBlk);
-        listenerAlloc->dealloc(listener->overlapBlk);
-    }
-
-    // Move all flagged listeners to the back
-    // Sort indices first, so that swapping does not do something bad
-    assert(tracker.deleteCount < tracker.count, "Deletecount wrong\n");
-    qsort(tracker.deleteIndices, tracker.deleteCount, sizeof(int), compareIntDesc);
-    for (int i = 0; i < tracker.deleteCount; i++) {
-        int index = tracker.deleteIndices[i];
-        tracker.listeners[index] = tracker.listeners[tracker.count - 1];
-        tracker.count--;
-    }
-    tracker.deleteCount = 0;
 }
 
 

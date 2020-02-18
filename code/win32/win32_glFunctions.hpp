@@ -129,6 +129,18 @@ bool loadAllFunctions()
     glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC) getAnyGLFuncAddress("glDeleteVertexArrays");
     glGetActiveAttrib = (PFNGLGETACTIVEATTRIBPROC) getAnyGLFuncAddress("glGetActiveAttrib");
     glGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC) getAnyGLFuncAddress("glGetAttribLocation");
+    glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC) getAnyGLFuncAddress("glGenerateMipmap");
+    glActiveTexture = (PFNGLACTIVETEXTUREPROC) getAnyGLFuncAddress("glActiveTexture");
+    glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC) getAnyGLFuncAddress("glGenFramebuffers");
+    glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC) getAnyGLFuncAddress("glBindFramebuffer");
+    glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC) getAnyGLFuncAddress("glDeleteFramebuffers");
+    glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC) getAnyGLFuncAddress("glCheckFramebufferStatus");
+    glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC) getAnyGLFuncAddress("glFramebufferTexture2D");
+    glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFERPROC) getAnyGLFuncAddress("glFramebufferRenderbuffer");
+    glGenRenderbuffers = (PFNGLGENRENDERBUFFERSPROC) getAnyGLFuncAddress("glGenRenderbuffers");
+    glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSPROC) getAnyGLFuncAddress("glDeleteRenderbuffers");
+    glBindRenderbuffer = (PFNGLBINDRENDERBUFFERPROC) getAnyGLFuncAddress("glBindRenderbuffer");
+    glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEPROC) getAnyGLFuncAddress("glRenderbufferStorage");
 
     bool success = true;
     success = success && 
@@ -194,8 +206,20 @@ bool loadAllFunctions()
         (glGetActiveAttrib != NULL) &&
         (glGetAttribLocation != NULL) &&
         //        (glViewport != NULL) &&
-        (glGetProgramInfoLog != NULL);
-    
+        (glGetProgramInfoLog != NULL) &&
+        (glGenerateMipmap != NULL) &&
+        (glActiveTexture != NULL) &&
+        (glGenFramebuffers != NULL) &&
+        (glBindFramebuffer != NULL) &&
+        (glDeleteFramebuffers != NULL) &&
+        (glCheckFramebufferStatus != NULL) &&
+        (glFramebufferTexture2D != NULL) &&
+        (glFramebufferRenderbuffer != NULL) &&
+        (glGenRenderbuffers != NULL) &&
+        (glDeleteRenderbuffers != NULL) &&
+        (glBindRenderbuffer != NULL) &&
+        (glRenderbufferStorage != NULL);
+
     //printAllExtensions();
     success = success && loadExtensions();
 

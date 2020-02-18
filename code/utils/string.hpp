@@ -2,6 +2,7 @@
 #define __STRING_HPP__
 
 #include <ctype.h> // for tolower
+#include "tmpAlloc.hpp"
 
 void toLower(char* buf)
 {
@@ -41,6 +42,56 @@ bool contains(const char* str, char c) {
     return false;
 }
 
+// Temp string class
+class TmpStr
+{
+public:
+    char* str;
+    int length;
+    u64 checkpoint;
+
+    TmpStr(const char* str) {
+        length = (int)strlen(str);
+        checkpoint = tmpAlloc.createCheckpoint();
+        this->str = (char*) tmpAlloc.alloc(length+1);
+        memcpy(this->str, str, length+1);
+    }
+
+    ~TmpStr() {
+        tmpAlloc.rollback(checkpoint);
+    }
+
+    TmpStr operator+(const char* str) {
+        SCOPE_EXIT_ROLLBACK;
+        int len = (int)strlen(str);
+        char* cat = (char*) tmpAlloc.alloc(len + length + 1);
+        strcpy(cat, this->str);
+        strcat(cat, str);
+        return TmpStr(cat);
+    }
+
+    TmpStr operator+(const TmpStr& other) {
+        SCOPE_EXIT_ROLLBACK;
+        char* str = other.str;
+        int len = (int)strlen(str);
+        char* cat = (char*) tmpAlloc.alloc(len + length + 1);
+        strcpy(cat, this->str);
+        strcat(cat, str);
+        return TmpStr(cat);
+    }
+
+    operator const char*() {
+        return str;
+    }
+
+    operator char*() {
+        return str;
+    }
+
+    const char* c_str() {
+        return str;
+    }
+};
 
 
 

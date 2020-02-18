@@ -5,38 +5,35 @@
 // --- ALLOCATORS ---
 // ------------------
 // Following allocators are implemented in this file:
+//
+//  Test allocators:
 //  - NullAllocator (For testing only)
-//  - PrintAllocator (Used for debugging, prints allocs and mallocs)
+//  - PrintAllocator (Used for debugging, prints all alloc and malloc calls) 
 //  - SystemAllocator (Uses malloc and free)
 //
 //  Fixed Size allocators:
-//  - StackAllocator
-//  - BlockAllocator
-//  - ListAllocator
+//  - StackAllocator (Uses a stack, only limited dealloc functionality)
+//  - BlockAllocator (Allocates fixed sized blocks, alloc and dealloc in O(1))
+//  - ListAllocator (Saves all allocations in a linked list, alloc and dealloc in O(n))
 //
+//  Composition Allocators:
+//  - FallbackAllocator (Calls another allocator if one fails)
+//  - SegregateAllocator (Depending on threshhold, calls different allocators)
+
 //  Not yet implemented:
 //  - Composers:
-//      * FallbackAllocator
-//      * Segregator (Uses threshold and two allocators)
 //      * Bucketizer (Linear buckets)
 //      * CascadingAllocator (List of allocators, grow lazily)
-
-//  Fixed size:
-//  - BuddySystem (Power of 2 allocator)
-//  - BitmappedBlock (Block allocator using bitmap)
-//  - FreeList (Sits on top of another allocator, keeps sizes)
+//  - Fixed size:
+//      * BuddySystem (Power of 2 allocator)
+//      * BitmappedBlock (Block allocator using bitmap)
+//      * FreeList (Sits on top of another allocator, keeps sizes)
 
 
 #include "../utils/datatypes.hpp"
 #include "../utils/debugging_tools.hpp"
 #include "../math/umath.hpp"
 #include <stddef.h> // Defines max_align_t
-
-// REMOVE LATER
-int easyPtr(void* p) {
-    return (int)((u64)p % 4096);
-}
-// END REMOVE
 
 // This is THE memory management unit, alloc and dealloc
 // both use this structure.
@@ -90,8 +87,11 @@ public:
     //  - void init(Blk b);
     //  - void init(Allocator* a, ...)
     //  - shutdown()    (Used after init)
+    //  - allocAll() // Allocats all available space
+    //  - count() // Returns allocation count if available
 };
 
+// DEBUG ALLOCATORS:
 class NullAllocator : public Allocator
 {
 public:
@@ -108,22 +108,36 @@ public:
     }
 };
 
-template <typename T, const char* AllocText = "Allocated: ", const char* DeallocText = "Deallocated: ">
+template <typename T>
 class PrintAllocator : public Allocator
 {
 public:
-    PrintAllocator(T* allocator) {
+    PrintAllocator() {}
+    PrintAllocator(T* alloc, const char* allocText, const char* deallocText) {
+        init(alloc, allocText, deallocText);
+    }
+    PrintAllocator(T* alloc) {
+        init(alloc);
+    }
+    void init(T* allocator, const char* allocText, const char* deallocText) {
+        new(this) PrintAllocator;
         this->allocator = allocator;
+        this->allocText = allocText;
+        this->deallocText = deallocText;
+    }
+
+    void init(T* allocator) {
+        init(allocator, "Allocated: ", "Deallocated: ");
     }
 
     Blk alloc(u64 size) {
         Blk b = allocator->alloc(size); 
-        loggf("%sdata: %p\tsize: %ld\n", AllocText, b.data, b.size);
+        loggf("%srequest %ld\t data %p\tsize %ld\n", allocText, size, b.data, b.size);
         return b; 
     }
 
     void dealloc(const Blk& b) {
-        loggf("%sdata: %p\tsize: %ld\n", DeallocText, b.data, b.size);
+        loggf("%sdata: %p\tsize: %ld\n", deallocText, b.data, b.size);
         allocator->dealloc(b);
     }
 
@@ -132,11 +146,17 @@ public:
     }
 
     T* allocator;
+    const char* allocText;
+    const char* deallocText;
 };
 
 class SystemAllocator : public Allocator
 {
 public: 
+    void init() {
+        new(this) SystemAllocator;
+    }
+
     Blk alloc(u64 size) {
         return Blk(malloc(size), size);    
     };
@@ -146,33 +166,94 @@ public:
     };
 };
 
+// COMPOSER ALLOCATORS
 template <typename P, typename F>
 class FallbackAllocator : public Allocator
 {
 public: 
+    FallbackAllocator() {};
+    FallbackAllocator(P* primary, F* fallback) {
+        init(primary, fallback);
+    }
+    void init(P* primary, F* fallback) {
+        this->primary = primary;
+        this->fallback = fallback;
+        new(this) FallbackAllocator;
+    }
+
     Blk alloc(u64 size) 
     {
-        Blk b = primary.alloc(size);
+        Blk b = primary->alloc(size);
         if (b.data == nullptr) {
-            return fallback.alloc(size);
+            return fallback->alloc(size);
         }
-    };
+        return b;
+    }
 
     void dealloc(const Blk& b) {
-        if (primary.owns(b)) {
-            primary.dealloc(b);
+        if (primary->owns(b)) {
+            primary->dealloc(b);
         }
         else {
-            fallback.dealloc(b);
+            fallback->dealloc(b);
         }
     };
 
     bool owns(const Blk& b) {
-        return primary.owns(b) || fallback.owns(b);
+        return primary->owns(b) || fallback->owns(b);
     }
 
-    P primary;
-    F fallback;
+    P* primary;
+    F* fallback;
+};
+
+template <typename L , typename U>
+class SegregateAllocator : public Allocator
+{
+public:
+    SegregateAllocator(){};
+    SegregateAllocator(int threshold, L* underAlloc, U* overAlloc) {
+        init(threshold, underAlloc, overAlloc);
+    }
+
+    void init(int threshold, L* underAlloc, U* overAlloc) 
+    {
+        this->threshold = threshold;
+        this->underAlloc = underAlloc;
+        this->overAlloc = overAlloc;
+        new(this) SegregateAllocator;
+    }
+
+    Blk alloc(u64 size) {
+        if (size <= threshold) {
+            return underAlloc->alloc(size);
+        }
+        else {
+            return overAlloc->alloc(size);
+        }
+    }
+
+    void dealloc(const Blk& b) {
+        if (b.size <= threshold) {
+            underAlloc->dealloc(b);
+        }
+        else {
+            overAlloc->dealloc(b);
+        }
+    }
+
+    bool owns(const Blk& b) {
+        if (b.size <= threshold) {
+            return underAlloc->owns(b);
+        }
+        else {
+            return overAlloc->owns(b);
+        }
+    }
+
+    int threshold;
+    L* underAlloc;
+    U* overAlloc;
 };
 
 class StackAllocator : public Allocator
@@ -183,6 +264,7 @@ public:
         memAllocator = nullptr;
         stack = b;
         p = 0;
+        new(this) StackAllocator;
     }
 
     void init(Allocator* a, u64 size)
@@ -191,6 +273,7 @@ public:
         memAllocator = a;
         stack = a->alloc(size);
         p = 0;
+        new(this) StackAllocator;
     }
 
     void shutdown() 
@@ -213,6 +296,15 @@ public:
         Blk res((void*)((u64)stack.data + nextP), size);
         p = nextP + size;
         return res;
+    }
+
+    Blk allocAll() 
+    {
+        // P is used because we assume that stack is aligned
+        u64 nextP = ceil(p, alignof(max_align_t)); 
+        assert(nextP < stack.size, "Alloc all called with (almost) full stack\n");
+        u64 size = stack.size - nextP;
+        return alloc(size);
     }
 
     bool owns(const Blk& b) {
@@ -290,6 +382,7 @@ public:
         this->blockSize = max(blockSize, sizeof(void*));
         this->blockCount = b.size / this->blockSize;
         setupBlocks();
+        new(this) BlockAllocator;
     }
 
     void init(Allocator* a, u64 blockSize, u64 blockCount)
@@ -299,6 +392,7 @@ public:
         this->blockCount = blockCount;
         memory = a->alloc(blockCount*this->blockSize);
         setupBlocks();
+        new(this) BlockAllocator;
     }
 
     void shutdown() 
@@ -335,6 +429,19 @@ public:
     bool owns(const Blk& b){
         return inside(toInterval(b), toInterval(memory));
     }
+
+    // Returns the number of allocations
+    int count() 
+    {
+        // Count number of free blocks
+        int freeCount = 0;
+        void* it = head;
+        while (it != nullptr) {
+            it = getNextBlock(it);
+            freeCount++;
+        }
+        return (int) (blockCount - freeCount);
+    }
 };
 
 struct ListAllocNode
@@ -342,6 +449,11 @@ struct ListAllocNode
     ListAllocNode* next;
     Blk memory;
 };
+
+// Used in list allocator printing
+int readablePtr(void* p) {
+    return (int)((u64)p % (2<<16));
+}
 
 class ListAllocator : public Allocator
 {
@@ -364,12 +476,14 @@ public:
         this->parent = parent;
         memory = parent->alloc(size);
         resetHead();
+        new(this) ListAllocator;
     }
 
     void init(const Blk& b) {
         parent = nullptr;
         memory = b;
         resetHead();
+        new(this) ListAllocator;
     }
 
     void shutdown() {
@@ -435,18 +549,18 @@ public:
     }
 
     void debugPrintNode(ListAllocNode* n) {
-        loggf("\t Data: %d\t size: %ld\n", easyPtr(n->memory.data), n->memory.size);
+        loggf("\t Data: %d\t size: %ld\n", readablePtr(n->memory.data), n->memory.size);
     }
 
     void print() {
         logg("Printing list alloc:\n");
         ListAllocNode* it = getHead();
-        loggf("\tMemory start: %d\n", easyPtr(memory.data));
+        loggf("\tMemory start: %d\n", readablePtr(memory.data));
         while (it != nullptr) {
             debugPrintNode(it);
             it = it->next;
         }
-        loggf("\tEnd: %d\n", easyPtr(blkEnd(memory)));
+        loggf("\tMemory End: %d\n", readablePtr(blkEnd(memory)));
     }
 
     void dealloc(const Blk& b) 
@@ -477,7 +591,18 @@ public:
         invalid_path("Dealloc of list did not find allocation");
     }
 
-    bool owns(const Blk& b) {
+    int count() {
+        ListAllocNode* n = getHead();
+        int c = 0;
+        while (n != nullptr) {
+            c++;
+            n = n->next;
+        }
+        return c - 1; // Because head always exists in current impl
+    }
+
+    bool existsInList(const Blk& b) 
+    {
         ListAllocNode* n = getHead();
         while (n != nullptr) 
         {
@@ -488,6 +613,14 @@ public:
         }
 
         return false;
+    }
+
+    bool owns(const Blk& b) {
+        // Owns should be simplified to this for performance reasons
+        //return inside(toInterval(b), toInterval(memory));
+        
+        // But for debugging savety, we will use this instead:
+        return existsInList(b);
     }
 };
 

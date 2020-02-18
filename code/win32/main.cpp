@@ -426,6 +426,18 @@ void setGameFunctionPtrs()
         glGetStringi,
         wglSwapIntervalExt,
         wglGetExtensionsStringARB,
+        glGenerateMipmap,
+        glActiveTexture,
+        glGenFramebuffers,
+        glBindFramebuffer,
+        glDeleteFramebuffers,
+        glCheckFramebufferStatus,
+        glFramebufferTexture2D,
+        glFramebufferRenderbuffer,
+        glGenRenderbuffers,
+        glDeleteRenderbuffers,
+        glBindRenderbuffer,
+        glRenderbufferStorage
     };
 
     gameLoadFunctionPtrs(functionPtrs);
@@ -468,12 +480,6 @@ void loadGameFunctions()
         setToFallback();
         return;
     }
-}
-
-void initDynamicLoading() 
-{
-    setToFallback();
-    loadGameFunctions();
 }
 
 void renderToWindow(HDC deviceContext, BITMAPINFO* bitmapInfo, VideoData* videoData) 
@@ -894,6 +900,7 @@ bool createWindowWithOpenGL()
 
 void onGameDllChanged(const char* filename, void* userData) {
     gameBeforeReset(&gameState);
+    //printFileListenerCount();
     loadGameFunctions();
     setGameFunctionPtrs();
     gameAfterReset(&gameState);
@@ -919,8 +926,9 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
 
     // Initialize GameState
     {
-        Memory* mem = &gameState.memory; mem->size = 1024L * 1024L * 4L;
-        loggf("Memory size: %lld\n", mem->size);
+        Memory* mem = &gameState.memory; 
+        mem->size = 1024L * 1024L * 1024L * 1L; // 1 GB
+        loggf("Memory size: %lld\n", mem->size); 
         mem->memory = (byte*) VirtualAlloc(NULL, mem->size, MEM_COMMIT, PAGE_READWRITE);
         if (mem->memory == NULL) {
             loggf("VirtualAlloc failed: null returend\n");
@@ -943,12 +951,10 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     logg("--- PROGRAM START ---\n");
     logg("---------------------\n");
     //CHECK_VALID(initRenderer(&sysAlloc), "Error initializing renderer\n");
-    
-    // Init dynamic loading
-    ListenerToken dllListener = createFileListener("build\\game_tmp.dll", &onGameDllChanged, nullptr);
-    initDynamicLoading();
 
-    // Initialize Game
+    // Initialize Game + Dynamic Loading
+    ListenerToken dllListener = createFileListener("build\\game_tmp.dll", &onGameDllChanged, nullptr);
+    loadGameFunctions();
     setGameFunctionPtrs();
     gameInit(&gameState);
 
@@ -1063,13 +1069,14 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
             RECT window;
             GetWindowRect(hwnd, &window);
             POINT p;
-            p.x = window.left + window.right/2;
-            p.y = window.top + window.bottom/2;
-            ClientToScreen(hwnd, &p);
+            p.x = (window.left + window.right)/2;
+            p.y = (window.top + window.bottom)/2;
+            
             POINT oldPos;
             GetCursorPos(&oldPos);
             gameState.input.deltaX += oldPos.x - p.x;
             gameState.input.deltaY += oldPos.y - p.y;
+            
             SetCursorPos(p.x, p.y);
         }
 
@@ -1102,6 +1109,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     gameShutdown(&gameState);
 
     debugPrint("Program exit\n");
+    //sleepFor(1);
     debugWaitForConsoleInput();
 
     return 0;

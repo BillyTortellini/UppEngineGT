@@ -174,14 +174,14 @@ mat4 lookInDir(const vec3& pos, const vec3& dir, const vec3& up)
 {
     mat4 view;
 
-    vec3 d = normalizeSafe(dir);
+    vec3 d = normalizeSafe(-dir);
     vec3 u = normalizeSafe(up);
-    vec3 r = normalizeSafe(cross(d, u));
+    vec3 r = normalizeSafe(cross(u, d));
+    u = cross(d, r);
 
-    u = cross(r, d);
     view = mat4(transpose(mat3(r, u, d)));
-    view = view * translate(pos);
-    
+    view = view * translate(-pos);
+
     return view;
 }
 

@@ -26,7 +26,7 @@ void init(ArcBallController* c, Camera3D* cam, float sensitivity, float wheelSen
 void update(ArcBallController* c, Input* input) 
 {
     // Update sphereCoords
-    c->sphereCoords += vec2(input->deltaX, input->deltaY) * c->sensitivity;
+    c->sphereCoords -= vec2(input->deltaX, input->deltaY) * c->sensitivity;
     c->sphereCoords = sphericalNorm(c->sphereCoords);
     c->cam->dir = sp2eu(c->sphereCoords);
 
@@ -35,16 +35,16 @@ void update(ArcBallController* c, Input* input)
     view = transpose(view);
     vec3 moveDir(0);
     if (input->keyDown[KEY_W]) {
-        moveDir += vec3(0.0f, 0.0f, 1.0f);
-    }
-    if (input->keyDown[KEY_A]) {
-        moveDir += vec3(1.0f, 0.0f, 0.0f);
-    }
-    if (input->keyDown[KEY_S]) {
         moveDir += vec3(0.0f, 0.0f, -1.0f);
     }
-    if (input->keyDown[KEY_D]) {
+    if (input->keyDown[KEY_A]) {
         moveDir += vec3(-1.0f, 0.0f, 0.0f);
+    }
+    if (input->keyDown[KEY_S]) {
+        moveDir += vec3(0.0f, 0.0f, 1.0f);
+    }
+    if (input->keyDown[KEY_D]) {
+        moveDir += vec3(1.0f, 0.0f, 0.0f);
     }
     float speed = 3.0f;
     if (input->keyDown[KEY_SHIFT]) {

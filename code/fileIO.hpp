@@ -41,6 +41,28 @@ char* load_text_file_tmp(const char* filepath)
     return text;
 }
 
+Blk load_file_tmp(const char* filepath)
+{
+    FILE* file = fopen(filepath, "rb");
+    assert(file != NULL, "File %s could not be opnened!\n", filepath);
+    SCOPE_EXIT(fclose(file));
+
+    // Get File size
+    fseek(file, 0, SEEK_END); 
+    u64 fileSize =  ftell(file);
+    fseek(file, 0, SEEK_SET); // Put cursor back to start of file
+    
+    // Alloc Memory
+    Blk tmpMem = tmpAlloc.alloc(fileSize);
+    tmpMem.size = fileSize;
+
+    // Read 
+    u64 readSize = (u64) fread(tmpMem.data, 1, fileSize, file); 
+    assert(readSize == fileSize, "fread failed, it returned %d size instead of %d fileSize\n", readSize, fileSize);
+
+    return tmpMem;
+}
+
 // Allocates memory for the whole file, then reads the file into the specified memory area
 void load_file(const char* filepath, const Blk& memory) 
 {
