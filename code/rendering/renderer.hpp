@@ -315,6 +315,15 @@ struct AttribLoc
     GLuint location;
 };
 
+struct UniformInfo
+{
+    GLint location;
+    char* name;
+    GLenum type;
+    GLint size;
+    Blk nameBlk;
+};
+
 struct ShaderProgram
 {
     int id;
@@ -322,6 +331,10 @@ struct ShaderProgram
     int tokenCount;
     ListenerToken tokens[MAX_SHADER_COUNT];
     const char* filenames[MAX_SHADER_COUNT];
+    // Uniform infos
+    int uniformCount;
+    UniformInfo* uniformInfos;
+    Blk uniformInfosBlk;
     // Auto uniform 
     int perModelCount;
     int perFrameCount;
@@ -397,52 +410,88 @@ void detectAutoUniforms(ShaderProgram* program)
     program->perModelCount = 0;
 
     // Loop over all uniforms
-    int uniformCount;
-    glGetProgramiv(program->id, GL_ACTIVE_UNIFORMS, &uniformCount);
-    for (int i = 0; i < uniformCount; i++) 
+    for (int i = 0; i < program->uniformCount; i++) 
     {
-        char uniformName[256];
-        GLint size;
-        GLenum type;
-        glGetActiveUniform(program->id, (GLuint) i, 256, NULL, &size, &type, (GLchar*) uniformName);
-
-        if (size != 1) {
+        UniformInfo* info = &program->uniformInfos[i];
+        if (info->size != 1) {
             continue;
         }
 
-        GLint uniformLocation = glGetUniformLocation(program->id, uniformName);
-        assert(uniformLocation != -1, "glGetUniformLocation failed with string: %s\n", uniformName);
-
+        TmpStr lowerName = info->name;
         // Set uniform name to all lower charcters
-        toLower(uniformName);
+        toLower((char*) lowerName);
 
         // Loop over all supported uniforms and check if they match
-        int supportedCount = sizeof(supportedAutoUniforms)/sizeof(SupportedAutoUniform);
+        int supportedCount = 
+            sizeof(supportedAutoUniforms)/sizeof(SupportedAutoUniform);
         for (int j = 0; j < supportedCount; j++)
         { 
             SupportedAutoUniform& sup = supportedAutoUniforms[j];
-            if (strcmp(sup.name, uniformName) == 0 && sup.glType == type)
+            if (strcmp(sup.name, lowerName.c_str()) == 0 && 
+                sup.glType == info->type)
             {
                 AutoUniform* uniform;
                 if (sup.perFrame) {
-                    assert(program->perFrameCount + 1 < AutoUniformType::COUNT, "Max per frame autouniforms reached\n");
+                    assert(program->perFrameCount + 1 < AutoUniformType::COUNT, 
+                            "Max per frame autouniforms reached\n");
                     uniform = program->perFrameUniforms + program->perFrameCount;
                     program->perFrameCount++;
                 }
                 else {
-                    assert(program->perModelCount + 1 < AutoUniformType::COUNT, "Max per model autouniforms reached\n");
+                    assert(program->perModelCount + 1 < AutoUniformType::COUNT, 
+                            "Max per model autouniforms reached\n");
                     uniform = program->perModelUniforms + program->perModelCount;
                     program->perModelCount++;
                 }
 
                 uniform->type = sup.type;
-                uniform->location = uniformLocation;
-                //loggf("AutoUniform found: %s\n", uniformName);
+                uniform->location = info->location;
                 break;
             }
         }
     }
 }
+
+UniformInfo* getUniformInfo(ShaderProgram* p, const char* name)
+{
+    for (int i = 0; i < p->uniformCount; i++)
+    {
+        UniformInfo* info = &p->uniformInfos[i];
+        if (strcmp(info->name, name) == 0) {
+            return info;
+        }
+    }
+
+    return nullptr;
+}
+
+#define GEN_UNIFORM_SETTER(dataType, glType, setter) \
+void setUniform(ShaderProgram* p, const char* name, dataType t) \
+{ \
+    bindVao(p->id); \
+    UniformInfo* info = getUniformInfo(p, name); \
+    if (info == nullptr) { \
+        loggf("Uniform \"%s\" not in shaderprogram\n", name); \
+        return; \
+    } \
+    if (info->type != glType) { \
+        loggf("Uniform \"%s\" type did not match\n", name); \
+        return; \
+    } \
+    setter; \
+}
+
+GEN_UNIFORM_SETTER(int, GL_INT, glUniform1i(info->location, t));
+GEN_UNIFORM_SETTER(u32, GL_UNSIGNED_INT, glUniform1ui(info->location, t));
+GEN_UNIFORM_SETTER(float, GL_FLOAT, glUniform1f(info->location, t));
+GEN_UNIFORM_SETTER(const vec2&, GL_FLOAT_VEC2, glUniform2fv(info->location, 1, (GLfloat*) &t));
+GEN_UNIFORM_SETTER(const vec3&, GL_FLOAT_VEC3, glUniform3fv(info->location, 1, (GLfloat*) &t));
+GEN_UNIFORM_SETTER(const vec4&, GL_FLOAT_VEC4, glUniform4fv(info->location, 1, (GLfloat*) &t));
+GEN_UNIFORM_SETTER(const mat2&, GL_FLOAT_MAT2, glUniformMatrix2fv(info->location, 1, GL_FALSE, (GLfloat*) &t));
+GEN_UNIFORM_SETTER(const mat3&, GL_FLOAT_MAT3, glUniformMatrix3fv(info->location, 1, GL_FALSE, (GLfloat*) &t));
+GEN_UNIFORM_SETTER(const mat4&, GL_FLOAT_MAT4, glUniformMatrix4fv(info->location, 1, GL_FALSE, (GLfloat*) &t));
+
+#undef GEN_UNIFORM_SETTER
 
 struct MeshAttribName
 {
@@ -625,6 +674,43 @@ void prepare(ShaderProgram* program, const Transform& transform)
     }
 }
 
+void loadUniformInfos(ShaderProgram* p)
+{
+    if (p->id == 0) {
+        return;
+    }
+
+    // Get uniform count
+    glGetProgramiv(p->id, GL_ACTIVE_UNIFORMS, &p->uniformCount);
+    if (p->uniformCount == 0) {
+        return;
+    }
+
+    // Alloc uniformInfo array
+    p->uniformInfosBlk = 
+        renderAlloc->alloc(sizeof(UniformInfo) * p->uniformCount);
+    p->uniformInfos = (UniformInfo*) p->uniformInfosBlk;
+    memset(p->uniformInfos, 0, sizeof(UniformInfo) * p->uniformCount);
+
+    // Loop over all uniforms
+    for (int i = 0; i < p->uniformCount; i++) 
+    {
+        UniformInfo* info = &p->uniformInfos[i];
+        char nameBuffer[256];
+        glGetActiveUniform(p->id, (GLuint) i, 256, NULL, 
+                &info->size, &info->type, (GLchar*) nameBuffer);
+
+        info->location = glGetUniformLocation(p->id, nameBuffer);
+        assert(info->location != -1, 
+                "glGetUniformLocation failed with string: %s\n", nameBuffer);
+
+        // Copy uniform name
+        info->nameBlk = renderAlloc->alloc(strlen(nameBuffer)+1);
+        info->name = (char*) info->nameBlk;
+        strcpy(info->name, nameBuffer);
+    }
+}
+
 void onShaderFileChanged(const char* filename, void* shaderProgram)
 {
     ShaderProgram* p = (ShaderProgram*) shaderProgram;
@@ -634,6 +720,11 @@ void onShaderFileChanged(const char* filename, void* shaderProgram)
 
     glDeleteProgram(p->id);
     p->id = createShaderProgram(p->tokenCount, p->filenames);
+    if (p->id == 0) {
+        return;
+    }
+
+    loadUniformInfos(p);
     detectAutoUniforms(p);
     detectShaderAttribs(p);
 }
@@ -644,6 +735,7 @@ bool init(ShaderProgram* p, int fileCount, const char** filenames)
 
     p->lastUpdateFrame = currentFrame-1;
     p->id = createShaderProgram(fileCount, filenames);
+
     // Add file listeners
     for (int i = 0; i < fileCount; i++) {
         p->filenames[i] = filenames[i];
@@ -655,6 +747,17 @@ bool init(ShaderProgram* p, int fileCount, const char** filenames)
     }
     p->tokenCount = fileCount;
 
+    // Set counts to zero for safety
+    p->uniformCount = 0;
+    p->perModelCount = 0;
+    p->perFrameCount = 0;
+    p->attribLocCount = 0;
+
+    if (p->id == 0) {
+        return false;
+    }
+
+    loadUniformInfos(p);
     detectAutoUniforms(p);
     detectShaderAttribs(p);
 
@@ -663,10 +766,18 @@ bool init(ShaderProgram* p, int fileCount, const char** filenames)
 
 void shutdown(ShaderProgram* p)
 {
-    glDeleteProgram(p->id);
+    if (p->id != 0) {
+        glDeleteProgram(p->id);
+    }
+    // Remove file listeners
     for (int i = 0; i < p->tokenCount; i++) {
         deleteFileListener(p->tokens[i]);
     }
+    // Dealloc uniform infos
+    for (int i = 0; i < p->uniformCount; i++) {
+        renderAlloc->dealloc(p->uniformInfos[i].nameBlk);
+    }
+    renderAlloc->dealloc(p->uniformInfosBlk);
 }
 
 bool init(ShaderProgram* p, std::initializer_list<const char*> filenames)

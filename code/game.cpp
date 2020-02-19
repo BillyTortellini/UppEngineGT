@@ -53,6 +53,7 @@ struct GameData
     // Game variables
     Mesh cubeMesh;
     Mesh planeMesh;
+    Mesh plane2DMesh;
     ArcBallController controller;
     Camera3D camera;
 };
@@ -167,6 +168,7 @@ void gameInit()
     // Create mesh
     createCubeMesh(&gameData->cubeMesh);
     createPlaneMesh(&gameData->planeMesh);
+    createPlane2DMesh(&gameData->plane2DMesh);
 
     // Create/set camera and controller
     init(&gameData->camera);
@@ -180,16 +182,16 @@ void gameShutdown()
     gameBeforeReset();
 }
 
-void setUniform(ShaderProgram* p, const char* name, int val) 
-{
-    GLint loc = glGetUniformLocation(p->id, name);
-    if (loc == -1) {
-        loggf("Uniform %s not found\n", name);
-        return;
-    }
-
-    glUniform1i(loc, val);
-}
+//void setUniform(ShaderProgram* p, const char* name, int val) 
+//{
+//    GLint loc = glGetUniformLocation(p->id, name);
+//    if (loc == -1) {
+//        loggf("Uniform %s not found\n", name);
+//        return;
+//    }
+//
+//    glUniform1i(loc, val);
+//}
 
 void gameTick() 
 {
@@ -225,7 +227,7 @@ void gameTick()
     draw(&skyShader, &gameData->cubeMesh, Transform(vec3(0)));
     prepare(&imageShader, &gameData->planeMesh, Transform(vec3(0)));
     GLint loc = bind(&testTexture);
-    setUniform(&imageShader, "image", loc);
+    //setUniform(&imageShader, "image", loc);
     draw(&gameData->planeMesh);
 
     draw(&colorShader, &gameData->cubeMesh, Transform(vec3(3.0f)));
