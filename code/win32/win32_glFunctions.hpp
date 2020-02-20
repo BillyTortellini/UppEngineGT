@@ -22,7 +22,7 @@ void* getAnyGLFuncAddress(const char* name)
     return p;
 }
 
-void printAllExtensions()
+void printAllExtensions(HDC deviceContext)
 { 
     GLint extCount; 
     glGetIntegerv(GL_NUM_EXTENSIONS, &extCount);
@@ -34,30 +34,21 @@ void printAllExtensions()
 
     }
     loggf("\n");
-    //const char* wglExtensions = (const char*) wglGetExtensionsStringARB();
-    //debugPrintf("WGL Extensions:\n------------------%s\n----------------------\n", wglExtensions);
+
+    const char* wglExtensions = (const char*) wglGetExtensionsStringARB(deviceContext);
+    loggf("WGL Extensions:\n------------------%s\n----------------------\n", wglExtensions);
 }
 
 extern HDC deviceContext;
 bool loadExtensions()
 {
-    wglSwapIntervalExt = (PFNWGLSWAPINTERVALEXTPROC) getAnyGLFuncAddress("wglSwapIntervalEXT");
     bool success = true;
-    success = success && 
-        (wglSwapIntervalExt != NULL);
 
-    if (wglGetExtensionsStringARB == NULL)
-    {
-        wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC) wglGetProcAddress("wglGetExtensionsStringARB");
-        if (wglGetExtensionsStringARB == NULL) {
-            logg("wglGetExtensionsStringARB not supported!\n");
-        }
-        else 
-        {
-            //char* string = (char*) wglGetExtensionsStringARB(deviceContext);
-            //loggf("WGL extensions: \n%s\n", string);
-        }
-    }
+    wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC) getAnyGLFuncAddress("wglSwapIntervalEXT");
+    wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC) wglGetProcAddress("wglGetExtensionsStringARB");
+    success = success && 
+        (wglSwapIntervalEXT != NULL) &&
+        (wglGetExtensionsStringARB != NULL);
 
     return success;
 }
@@ -220,7 +211,7 @@ bool loadAllFunctions()
         (glBindRenderbuffer != NULL) &&
         (glRenderbufferStorage != NULL);
 
-    //printAllExtensions();
+    // Load extensions
     success = success && loadExtensions();
 
     return success;

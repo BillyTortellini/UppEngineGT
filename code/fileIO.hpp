@@ -84,4 +84,11 @@ void load_file(const char* filepath, const Blk& memory)
     return;
 }
 
+bool file_exists(const char* filepath) {
+    FILE* file = fopen(filepath, "r");
+    if (file == nullptr) return false;
+    fclose(file);
+    return true;
+}
+
 #endif

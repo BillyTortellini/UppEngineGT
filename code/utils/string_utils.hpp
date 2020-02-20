@@ -1,5 +1,5 @@
-#ifndef __STRING_HPP__
-#define __STRING_HPP__
+#ifndef __STRING_UTILS_HPP__
+#define __STRING_UTILS_HPP__
 
 #include <ctype.h> // for tolower
 #include "tmpAlloc.hpp"
@@ -55,6 +55,14 @@ public:
         checkpoint = tmpAlloc.createCheckpoint();
         this->str = (char*) tmpAlloc.alloc(length+1);
         memcpy(this->str, str, length+1);
+    }
+
+    TmpStr(int length) {
+        assert(length > 0, "TmpStr called with length <= 0\n");
+        this->length = length;
+        checkpoint = tmpAlloc.createCheckpoint();
+        this->str = (char*) tmpAlloc.alloc(length+1);
+        this->str[0] = '\0';
     }
 
     ~TmpStr() {

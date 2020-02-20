@@ -23,8 +23,9 @@ void init(ArcBallController* c, Camera3D* cam, float sensitivity, float wheelSen
     c->wheelSensitivity = wheelSensitivity;
 }
 
-void update(ArcBallController* c, Input* input) 
+void update(ArcBallController* c, GameState* state) 
 {
+    Input* input = &state->input;
     // Update sphereCoords
     c->sphereCoords -= vec2(input->deltaX, input->deltaY) * c->sensitivity;
     c->sphereCoords = sphericalNorm(c->sphereCoords);
@@ -50,7 +51,7 @@ void update(ArcBallController* c, Input* input)
     if (input->keyDown[KEY_SHIFT]) {
         speed = 6.0f;
     }
-    moveDir = view * moveDir * speed * (float)gameState->time.tslf; // Test if works
+    moveDir = view * moveDir * speed * (float)state->time.tslf; // Test if works
     c->pos += moveDir;
 
     // Update distance

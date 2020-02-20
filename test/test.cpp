@@ -51,26 +51,16 @@ namespace MeshAttrib
 
 int main(int argc, char** argv)
 {
-    {
-        //SCOPE_EXIT(cout << "Hello" << endl;);
-        //SCOPE_EXIT(cout << "something" << endl;);
-        //cout << "Before scope exit" << endl;
-    }
-
-    {
-        using namespace tst;
-    }
-    MeshAttrib::POS3
-
-    cout << "worked" << endl;
-
-    //Blk b(new char[256], 256);
-    //char* test = (char*)b;
-    //cout << "b.data:\t" << b.data << endl << "test:\t" << (void*)test << endl;
+    //int arr[] = {1, 2, 4, 5, 6};    
+    //for (int& i : arr) {
+    //    cout << i << endl;
+    //    i = 5;
+    //}
+    //cout << endl << "NEW: " << endl;
+    //for (int& i : arr) {
+    //    cout << i << endl;
+    //}
 
     cin.ignore();
-
-
-
     return 0;
 }

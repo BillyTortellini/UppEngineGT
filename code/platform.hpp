@@ -3,21 +3,15 @@
 
 #include "uppLib.hpp"
 
-// Defines
-#define NUM_KEYS 256
-#define NUM_MOUSE_KEYS 3
-
 // Things that need to be defined in the platformSpecifics.hpp
 struct Pixel; // Has to contain bytes r, g, b and a. Is defined by the platform
 #ifndef DECLARE_EXPORT
-#define DECLARE_EXPORT errorerrorerror
+#error "Macro DeclareExport was not defined"
 #endif
 
-struct Memory
-{
-    byte* memory;
-    uint64 size;
-};
+// Defines
+#define NUM_KEYS 256
+#define NUM_MOUSE_KEYS 3
 
 struct Input
 {
@@ -32,28 +26,35 @@ struct Input
 
 struct WindowState
 {
-    int width, height;
+    // These variables have no effect when being set
+    // They also will be reset every frame
+    bool wasResized; 
+    bool wasMoved; 
+    bool wasMinimized;
+
+    // These variables can be set
     bool fullscreen;
-    bool minimized;
     bool quit;
-    int fps;
     bool hideCursor;
-    bool continuousDraw; // If true, the window will try to display FPS frame per second
-    bool wasResized;
+    bool minimized;
+
+    int width; // Client size
+    int height; // Client size
+    int x, y;
 };
 
-struct VideoData
+struct RenderOptions
 {
-    Pixel* pixels;
-    int width;
-    int height;
+    int fps; // How often gameTick should be called
+    bool vsync; 
+    bool continuousDraw; // If true, SwapBuffers will be called after 
+    bool redraw; // If continousDraw is false, window will only be refreshed after redraw is set to true
 };
 
 struct Time
 {
     double now; // In seconds since game start
     double tslf; // In seconds
-    double lastGameTick;
 };
 
 struct SoundInfo
@@ -64,30 +65,14 @@ struct SoundInfo
     int sampleDelay;
 };
 
-typedef void (*lockSoundFunc)();
-typedef void (*unlockSoundFunc)();
-typedef uint32 (*getFileSizeFunc)(const char* filename);
-typedef void (*loadFileFunc)(byte* memory, u64* size);
-typedef void (*debugPrintFunc)(const char* str);
-
-struct Services
-{
-    lockSoundFunc lockSound; 
-    unlockSoundFunc unlockSound;
-    getFileSizeFunc getFileSize;
-    loadFileFunc loadFile;
-    debugPrintFunc debugPrint;
-};
-
 struct GameState
 {
-    Memory memory;
+    Blk memory;
     Input input;
     Time time;
-    VideoData videoData;
+    RenderOptions renderOptions;
     SoundInfo soundInfo;
     WindowState windowState;
-    Services services;
 };
 
 typedef void (*gameInitFunc)(GameState* state); // Gets called once at program startup

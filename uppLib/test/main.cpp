@@ -247,11 +247,96 @@ void test_allocators()
     logg("\n");
 }
 
+void test_datastructures() 
+{
+    SystemAllocator sa;
+    sa.init();
+    PrintAllocator<SystemAllocator> printAlloc;
+    printAlloc.init(&sa);
+    
+    DynArr<int> arr;
+    arr.init(&printAlloc, 2);
+    SCOPE_EXIT(arr.shutdown());
+    
+    arr[0] = 15;
+    arr[1] = 17;
+    arr[2] = 1;
+    arr[3] = -15;
+    arr[4] = 6;
+
+    loggf("count: %d\n", arr.size());
+    arr.swap_remove(0);
+    loggf("After remove arr[0]: %d, count: %d\n", arr[0], arr.size());
+
+    for(auto& i : arr) {
+        loggf("i: %d\n", i);
+    }
+
+    logg("\n Sort test:\n");
+    auto intCmp = [](int* a, int*b) {
+        if (*a < *b) return -1;
+        if (*a == *b) return 0;
+        return 1;
+    };
+    arr.sort(intCmp);
+    for(int& i : arr) {
+        loggf("i: %d\n", i);
+    }
+
+    arr.reset();
+    logg("\nAfter reset:\n");
+    for(int& i : arr) {
+        loggf("i: %d\n", i);
+    }
+
+    arr.shutdown();
+
+    logg("\nTest with init to 0!\n");
+    arr.init(&printAlloc, 0);
+    arr[0] = 1;
+    arr.push_back(-5);
+    arr.push_back(-6);
+    arr.push_back(-7);
+    arr.push_back(-8);
+    arr.sort(intCmp);
+    for(int& i : arr) {
+        loggf("i: %d\n", i);
+    }
+
+    loggf("BIG TEST\n");
+    DynArr<int> zero;
+    zero.init(&printAlloc, 0);
+    zero.shutdown();
+}
+
+void test_strings()
+{
+    SystemAllocator sa;
+    sa.init();
+    PrintAllocator<SystemAllocator> pa;
+    pa.init(&sa);
+
+    String str;
+    str.init(&pa, "Hello");
+    SCOPE_EXIT(str.shutdown(););
+    str.cat("asdf");
+    loggf("str = \"%s\", size: %d\n", str.c_str(), str.size());
+
+    loggf("\nCheck if string works in arr\n");
+    DynArr<String> arr;
+    arr.init(&pa, 8);
+    SCOPE_EXIT(arr.shutdown(););
+
+    arr[0] = str;
+}
+
 int main(int argc, char** argv)
 {
     //test_scopedExit();
     //test_debug_tools();
-    test_allocators();
+    //test_allocators();
+    test_datastructures();
+    //test_strings();
 
     return 0;
 }

@@ -12,6 +12,7 @@
 // INCLUDES
 #include "../fileListener.hpp"
 #include "../utils/tmpAlloc.hpp"
+#include "../fileIO.hpp"
 #include <cstdlib>
 
 // MAKROS
@@ -45,10 +46,11 @@ struct FileListenerTracker
 FileListenerTracker tracker;
 Allocator* listenerAlloc;
 
-void printFileListenerCount() {
+void printFileListeners() 
+{
     loggf("FileListenerCount: %d\n", tracker.count);
     for (int i = 0; i < tracker.count; i++) {
-        loggf("\t#%d: %s", i, tracker.listeners[i].filename);
+        loggf("\t#%d: %s, path: %s\n", i, tracker.listeners[i].filename, tracker.listeners[i].dir);
     }
 }
 
@@ -88,6 +90,10 @@ ListenerToken createFileListener(
         loggf("Create file listener max listener reached!\n");
         return INVALID_TOKEN; 
     }
+
+    // Check if file exists
+    assert(file_exists(path), 
+            "CreateListener called with non existing file %s\n", path);
 
     // Extract directory and filename from path 
     char filename[512];
@@ -270,7 +276,7 @@ void checkFilesChanged()
     {
         FileListener* listener = &(tracker.listeners[i]);
         if (checkFileChanged(listener)) {
-            //loggf("Calling callback of file: %s\n", listener->filename);
+            loggf("Calling callback of file: %s\n", listener->filename);
             listener->callback(listener->filename, listener->userData);
         }
     }

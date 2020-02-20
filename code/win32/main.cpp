@@ -21,44 +21,72 @@
 #include "../utils/tmpAlloc.hpp"
 #include "win32_fileListener.cpp"
 
-// GLOBALS
+// ---------------
+// --- GLOBALS ---
+// ---------------
 GameState gameState = {};
 
-// Rendering
-HDC deviceContext;
-BITMAPINFO bitmapInfo;
-WindowState actualWinState;
+// WindowState
+struct ActualWinState
+{
+    int width;
+    int height;
+    int x;
+    int y;
+    bool fullscreen;
+    bool minimized;
+    bool hideCursor;
 
-// Window State
-RECT savedWindowPos;
-HWND hwnd = NULL;
+    int fps;
+    bool vsync;
+    int continuousDraw;
+    bool redraw;
 
-// Input
-byte keyTranslationTable[NUM_KEYS];
+    RECT savedWindowRect;
+    LONG savedWindowStyle;
+    LONG savedWindowStyleEx;
+};
+ActualWinState actualWinState;
 
-// Timing
-int64 performanceFrequency;
 
-// Debug printing
-HANDLE consoleOutHandle;
-HANDLE consoleInHandle;
 
-// Prototypes
-void resizeVideoBuffer();
-void initKeyTranslationTable();
 
-void debugPrint(const char* str) {
-    DWORD out;
-    WriteConsole(consoleOutHandle, str, (DWORD)strlen(str), &out, NULL);
-}
-
-void win32_invalid_path(const char* str) {
+// -----------------------
+// --- DEBUG FUNCTIONS ---
+// -----------------------
+void win32_invalid_path(const char* str) 
+{
     MessageBox(NULL, str, "INVALID_PATH", MB_OK);
     __debugbreak();
     exit(EXIT_FAILURE);
 }
 
-void debugRead(char* buffer, uint32 size) {
+HANDLE consoleOutHandle;
+HANDLE consoleInHandle;
+void initDebugConsole() 
+{
+    BOOL success = AllocConsole();
+    if (!success) {
+        win32_invalid_path("AllocConsole failed\n");
+    }
+
+    consoleOutHandle= GetStdHandle(STD_OUTPUT_HANDLE);
+    consoleInHandle = GetStdHandle(STD_INPUT_HANDLE);
+
+    if (consoleOutHandle == INVALID_HANDLE_VALUE || 
+            consoleInHandle == INVALID_HANDLE_VALUE) {
+        win32_invalid_path("GetStdHandle failed\n");
+    }
+}
+
+void debugPrint(const char* str) 
+{
+    DWORD out;
+    WriteConsole(consoleOutHandle, str, (DWORD)strlen(str), &out, NULL);
+}
+
+void debugRead(char* buffer, uint32 size) 
+{
     CONSOLE_READCONSOLE_CONTROL c;
     c.nLength = sizeof(c);
     c.nInitialChars = 0;
@@ -69,25 +97,14 @@ void debugRead(char* buffer, uint32 size) {
     ReadConsole(consoleInHandle, buffer, size, &actuallyRead, &c);
 }
 
-void debugWaitForConsoleInput() {
+void debugWaitForConsoleInput() 
+{
     char buf[256];
     debugRead(buf, sizeof(buf));
 }
 
-bool initDebugConsole() {
-    if (AllocConsole() == NULL) {
-        return false;
-    }
-    consoleOutHandle= GetStdHandle(STD_OUTPUT_HANDLE);
-    consoleInHandle = GetStdHandle(STD_INPUT_HANDLE);
-    if (consoleOutHandle == INVALID_HANDLE_VALUE || 
-            consoleInHandle == INVALID_HANDLE_VALUE) {
-        return false;
-    }
-    return true;
-}
-
-void printLastError() {
+void printLastError() 
+{
     DWORD error = GetLastError();
     char* msgBuffer;
     FormatMessage(
@@ -103,6 +120,12 @@ void printLastError() {
     debugWaitForConsoleInput();
 }
 
+
+
+// ---------------------
+// --- INPUT HANDING ---
+// ---------------------
+byte keyTranslationTable[NUM_KEYS];
 void initKeyTranslationTable() 
 {
     keyTranslationTable['A'] = KEY_A; 
@@ -172,6 +195,7 @@ void initKeyTranslationTable()
     //keyTranslationTable[] = KEY_RALT;
 }
 
+// Gets called once after each gameTick
 void resetInputState() 
 {
     memset(&gameState.input.keyPressed, 0, NUM_KEYS);
@@ -180,6 +204,12 @@ void resetInputState()
     gameState.input.deltaY = 0;
     gameState.input.mouseWheel = 0;
     gameState.windowState.wasResized = false;
+}
+
+void initInput()
+{
+    resetInputState();
+    initKeyTranslationTable();
 }
 
 LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
@@ -201,26 +231,26 @@ LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
         case WM_PAINT: // Some part of the window needs to be repainted
             break;
 
-        // Keyboard input
+            // Keyboard input
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
             {
-            int key = (int)wParam;
-            int repeatCount = lParam & 0xFFFF;
-            if (gameState.input.keyDown[keyTranslationTable[key]] == false &&
-                repeatCount == 1) {
-                gameState.input.keyPressed[keyTranslationTable[key]]++;
-            }
-            gameState.input.keyDown[keyTranslationTable[key]] = true;
-            break;
+                int key = (int)wParam;
+                int repeatCount = lParam & 0xFFFF;
+                if (gameState.input.keyDown[keyTranslationTable[key]] == false &&
+                        repeatCount == 1) {
+                    gameState.input.keyPressed[keyTranslationTable[key]]++;
+                }
+                gameState.input.keyDown[keyTranslationTable[key]] = true;
+                break;
             }
 
         case WM_KEYUP:
         case WM_SYSKEYUP:
             {
-            int key = (int)wParam;
-            gameState.input.keyDown[keyTranslationTable[key]] = false;
-            break;
+                int key = (int)wParam;
+                gameState.input.keyDown[keyTranslationTable[key]] = false;
+                break;
             }
 
             // Mouse Input
@@ -264,69 +294,47 @@ LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
 
         case WM_SIZE:
             {
+                // Set new parameters
                 if (wParam == SIZE_MINIMIZED) {
                     actualWinState.minimized = true;
                     gameState.windowState.minimized = true;
+                    // Indicate change
+                    gameState.windowState.wasMinimized = true;
                     return 0;
                 }
-                RECT r;
-                GetClientRect(hwnd, &r);
-                if (actualWinState.width != r.right ||
-                        actualWinState.height != r.bottom)  
-                {
-                    actualWinState.minimized = false;
-                    gameState.windowState.minimized = false;
-                    actualWinState.width = r.right;
-                    actualWinState.height = r.bottom;
-                    gameState.windowState.width = r.right;
-                    gameState.windowState.height = r.bottom;
-                    gameState.windowState.wasResized = true;
-                    resizeVideoBuffer();
-                }
+                actualWinState.width = LOWORD(lParam); // Is in client area
+                actualWinState.height = HIWORD(lParam); // Is in client area
+                actualWinState.minimized = false;
+                gameState.windowState.width = actualWinState.width;
+                gameState.windowState.height = actualWinState.height;
+                gameState.windowState.minimized = false;
+
+                // Indicate change
+                gameState.windowState.wasResized = true;
+
                 return 0;
             }
+        case WM_MOVE:
+            actualWinState.x = (i16)LOWORD(lParam);
+            actualWinState.y = (i16)HIWORD(lParam);
+            gameState.windowState.x = actualWinState.x;
+            gameState.windowState.y = actualWinState.y;
+
+            // Indicate change
+            if (!actualWinState.minimized) {
+                gameState.windowState.wasMoved = true;
+            }
+            return 0;
     }
 
     return DefWindowProc(hwnd, msgType, wParam, lParam);
 }
 
 
-void resizeVideoBuffer() 
-{
-    loggf("ResizeVideoBuffer w/h: %d/%d\n", actualWinState.width, actualWinState.height); 
-    if (actualWinState.width == 0 || actualWinState.height == 0) {
-        return;
-    }
 
-    VideoData* videoData = &gameState.videoData;
-    videoData->width = actualWinState.width;
-    videoData->height = actualWinState.height;
-
-    if (videoData->pixels != nullptr) {
-        // Deallocate memory
-        VirtualFree(videoData->pixels, 0, MEM_RELEASE);
-    }
-
-    // Alloc memory
-    int bytesPerPixel = sizeof(Pixel);
-    int imgSize = bytesPerPixel * videoData->width * videoData->height;
-    videoData->pixels = (Pixel*) VirtualAlloc(NULL, imgSize, MEM_COMMIT, PAGE_READWRITE);
-
-    bitmapInfo.bmiHeader.biSize = sizeof(bitmapInfo);
-    bitmapInfo.bmiHeader.biWidth = videoData->width;
-    bitmapInfo.bmiHeader.biHeight = videoData->height;
-    bitmapInfo.bmiHeader.biPlanes = 1;
-    bitmapInfo.bmiHeader.biBitCount = sizeof(Pixel) * 8;
-    bitmapInfo.bmiHeader.biCompression = BI_RGB;
-    bitmapInfo.bmiHeader.biSizeImage = imgSize;
-    bitmapInfo.bmiHeader.biXPelsPerMeter = 0;
-    bitmapInfo.bmiHeader.biYPelsPerMeter = 0;
-    bitmapInfo.bmiHeader.biClrUsed = 0;
-    bitmapInfo.bmiHeader.biClrImportant = 0;
-
-    memset(videoData->pixels, 0, imgSize);
-}
-
+// ------------------------------
+// --- DYNAMIC GAME RELOADING ---
+// ------------------------------
 gameInitFunc gameInit;
 gameTickFunc gameTick;
 gameShutdownFunc gameShutdown;
@@ -352,7 +360,8 @@ void setToFallback()
 
 void setGameFunctionPtrs()
 {
-    void* functionPtrs[] = {
+    void* functionPtrs[] = 
+    {
         // Debug functions (For uppLib)
         &debugPrint,
         &win32_invalid_path,
@@ -424,7 +433,7 @@ void setGameFunctionPtrs()
         glDeleteBuffers,
         glDeleteVertexArrays,
         glGetStringi,
-        wglSwapIntervalExt,
+        wglSwapIntervalEXT,
         wglGetExtensionsStringARB,
         glGenerateMipmap,
         glActiveTexture,
@@ -447,10 +456,13 @@ HMODULE gameLibrary = NULL;
 void loadGameFunctions()
 {
     loggf("LOAD GAME FUNCTIONS\n");
+
+    // Free current library so dll can be copied
     if (gameLibrary != NULL) {
         FreeLibrary(gameLibrary);
     }
 
+    // Copy the file
     bool res = CopyFile("build\\game_tmp.dll", "build\\game_inUse.dll", FALSE);
     if (!res) {
         loggf("Could not copy file game_tmp.dll\n");
@@ -458,6 +470,7 @@ void loadGameFunctions()
         return;
     }
 
+    // Load library
     gameLibrary = LoadLibrary("build\\game_inUse.dll");
     if (gameLibrary == NULL) {
         loggf("LoadGameFunctions failed: loadlibrary failed\n");
@@ -482,21 +495,30 @@ void loadGameFunctions()
     }
 }
 
-void renderToWindow(HDC deviceContext, BITMAPINFO* bitmapInfo, VideoData* videoData) 
+void onGameDllChanged(const char* filename, void* userData) 
 {
-    int width = videoData->width;
-    int height = videoData->height;
-    StretchDIBits (
-            deviceContext,
-            0, 0, width, height,
-            0, 0, width, height,
-            videoData->pixels, 
-            bitmapInfo,
-            DIB_RGB_COLORS,
-            SRCCOPY);
+    gameBeforeReset(&gameState);
+    loadGameFunctions();
+    setGameFunctionPtrs();
+    gameAfterReset(&gameState);
 }
 
-void initTiming() {
+void initDynamicReloading()
+{
+    ListenerToken dllListener = 
+        createFileListener("build\\game_tmp.dll", &onGameDllChanged, nullptr);
+    loadGameFunctions();
+    setGameFunctionPtrs();
+}
+
+
+
+// --------------
+// --- TIMING ---
+// --------------
+int64 performanceFrequency;
+void initTiming() 
+{
     bool res = QueryPerformanceFrequency((LARGE_INTEGER*) &performanceFrequency);    
     if (!res) {
         printLastError();
@@ -522,7 +544,9 @@ void sleepUntil(double until)
 
     // Calcuate ms for sleep
     int ms = (int)(diff*1000);
-    // To make sure that time is as accurate as possible, we sleep one ms less and do busy waiting
+
+    // To make sure that time is as accurate as possible, 
+    // we sleep one ms less and do busy waiting
     ms -= 1;
 
     if (ms > 0) {
@@ -531,258 +555,146 @@ void sleepUntil(double until)
         timeEndPeriod(1);
     }
 
+    // Busy wait until time actually passed
     do {} while (currentTime() < until);
 }
 
+void sleepFor(double seconds) 
+{
+    double start = currentTime();
+    sleepUntil(start + seconds);
+}
+
+
+// -------------
+// --- AUDIO ---
+// -------------
 void initAudio()
 {
     HMODULE directSoundLib = LoadLibrary("dsound.dll");
     if (directSoundLib)
     {
     }
-    loggf("asdf audio\n");
-    debugWaitForConsoleInput();
+    invalid_path("Audio not implemented yet\n");
 }
 
-void sleepFor(double seconds) {
-    double start = currentTime();
-    sleepUntil(start + seconds);
-}
 
-void debugGameTick() 
+
+// -----------------------
+// --- WINDOW CREATION ---
+// -----------------------
+void createWindowClass(HINSTANCE instance, const char* className)
 {
-    Input& input = gameState.input;
-    if (input.deltaX != 0 ||
-            input.deltaY != 0) {
-        //loggf("Mouse X/Y: %d/%d, delta: %d/%d \n", input.mouseX, input.mouseY, input.deltaX, input.deltaY);
-    }
-    if (gameState.windowState.wasResized) {
-        loggf("GAMETICK: resized to %d/%d\n", gameState.windowState.width, gameState.windowState.height);
-    }
-    if (input.mouseWheel != 0) {
-        loggf("MouseWheel: %f\n", input.mouseWheel);
-    }
-    if (input.keyPressed[KEY_F5]) {
-        bool& d = gameState.windowState.continuousDraw;
-        d = !d;
-        loggf("Continuous draw switched to %s\n", d == true ? "TRUE" : "FALSE");
-    }
-    if (input.keyPressed[KEY_F11]) {
-        bool& f = gameState.windowState.fullscreen;
-        f = !f;
-        loggf("Fullscreen toggled to %s\n", f == true ? "TRUE" : "FALSE");
-    }
-    if (gameState.input.mousePressed[MOUSE_LEFT]) {
-        debugPrint("Mouse Left pressed\n");
-        loggf("MB_RIGHT: %d\n", MOUSE_RIGHT);
-    }
-    if (gameState.input.mousePressed[MOUSE_RIGHT]) {
-        debugPrint("Mouse RIGHT pressed\n");
-    }
-    if (gameState.input.mousePressed[MOUSE_MIDDLE]) {
-        debugPrint("Mouse MIDDLE pressed\n");
-    }
-    if (gameState.input.keyPressed[KEY_ESCAPE]) {
-        gameState.windowState.quit = true;
-    }
-    if (gameState.input.keyPressed[KEY_A]) {
-        debugPrint("A pressed\n");
-    }
-    if (gameState.input.keyPressed[KEY_D]) {
-        debugPrint("D pressed\n");
-    }
-    if (gameState.input.keyPressed[KEY_TAB]) {
-        debugPrint("TAB pressed\n");
-    }
-    gameState.windowState.continuousDraw = true;
-    gameState.windowState.fps = 60;
-}
-
-int windowStyle;
-int windowStyleEX;
-HCURSOR cursor;
-const char* CLASS_NAME = "UppEngineGT";
-HINSTANCE globalInstance;
-bool initWindow()
-{
-    windowStyle = WS_OVERLAPPEDWINDOW;
-    windowStyleEX = WS_EX_OVERLAPPEDWINDOW;
-
-    // Load cursor
-    cursor = LoadCursor(NULL, IDC_ARROW);
-    if (cursor == NULL) {
-        debugPrint("LoadCursor failed\n");
-        printLastError();
-        return false;
-    }
-
+    // Create window class
     WNDCLASS wc = {};
     wc.style = CS_HREDRAW  | CS_VREDRAW | CS_OWNDC;
     wc.lpfnWndProc = &windowProc;
     wc.cbClsExtra = 0;
-    wc.hInstance = globalInstance;
+    wc.hInstance = instance;
     wc.hIcon = NULL;
-    wc.hCursor = NULL;
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = NULL;
     wc.lpszMenuName = NULL;
-    wc.lpszClassName = CLASS_NAME;
+    wc.lpszClassName = className;
 
     if (RegisterClass(&wc) == 0) {
-        debugPrint("Register class failed!\n");
-        return false;
+        invalid_path("RegisterClass failed!\n");
     }
-
-    return true;
 }
 
-#define CHECK_VALID(cond, msg) if (!(cond)) {debugPrint(msg); return false;}
-bool createWindow(bool show)
+HWND createWindow(HINSTANCE instance, bool show, 
+        const char* className, const char* windowName)
 {
-    hwnd = CreateWindowEx(
+    int windowStyle = WS_OVERLAPPEDWINDOW;
+    int windowStyleEX = WS_EX_OVERLAPPEDWINDOW;
+
+    // Create window
+    HWND hwnd = CreateWindowEx(
             windowStyleEX,
-            CLASS_NAME,
-            CLASS_NAME,
+            className,
+            windowName,
             windowStyle,
             CW_USEDEFAULT, CW_USEDEFAULT,
             CW_USEDEFAULT, CW_USEDEFAULT,
             NULL,
             NULL,
-            globalInstance,
+            instance,
             NULL);
-    if (hwnd == NULL) {
-        debugPrint("CreateWindowEX failed!\n");
-        return false;
-    }
 
+    assert(hwnd != NULL, "CreateWindowEX failed\n");
+
+    // Show window if specified
     if (show) {
         ShowWindow(hwnd, SW_SHOW);
-        SetCursor(cursor);
     }
 
-    // Init savedWindowPos for toggling fullscreen
-    GetWindowRect(hwnd, &savedWindowPos);
-
-    // Init winState
-    actualWinState.fullscreen = false;
-    actualWinState.minimized = false;
-    actualWinState.continuousDraw = false;
-    actualWinState.fps = 60;
-    actualWinState.hideCursor = false;
-    WindowState& desiredWinState = gameState.windowState;
-    memcpy(&desiredWinState, &actualWinState, sizeof(WindowState));
-
-    // Initialize Drawing with GDI
-    deviceContext = GetDC(hwnd);
-    CHECK_VALID(deviceContext != 0, "GetDC failed\n");
-
-    resizeVideoBuffer(); // Initializes video memory
-
-    return true;
+    return hwnd;
 }
 
-void destroyWindow()
+HGLRC createDummyContext(HDC deviceContext)
 {
-    if (hwnd != NULL) {
-        DestroyWindow(hwnd);
-        hwnd = NULL;
-    }
-}
-
-PIXELFORMATDESCRIPTOR getDummyDescriptor()
-{
+    // Set pixelFormatDescriptor
     PIXELFORMATDESCRIPTOR pfd;
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 32;
-    pfd.cRedBits = 0;
-    pfd.cRedShift = 0;
-    pfd.cGreenBits = 0;
-    pfd.cGreenShift = 0;
-    pfd.cBlueBits = 0;
-    pfd.cBlueShift = 0;
-    pfd.cAlphaBits = 0;
-    pfd.cAlphaShift = 0;
-    pfd.cAccumBits = 0;
-    pfd.cAccumRedBits = 0; 
-    pfd.cAccumGreenBits = 0;
-    pfd.cAccumBlueBits = 0;
-    pfd.cAccumAlphaBits = 0;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 8;
-    pfd.cAuxBuffers = 0;
-    pfd.iLayerType = 0;
-    pfd.bReserved = 0;
-    pfd.dwLayerMask = 0;
-    pfd.dwVisibleMask = 0;
-    pfd.dwDamageMask = 0;
-    return pfd;
-}
-
-HGLRC glContext;
-bool createDummyContext()
-{
-    PIXELFORMATDESCRIPTOR pfd = getDummyDescriptor();
-    int index = ChoosePixelFormat(deviceContext, &pfd);
-    if (index == NULL) {
-        loggf("ChoosePixelFormat failed\n");
-        printLastError();
-        return false;
+    {
+        pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+        pfd.nVersion = 1;
+        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+        pfd.iPixelType = PFD_TYPE_RGBA;
+        pfd.cColorBits = 32;
+        pfd.cRedBits = 0;
+        pfd.cRedShift = 0;
+        pfd.cGreenBits = 0;
+        pfd.cGreenShift = 0;
+        pfd.cBlueBits = 0;
+        pfd.cBlueShift = 0;
+        pfd.cAlphaBits = 0;
+        pfd.cAlphaShift = 0;
+        pfd.cAccumBits = 0;
+        pfd.cAccumRedBits = 0; 
+        pfd.cAccumGreenBits = 0;
+        pfd.cAccumBlueBits = 0;
+        pfd.cAccumAlphaBits = 0;
+        pfd.cDepthBits = 24;
+        pfd.cStencilBits = 8;
+        pfd.cAuxBuffers = 0;
+        pfd.iLayerType = 0;
+        pfd.bReserved = 0;
+        pfd.dwLayerMask = 0;
+        pfd.dwVisibleMask = 0;
+        pfd.dwDamageMask = 0;
     }
+
+    // Choose pixel format only returns an approximate format
+    int index = ChoosePixelFormat(deviceContext, &pfd);
+    assert(index != NULL, "ChoosePixelFormat failed\n");
 
     // Check if the closest pixel format supports what we need
-    PIXELFORMATDESCRIPTOR available;
-    int ret = DescribePixelFormat(deviceContext, index, sizeof(PIXELFORMATDESCRIPTOR), &available);
-    if (ret == NULL) {
-        loggf("DescribePixelFormat failed\n");
-        printLastError();
-        return false;
-    }
+    {
+        PIXELFORMATDESCRIPTOR available;
+        int ret = DescribePixelFormat(deviceContext, index, 
+                sizeof(PIXELFORMATDESCRIPTOR), &available);
+        assert(ret != NULL, "DescribePixelFormat failed\n");
 
-    // Check if availabe is good enough
-    bool success = true;
-    // PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    success = success && (available.dwFlags | PFD_DRAW_TO_WINDOW); // Opengl, doublebuffer and draw to windos is necessary
-    success = success && (available.dwFlags | PFD_SUPPORT_OPENGL); // Opengl, doublebuffer and draw to windos is necessary
-    success = success && (available.dwFlags | PFD_DOUBLEBUFFER); // Opengl, doublebuffer and draw to windos is necessary
-    success = success && (available.iPixelType == pfd.iPixelType); // RGBA is necessary
-
-    if (!success) {
-        loggf("Available pixelformat does not fullfill the games requirements\n");
-        return false;
+        // Following attributes are required:
+        // PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER
+        // Also pixelType must match (RGBA);
+        bool success = 
+            (available.dwFlags | PFD_DRAW_TO_WINDOW) &&
+            (available.dwFlags | PFD_SUPPORT_OPENGL) &&
+            (available.dwFlags | PFD_DOUBLEBUFFER) &&
+            (available.iPixelType == pfd.iPixelType);
+        assert(success, "Could not get pixelFormat that matches required format\n");
     }
 
     // Set pixel format
-    if (SetPixelFormat(deviceContext, index, &pfd) == FALSE) {
-        loggf("SetPixelFormat failed\n");
-        printLastError();
-        return false;
-    }
+    bool success = SetPixelFormat(deviceContext, index, &pfd);
+    assert(success, "SetPixelFormat failed\n");
 
-    // Create the OpenGL context
-    glContext = wglCreateContext(deviceContext);
-    if (glContext == NULL) {
-        loggf("wglCreateContext failed\n");
-        printLastError();
-        return false;
-    }
+    HGLRC glContext = wglCreateContext(deviceContext);
+    assert(glContext != NULL, "wglCreateContext failed\n");
 
-    if (wglMakeCurrent(deviceContext, glContext) == FALSE) {
-        loggf("wglMakeCurrent failed\n");
-        printLastError();
-        return false;
-    }
-
-    return true;
+    return glContext;
 }
-
-void destroyOpenGLContext()
-{
-    wglMakeCurrent(NULL, NULL);
-    wglDeleteContext(glContext);
-}
-
 
 void customDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, 
         const GLchar* message, const void* userParam)
@@ -825,292 +737,484 @@ void customDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLs
     loggf("\n");
 }
 
-PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
-bool createWindowWithOpenGL()
+void initWindowAndOpenGL(HINSTANCE instance, HWND& hwnd, HDC& deviceContext, HGLRC& glContext)
 {
-    loggf("Init window with OpenGL\n");
+    const char* className = "UppEngineGT";
+    const char* windowName = "UppEngineGT";
+    createWindowClass(instance, className);
 
-    if (!createWindow(false)) {
-        loggf("CreateWindow dummy failed\n");
-        return false;
-    }
+    // Create dummy window for dummy context
+    hwnd = createWindow(instance, false, className, windowName);
 
-    if (!createDummyContext()) {
-        loggf("Create dummy context failed\n");
-        return false;
-    }
+    // Get window device context
+    deviceContext = GetDC(hwnd);
+    assert(deviceContext != 0, "GetDC failed\n");
 
+    // Create dummy context
+    glContext = createDummyContext(deviceContext);
+    BOOL success = wglMakeCurrent(deviceContext, glContext);
+    assert(glContext != NULL, "wglMakeCurrent failed\n");
+
+    // DEBUG START
     loggf("Dummy context creation worked!\n");
     char* version = (char*)glGetString(GL_VERSION);
     loggf("dummy context version: \"%s\"\n", version);
+    // DEBUG END
 
-    wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) getAnyGLFuncAddress("wglCreateContextAttribsARB");
-    if (wglCreateContextAttribsARB == NULL) {
-        loggf("Get andy func failed for createContextAttribs\n");
-        return false;
-    }
+    // Get createContextAttribs function
+    PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
+    wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) 
+        getAnyGLFuncAddress("wglCreateContextAttribsARB");
+    assert(wglCreateContextAttribsARB != NULL, 
+            "Get any function failed for createContextAttribs\n");
 
     // Destroy dummy context
-    destroyOpenGLContext();
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(glContext);
+
+    // TODO
+    // Destroy current hwnd and do pixelformat stuff again
+    // with the better functions from the real context
 
     // Create real context
     int attribs[] = {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 4, // Opengl Version
         WGL_CONTEXT_MINOR_VERSION_ARB, 5,
-        WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-        0
+        WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB, // Core Profile
+        0 // MUST STAY, this is the end marker for wlgCreateContextAtribsARB
     };
 
     glContext = wglCreateContextAttribsARB(deviceContext, NULL, attribs);
-    if (glContext == NULL) {
-        loggf("glContext was null!\n");
-        debugWaitForConsoleInput();
-        return false;
-    }
+    assert(glContext != NULL, "wglCreateContextAttribsARB failed\n");
 
     // Make context current
-    if (wglMakeCurrent(deviceContext, glContext) == FALSE) {
-        loggf("wglMakeCurrent failed\n");
-        printLastError();
-        return false;
-    }
+    success = wglMakeCurrent(deviceContext, glContext);
+    assert(success, "wglMakeCurrent failed!\n");
 
     loggf("Initializisation version 4.5 worked!!!\n");
     version = (char*)glGetString(GL_VERSION);
     loggf("version: \"%s\"\n", version);
 
     // Load opengl functions
-    if (!loadAllFunctions()) {
-        loggf("Could not load all gl functions!\n");
-        debugWaitForConsoleInput();
-        return false;
-    }
+    success = loadAllFunctions();
+    assert(success, "loadAllFunctions failed!\n");
 
     // Enable debug output
-    {
-        glDebugMessageCallback(&customDebugProc, nullptr);
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    }
+    glDebugMessageCallback(&customDebugProc, nullptr);
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
+    // Set vsync to on
+    wglSwapIntervalEXT(1);
+
+    // Show window again
     ShowWindow(hwnd, SW_SHOWNORMAL);
     SetActiveWindow(hwnd);
-    return true;
 }
 
-void onGameDllChanged(const char* filename, void* userData) {
-    gameBeforeReset(&gameState);
-    //printFileListenerCount();
-    loadGameFunctions();
-    setGameFunctionPtrs();
-    gameAfterReset(&gameState);
-}
 
-int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdShow)
+
+// -----------------------
+// --- STATE FUNCTIONS ---
+// -----------------------
+void initWindowState(HWND hwnd)
 {
-    globalInstance = instance;
+    // Get window size infos
+    RECT clientRect;
+    GetWindowRect(hwnd, &actualWinState.savedWindowRect);
+    GetClientRect(hwnd, &clientRect),
 
-    // Init allocators
-    SystemAllocator sysAlloc;
-    initTmpAlloc(&sysAlloc);
-    SCOPE_EXIT(shutdownTmpAlloc());
+        // Init actual window state
+        actualWinState.x = actualWinState.savedWindowRect.left;
+    actualWinState.y = actualWinState.savedWindowRect.top;
+    actualWinState.width = clientRect.right - clientRect.left;
+    actualWinState.height = clientRect.bottom - clientRect.top;
+    actualWinState.fullscreen = false;
+    actualWinState.minimized = false;
+    actualWinState.continuousDraw = true;
+    actualWinState.redraw = false;
+    actualWinState.fps = 60;
+    actualWinState.hideCursor = false;
 
-    // Init subsystems
-    memset(&gameState, 0, sizeof(GameState));
-    assert(initDebugConsole(), "Console initialization failed\n");
-    setDebugFunctions(&debugPrint, &win32_invalid_path);
-    initKeyTranslationTable();
-    initTiming();
-    initFileListener(&sysAlloc);
-    //initAudio();
+    // Save window style
+    actualWinState.savedWindowStyle = GetWindowLong(hwnd, GWL_STYLE);
+    actualWinState.savedWindowStyleEx = GetWindowLong(hwnd, GWL_EXSTYLE);
+}
 
-    // Initialize GameState
-    {
-        Memory* mem = &gameState.memory; 
-        mem->size = 1024L * 1024L * 1024L * 1L; // 1 GB
-        loggf("Memory size: %lld\n", mem->size); 
-        mem->memory = (byte*) VirtualAlloc(NULL, mem->size, MEM_COMMIT, PAGE_READWRITE);
-        if (mem->memory == NULL) {
-            loggf("VirtualAlloc failed: null returend\n");
-            printLastError();
-            return -1;
-        }
-    }
+void initGameState()
+{
+    // Set windowState
+    WindowState* w = &gameState.windowState;
+    w->wasResized = false;
+    w->wasMoved = false;
+    w->wasMinimized = false;
+    w->quit = false;
+    w->fullscreen = actualWinState.fullscreen;
+    w->hideCursor = actualWinState.hideCursor;
+    w->minimized = actualWinState.minimized;
+    w->width = actualWinState.width;
+    w->height = actualWinState.height;
+    w->x = actualWinState.x;
+    w->y = actualWinState.y;
 
-    // Init services
-    {
-        Services* services = &gameState.services;
-        services->debugPrint = &debugPrint;
-    }
+    // Set input
+    memset(&gameState.input, 0, sizeof(Input));
 
-    // Initialize window with OpenGL
-    CHECK_VALID(initWindow(), "InitWindow failed\n");
-    CHECK_VALID(createWindowWithOpenGL(), "Init opengl failed\n");
-    logg("\n");
-    logg("---------------------\n");
-    logg("--- PROGRAM START ---\n");
-    logg("---------------------\n");
-    //CHECK_VALID(initRenderer(&sysAlloc), "Error initializing renderer\n");
+    // Set RenderOptions
+    RenderOptions* r = &gameState.renderOptions;
+    r->vsync = true;
+    r->continuousDraw = true;
+    r->redraw = false;
+    r->fps = 60;
 
-    // Initialize Game + Dynamic Loading
-    ListenerToken dllListener = createFileListener("build\\game_tmp.dll", &onGameDllChanged, nullptr);
-    loadGameFunctions();
-    setGameFunctionPtrs();
-    gameInit(&gameState);
+    // Set SoundInfo
+    memset(&gameState.soundInfo, 0, sizeof(SoundInfo));
 
-    // Timing stuff
-    double frameStart = currentTime();
-    double tslf = 0;
-    double gameTickTime = 0.0;
-    double gameStartTime = frameStart;
-    int& fps = actualWinState.fps;
+    // Set Memory
+    gameState.memory.size = 1024L * 1024L * 1024L * 1L; // 1 GB
+    gameState.memory.data = VirtualAlloc(NULL, gameState.memory.size, 
+            MEM_COMMIT, PAGE_READWRITE);
+    assert(gameState.memory.data != NULL, "Virtual Alloc failed\n");
 
-    // MSG Loop
-    MSG msg;
+    // Set Time
+    gameState.time.now = currentTime();
+    gameState.time.tslf = 0;
+}
+
+
+
+// --------------------------
+// --- MSG LOOP FUNCTIONS ---
+// --------------------------
+bool processWindowMessages()
+{
     bool quit = false;
-    while (!quit) 
+    MSG msg;
+    if (!actualWinState.continuousDraw) 
     {
-        WindowState& desiredWinState = gameState.windowState;
-        if (!actualWinState.continuousDraw) 
-        {
-            // Block until one message is received
-            quit = (GetMessage(&msg, NULL, 0, 0) == 0);
-            if (quit) { continue; }
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+        // Block until one message is received
+        quit = (GetMessage(&msg, NULL, 0, 0) == 0);
+        if (quit) { return false; }
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    // Process all available messages
+    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) 
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+
+        if (msg.message == WM_QUIT) {
+            quit = true;
         }
+    }
 
-        // Process all available messages
-        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) 
+    return quit;
+}
+
+bool handleGameRequests(HWND hwnd)
+{
+    // Helpers
+    WindowState* w = &gameState.windowState;
+    RenderOptions* o = &gameState.renderOptions;
+    ActualWinState* actual = &actualWinState;
+    
+    // Simple updates
+    actual->redraw = o->redraw;
+    actual->continuousDraw = o->continuousDraw;
+    actual->fps = o->fps;
+
+    // Reset members that get reset each frame
+    w->wasResized = false;
+    w->wasMoved = false;
+    w->wasMinimized = false;
+
+    // Handle quit request
+    if (w->quit) {
+        return true;
+    }
+
+    // Handle minimize request
+    if (w->minimized != actual->minimized) 
+    {
+        actual->minimized = w->minimized;
+        if (w->minimized) {
+            ShowWindow(hwnd, SW_MINIMIZE);
+        }
+        else {
+            ShowWindow(hwnd, SW_RESTORE);
+        }
+    }
+
+    // Handle vsynch request
+    if (o->vsync != actual->vsync) {
+        actual->vsync = o->vsync;
+        if (o->vsync) {
+            wglSwapIntervalEXT(-1);
+        }
+        else {
+            wglSwapIntervalEXT(0);
+        }
+    }
+
+    // Handle request window move/resize
+    if (actual->x != w->x || actual->y != w->y ||
+        actual->width != w->width || actual->height != w->height) {
+        // Ignore if fullscreen is set or if minimized
+        if (!actual->fullscreen && !actual->minimized) 
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-
-            if (msg.message == WM_QUIT) {
-                quit = true;
+            SetWindowPos(hwnd, HWND_TOP, w->x, w->y, w->width, w->height, NULL);
+            w->wasMoved = true;
+            if (actual->x != w->x || actual->y != w->y) {
+                w->wasMoved = true;
             }
+            else {
+                w->wasResized = true;
+            }
+            actual->x = w->x;
+            actual->y = w->y;
+            actual->width = w->width;
+            actual->height = w->height;
         }
+    }
 
-        // Do timing
-        gameState.time.now = frameStart - gameStartTime;
-        gameState.time.tslf = tslf;
-        gameState.time.lastGameTick = gameTickTime;
-
-        // GameTick...
-        //debugGameTick();
-        gameTick(&gameState);
-        resetInputState();
-        SwapBuffers(deviceContext);
-        //renderToWindow(deviceContext, &bitmapInfo, &gameState.videoData);
-
-        // Handle requests
-        if (desiredWinState.quit) {
-            DestroyWindow(hwnd);
-        }
-        if (actualWinState.fullscreen != desiredWinState.fullscreen) 
+    // Handle fullscreen requests
+    if (actual->fullscreen != w->fullscreen)
+    {
+        actual->fullscreen = w->fullscreen;
+        if (w->fullscreen) 
         {
-            if (desiredWinState.fullscreen) 
+            // Save current window position and size
+            GetWindowRect(hwnd, &actual->savedWindowRect);
+            // Save window style
+            actual->savedWindowStyle = GetWindowLong(hwnd, GWL_STYLE);
+            actual->savedWindowStyleEx = GetWindowLong(hwnd, GWL_EXSTYLE);
+
+            // Switch to fullscreen 
+            HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+            MONITORINFO info;
+            info.cbSize = sizeof(MONITORINFO);
+            if (GetMonitorInfo(monitor, &info) == 0) {
+                loggf("GetMonitorInfo failed, could not switch to fullscreen\n");
+            }
+            else 
             {
-                // Save current window pos
-                GetWindowRect(hwnd, &savedWindowPos);
+                // Enable fullscreen
+                SetWindowLong(hwnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+                SetWindowLong(hwnd, GWL_EXSTYLE, NULL);
+                RECT& r = info.rcMonitor;
+                SetWindowPos(hwnd, HWND_TOP, 
+                        r.left, r.top, r.right - r.left, r.bottom - r.top, NULL);
+            }
+        }
+        else 
+        {
+            SetWindowLong(hwnd, GWL_STYLE, actual->savedWindowStyle | WS_VISIBLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, actual->savedWindowStyleEx);
+            RECT& r = actual->savedWindowRect;
+            SetWindowPos(hwnd, HWND_TOP, r.left, r.top, 
+                    r.right - r.left, r.bottom - r.top, NULL);
+        }
+    }
 
-                // Switch to fullscreen 
-                HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-                MONITORINFO info;
-                info.cbSize = sizeof(MONITORINFO);
-                if (GetMonitorInfo(monitor, &info) == 0) {
-                    debugPrint("GetMonitorInfo failed\n");
-                }
-                else {
-                    SetWindowLong(hwnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
-                    SetWindowLong(hwnd, GWL_EXSTYLE, NULL);
-                    RECT& r = info.rcMonitor;
-                    if (SetWindowPos(hwnd, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top, NULL) != NULL)  {
-                        actualWinState.fullscreen = true;
-                    }
-                }
-            }
-            else {
-                SetWindowLong(hwnd, GWL_STYLE, windowStyle | WS_VISIBLE);
-                SetWindowLong(hwnd, GWL_EXSTYLE, windowStyleEX);
-                RECT& r = savedWindowPos;
-                if (SetWindowPos(hwnd, HWND_TOP, r.left, r.top, r.right - r.left, r.bottom - r.top, NULL) != NULL)  {
-                    actualWinState.fullscreen = false;
-                }
-            }
-        }
-        actualWinState.continuousDraw = desiredWinState.continuousDraw;
-        if (desiredWinState.fps != fps) {
-            if (desiredWinState.fps > 1) {
-                fps = desiredWinState.fps;
-            }
-        }
-        if (actualWinState.hideCursor != desiredWinState.hideCursor) {
-            actualWinState.hideCursor = desiredWinState.hideCursor;
-            if (actualWinState.hideCursor) {
-                ShowCursor(FALSE);
-                // Confine cursor
-                RECT clip;
-                GetWindowRect(hwnd, &clip);
-                ClipCursor(&clip);
-            }
-            else {
-                ShowCursor(TRUE);
-                //SetCursor(cursor);
-                ClipCursor(NULL);
-            }
-        }
-        if (actualWinState.hideCursor && desiredWinState.wasResized) {
+    if (actual->hideCursor != w->hideCursor) 
+    {
+        actual->hideCursor = w->hideCursor;
+        if (actual->hideCursor) 
+        {
+            ShowCursor(FALSE);
+            // Confine cursor
             RECT clip;
             GetWindowRect(hwnd, &clip);
             ClipCursor(&clip);
         }
-        if (actualWinState.hideCursor) {
-            RECT window;
-            GetWindowRect(hwnd, &window);
-            POINT p;
-            p.x = (window.left + window.right)/2;
-            p.y = (window.top + window.bottom)/2;
-            
-            POINT oldPos;
-            GetCursorPos(&oldPos);
-            gameState.input.deltaX += oldPos.x - p.x;
-            gameState.input.deltaY += oldPos.y - p.y;
-            
-            SetCursorPos(p.x, p.y);
+        else 
+        {
+            ShowCursor(TRUE);
+            ClipCursor(NULL);
         }
+    }
 
-        // Do timing stuff
-        double gameTickEnd = currentTime();
-        double frameTime = 1.0 / fps;
-        gameTickTime = gameTickEnd - frameStart;
-        // Sleep if possible
-        sleepUntil(frameStart + frameTime);
+    // Update confinement if window was moved or resized
+    if (actual->hideCursor && (w->wasResized || w->wasMoved)) {
+        RECT clip;
+        GetWindowRect(hwnd, &clip);
+        ClipCursor(&clip);
+    }
 
-        double frameEnd = currentTime();
-        tslf = frameEnd - frameStart;
-        frameStart = frameEnd;
+    return false;
+}
+
+void afterProcessWindowMessages(HWND hwnd) 
+{
+    // Reset cursor position if hideCursor is enable
+    if (actualWinState.hideCursor) 
+    {
+        // Calculate middle of window pos
+        POINT p;
+        p.x = gameState.windowState.x + gameState.windowState.width/2;
+        p.y = gameState.windowState.y + gameState.windowState.height/2;
+
+        // Set to middle of window
+        POINT oldPos;
+        GetCursorPos(&oldPos);
+        gameState.input.deltaX = oldPos.x - p.x; 
+        gameState.input.deltaY = oldPos.y - p.y;
+        SetCursorPos(p.x, p.y);
+    }
+}
+
+
+
+// -----------------------
+// --- DEBUG FUNCTIONS ---
+// -----------------------
+void debugGameTick() 
+{
+    Input& input = gameState.input;
+    static bool first = true;
+    if (first) 
+    {
+        gameState.renderOptions.continuousDraw = true;
+        gameState.renderOptions.fps = 60;
+        gameState.windowState.x = -1000;
+        gameState.windowState.y = 400;
+        gameState.windowState.fullscreen = true;
+        first = false;
+    }
+    if (gameState.windowState.wasResized) {
+        loggf("GAMETICK: resized to %d/%d\n", gameState.windowState.width, gameState.windowState.height);
+    }
+    if (gameState.windowState.wasMoved) {
+        loggf("GAMETICK: moved to %d/%d\n", gameState.windowState.x, gameState.windowState.y);
+    }
+    if (gameState.windowState.wasMinimized) {
+        loggf("GAMETICK: moved to %d/%d\n", gameState.windowState.x, gameState.windowState.y);
+    }
+    if (input.mouseWheel != 0) {
+        loggf("MouseWheel: %f\n", input.mouseWheel);
+    }
+    if (input.keyPressed[KEY_F11]) {
+        bool& f = gameState.windowState.fullscreen;
+        f = !f;
+        loggf("Fullscreen toggled to %s\n", f == true ? "TRUE" : "FALSE");
+    }
+    if (input.keyPressed[KEY_F5]) {
+        //gameState.windowState.hideCursor = !gameState.windowState.hideCursor;
+        gameState.windowState.minimized = !gameState.windowState.minimized;
+        //gameState.windowState.x += 20;
+    }
+    if (gameState.input.mousePressed[MOUSE_LEFT]) {
+        debugPrint("Mouse Left pressed\n");
+        loggf("MB_RIGHT: %d\n", MOUSE_RIGHT);
+    }
+    if (gameState.input.mousePressed[MOUSE_RIGHT]) {
+        debugPrint("Mouse RIGHT pressed\n");
+    }
+    if (gameState.input.mousePressed[MOUSE_MIDDLE]) {
+        debugPrint("Mouse MIDDLE pressed\n");
+    }
+    if (gameState.input.keyPressed[KEY_ESCAPE]) {
+        gameState.windowState.quit = true;
+    }
+    if (gameState.input.keyPressed[KEY_A]) {
+        debugPrint("A pressed\n");
+    }
+    if (gameState.input.keyPressed[KEY_D]) {
+        debugPrint("D pressed\n");
+    }
+    if (gameState.input.keyPressed[KEY_TAB]) {
+        debugPrint("TAB pressed\n");
+    }
+}
+
+
+
+// ------------
+// --- MAIN ---
+// ------------
+int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdShow)
+{
+    // Init Debugging
+    initDebugConsole(); 
+    setDebugFunctions(&debugPrint, &win32_invalid_path);
+
+    // Init TmpAlloc
+    SystemAllocator sysAlloc;
+    initTmpAlloc(&sysAlloc);
+    SCOPE_EXIT(shutdownTmpAlloc());
+
+    // Init window
+    HWND hwnd;
+    HDC deviceContext;
+    HGLRC glContext;
+    initWindowAndOpenGL(instance, hwnd, deviceContext, glContext);
+
+    // Init subsystems
+    initFileListener(&sysAlloc);
+    initInput();
+    initTiming();
+    initDynamicReloading();
+    initWindowState(hwnd);
+    initGameState();
+
+    logg("\n");
+    logg("---------------------\n");
+    logg("--- PROGRAM START ---\n");
+    logg("---------------------\n");
+    logg("\n");
+    gameInit(&gameState);
+
+    // Timing stuff
+    double frameStart = currentTime();
+    double gameStartTime = frameStart;
+
+    // MSG Loop
+    while (true) 
+    {
+        // Process messages and handle requests
+        bool quit = false;
+        quit |= handleGameRequests(hwnd); // This order is important!
+        quit |= processWindowMessages();
+        afterProcessWindowMessages(hwnd);
+        if (quit) break;
 
         // Check if any files have changed
         checkFilesChanged();
 
-        // Debug print
-        /*{
-          double sleepFor =  (frameStart + frameTime) - gameTickEnd;
-          if (gameTickTime > frameTime) {
-          loggf("Frame took: %3.2fms, Tick: %3.2fms, OVER TIME\n", tslf * 1000, gameTickTime * 1000);
-          }
-          else {
-          loggf("Frame took: %3.2fms, Tick: %3.2fms\n", tslf * 1000, gameTickTime * 1000);
-          }
-          } */
+        // Update game
+        //debugGameTick();
+        gameTick(&gameState);
+        resetInputState();
+
+        // Show buffer (Hint: Maybe wait for vblanc to swap?)
+        if (actualWinState.continuousDraw || actualWinState.redraw) {
+            glFinish();
+            SwapBuffers(deviceContext);
+            actualWinState.redraw = false;
+        }
+
+        // Sleep until frame end
+        double frameTime = 1.0 / actualWinState.fps;
+        sleepUntil(frameStart + frameTime);
+
+        // Calculate frame timing
+        double frameEnd = currentTime();
+        double tslf = frameEnd - frameStart;
+        frameStart = frameEnd;
+
+        // Set game time
+        gameState.time.now = frameStart - gameStartTime; 
+        gameState.time.tslf = tslf;
     }
 
+    // Shutdown
+    DestroyWindow(hwnd);
     gameShutdown(&gameState);
-
-    debugPrint("Program exit\n");
-    //sleepFor(1);
+    loggf("Program exit\n");
+    //sleepFor(10);
     debugWaitForConsoleInput();
 
-    return 0;
+    return EXIT_SUCCESS;
 }
