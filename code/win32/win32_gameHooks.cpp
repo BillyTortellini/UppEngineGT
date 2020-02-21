@@ -93,7 +93,7 @@ extern "C"
         initTmpAlloc(gameDataAndAlloc->_tmpAllocBlk);
         // Init game
         gameInit();
-        gameAfterReset();
+        gameAfterReload();
     }
 
     __declspec(dllexport) void gameTick(GameState* state) {
@@ -103,21 +103,21 @@ extern "C"
 
     __declspec(dllexport) void gameShutdown(GameState* state) {
         initGlobals(state);
-        shutdownTmpAlloc();
-        gameBeforeReset();
+        gameBeforeReload();
         gameShutdown();
+        shutdownTmpAlloc();
     }
 
     __declspec(dllexport) void gameBeforeReset(GameState* state) {
         initGlobals(state);
+        gameBeforeReload();
         shutdownTmpAlloc();
-        gameBeforeReset();
     }
 
     __declspec(dllexport) void gameAfterReset(GameState* state) {
         initGlobals(state);
         initTmpAlloc(gameDataAndAlloc->_tmpAllocBlk);
-        gameAfterReset();
+        gameAfterReload();
     }
 
     __declspec(dllexport) void gameAudio(GameState* state, int length, byte* data) {

@@ -9,6 +9,20 @@ struct AutoMesh
     DynArr<MeshVao> meshVaos;
 };
 
+void print(AutoMesh* m) 
+{
+    loggf("AutoMesh print!\n");
+    loggf("MeshVao count: %d\n", m->meshVaos.size());
+    for (MeshVao& mVao : m->meshVaos) {
+        loggf("\tvao: %d\n", mVao.vao);
+        loggf("\tAttribLoc count: %d\n", mVao.attribLocs.size());
+        for (AttribLocation& atrLoc : mVao.attribLocs) {
+            loggf("\t\tAttrib: %s\n", toStr(atrLoc.attrib));
+            loggf("\t\tLocation: %d\n", atrLoc.location);
+        }
+    }
+}
+
 void init(AutoMesh* mesh, MeshData* meshData, Allocator* alloc)
 {
     init(&mesh->buffer, meshData, alloc); 
@@ -85,20 +99,20 @@ void draw(AutoMesh* mesh, AutoShaderProgram* p)
     // Loop through vaos if one fits
     for (MeshVao& meshVao : mesh->meshVaos)
     {
-        if (isCompatible(&meshVao, p)) {
-            draw(&meshVao, mesh->buffer.indexBuffer.indexCount);            
+        if (isCompatible(&meshVao, p)) 
+        {
+            draw(&meshVao, mesh->buffer.indexBuffer.indexCount);
             return;
         }
     }
 
     // Else create new vao
-    MeshVao meshVao;
     int attribLocCount = p->attribLocs.size();
     AttribLocation* attribLocs = (AttribLocation*)p->attribLocs.data.data;
+
+    MeshVao meshVao;
     init(&meshVao, &mesh->buffer, attribLocCount, attribLocs, p->program.alloc);
     mesh->meshVaos.push_back(meshVao);
-
-    draw(&meshVao, mesh->buffer.indexBuffer.indexCount);
 }
 
 

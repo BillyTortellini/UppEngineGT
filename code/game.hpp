@@ -12,8 +12,8 @@
 struct GameData;
 
 // These Prototypes must be implemented:
-void gameAfterReset(); // Called after dynamic reload
-void gameBeforeReset(); // Called before dynamic reload
+void gameAfterReload(); // Called after dynamic reload
+void gameBeforeReload(); // Called before dynamic reload
 
 void gameTick(); // Called each frame
 void gameInit(); // Called once on program startup

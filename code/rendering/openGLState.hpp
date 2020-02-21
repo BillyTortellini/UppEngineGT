@@ -14,8 +14,15 @@ struct OpenGLState
 };
 
 OpenGLState glState;
-void initOpenGLState() {
+void initOpenGLState() 
+{
     memset(&glState, 0, sizeof(OpenGLState));
+    glBindVertexArray(0);
+    glUseProgram(0);
+    for (int i = 0; i < TEXTURE_UNIT_COUNT; i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 }
 
 void bindVao(GLuint vao) {
@@ -41,7 +48,7 @@ GLint bindTexture2D(GLuint id)
             return i;
         }
     }
-    
+
     // Bind to unit
     GLint unit = glState.nextTextureUnit;
     glState.nextTextureUnit = (glState.nextTextureUnit + 1) % TEXTURE_UNIT_COUNT;

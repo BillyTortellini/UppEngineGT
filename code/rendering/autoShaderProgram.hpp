@@ -209,7 +209,7 @@ void detectAutoUniforms(AutoShaderProgram* p)
             if (strcmp(sup.name, lowerName.c_str()) == 0 && 
                     sup.glType == info.type)
             {
-                loggf("Detected uniform: %s\n", info.name);
+                //loggf("Detected uniform: %s\n", info.name);
                 AutoUniform* uniform;
                 if (sup.perFrame) {
                     uniform = &p->perFrame[p->perFrame.size()];
@@ -243,7 +243,7 @@ void detectAutoAttribs(AutoShaderProgram* p)
             if (strcmp(autoAttrib.name, attribName.c_str()) == 0 &&
                        autoAttrib.type == info.type)
             {
-                loggf("AttribName found: %s\n", autoAttrib.name);
+                //loggf("AttribName found: %s\n", autoAttrib.name);
                 p->attribLocs.push_back(AttribLocation(autoAttrib.attrib, info.location));
                 break;
             }

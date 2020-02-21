@@ -39,9 +39,6 @@
 
 struct GameData
 {
-    // Test
-    DynArr<std::function<void()>> gameResetFunctions; 
-    // GameDat
     Camera3D camera;
     ArcBallController controller;
     AutoMesh cubeMesh;
@@ -65,10 +62,6 @@ void draw(AutoShaderProgram* p, Mesh* m, const vec3& pos)
     draw(m);
 }
 
-void addResetFunction(std::function<void()> func) {
-    gameData->gameResetFunctions.push_back(func);
-}
-
 GLuint createFramebuffer()
 {
     //GLuint fbo; // Framebuffer object
@@ -90,12 +83,10 @@ GLuint createFramebuffer()
     return 0;
 }
 
-
 AutoShaderProgram colorShader;
 AutoShaderProgram imageShader;
-AutoMesh cubeMesh;
 Texture testTexture;
-void gameAfterReset() 
+void gameAfterReload() 
 {
     gameState->renderOptions.vsync = true;
     gameState->renderOptions.fps = 60;
@@ -110,32 +101,22 @@ void gameAfterReset()
 
     // Init textures
     init(&testTexture, "test.bmp", gameAlloc);
-    addResetFunction([](){shutdown(&testTexture);});
-
-    // Init meshes
-    createCubeMesh(&cubeMesh, gameAlloc);
-    addResetFunction([](){shutdown(&cubeMesh);});
 
     // Init shaders
     init(&imageShader, {"image.vert", "image.frag"}, gameAlloc);
-    addResetFunction([](){shutdown(&imageShader);});
     init(&colorShader, {"color.vert", "color.frag"}, gameAlloc);
-    addResetFunction([](){shutdown(&colorShader);});
     //init(&skyShader, {"sky.vert", "sky.frag"}, gameAlloc, gameState);
+   
+    print(&gameData->cubeMesh);
+    
 }
 
-void gameBeforeReset() 
+void gameBeforeReload() 
 {
-    for (int i = 0; i < gameData->gameResetFunctions.size(); i++) {
-        (gameData->gameResetFunctions[i])(); // Call function
-    }
-    gameData->gameResetFunctions.reset();
-    //shutdown(&colorShader);
-    //shutdown(&cubeMesh);
-    //shutdown(&imageShader);
+    shutdown(&testTexture);
+    shutdown(&imageShader);
+    shutdown(&colorShader);
     //shutdown(&skyShader);
-    
-    //shutdown(&testTexture);
 }
 
 void renderScene() 
@@ -144,9 +125,9 @@ void renderScene()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    //draw(&colorShader, &cubeMesh, vec3(5.0f));
+    draw(&colorShader, &gameData->cubeMesh, vec3(0.0f));
     setUniform(&imageShader.program, "image", &testTexture);
-    draw(&imageShader, &gameData->cubeMesh, vec3(0.0f));
+    draw(&imageShader, &gameData->cubeMesh, vec3(3.0f));
     
     //draw(&skyShader, &testMesh, vec3(0.0f));
 
@@ -209,9 +190,6 @@ void gameTick()
 
 void gameInit() 
 {
-    // Test
-    gameData->gameResetFunctions.init(gameAlloc, 8); 
-     
     // Set game options
     gameState->renderOptions.continuousDraw = true;
     gameState->renderOptions.fps = 60;

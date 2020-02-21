@@ -11,7 +11,7 @@
 # hlsearch on (H) or off (h):
 ~h
 # Last Search Pattern:
-~MSle0~/sleep
+~MSle0~/cube
 
 # Last Substitute Search Pattern:
 ~MSle0&gameState.
@@ -20,12 +20,12 @@
 $gameState->
 
 # Command Line History (newest to oldest):
-:q
-|2,0,1582291280,,"q"
 :wq
-|2,0,1582291279,,"wq"
+|2,0,1582299155,,"wq"
 :w
-|2,0,1582291225,,"w"
+|2,0,1582298813,,"w"
+:q
+|2,0,1582298680,,"q"
 :'<,'>s/gameState./gameState->/g
 |2,0,1582291029,,"'<,'>s/gameState./gameState->/g"
 :wjj
@@ -86,6 +86,54 @@ $gameState->
 |2,0,1581967249,,"qa"
 
 # Search String History (newest to oldest):
+?/cube
+|2,1,1582298795,47,"cube"
+?/glGetIn
+|2,1,1582298645,47,"glGetIn"
+?/glGetI
+|2,1,1582298630,47,"glGetI"
+?/glBindVertex
+|2,1,1582298433,47,"glBindVertex"
+?/gl
+|2,1,1582298423,47,"gl"
+?/glBindBuffer(GL_ELE
+|2,1,1582298052,47,"glBindBuffer(GL_ELE"
+?/glBindBuffer(GL_ELEMEN
+|2,1,1582297920,47,"glBindBuffer(GL_ELEMEN"
+?/GL_
+|2,1,1582297810,47,"GL_"
+?/bind(MeshVao
+|2,1,1582296968,47,"bind(MeshVao"
+?/draw
+|2,1,1582296311,47,"draw"
+?/glBindBuffer(GL_ELEMENT_A
+|2,1,1582295861,47,"glBindBuffer(GL_ELEMENT_A"
+?/glBufferData(GL_ELEMENT
+|2,1,1582295684,47,"glBufferData(GL_ELEMENT"
+?/glBufferData
+|2,1,1582295663,47,"glBufferData"
+? \<bindVao\>
+|2,1,1582295487,,"\\<bindVao\\>"
+?/glBindBuffer(GL_ELEMENT
+|2,1,1582295388,47,"glBindBuffer(GL_ELEMENT"
+?/AttribName
+|2,1,1582294624,47,"AttribName"
+?/AttribNAme
+|2,1,1582294615,47,"AttribNAme"
+?/Detecte
+|2,1,1582294606,47,"Detecte"
+? \<cubeMesh\>
+|2,1,1582294475,,"\\<cubeMesh\\>"
+? \<supportedAutoAttribs\>
+|2,1,1582294019,,"\\<supportedAutoAttribs\\>"
+?/struct MeshVao
+|2,1,1582293239,47,"struct MeshVao"
+?/print
+|2,1,1582293166,47,"print"
+? \<createGameAlloc\>
+|2,1,1582292224,,"\\<createGameAlloc\\>"
+?/gameAfter
+|2,1,1582291382,47,"gameAfter"
 ?/sleep
 |2,1,1582291222,47,"sleep"
 ? gameState.
@@ -130,8 +178,6 @@ $gameState->
 |2,1,1582283958,,"\\<Pixel\\>"
 ?/gameInit
 |2,1,1582251860,47,"gameInit"
-? \<cubeMesh\>
-|2,1,1582250885,,"\\<cubeMesh\\>"
 ?/bind
 |2,1,1582250804,47,"bind"
 ? \/
@@ -140,52 +186,6 @@ $gameState->
 |2,1,1582250536,47,"setUni"
 ?/j
 |2,1,1582250138,47,"j"
-?/MeshVao
-|2,1,1582249380,47,"MeshVao"
-?/init(MeshData
-|2,1,1582248870,47,"init(MeshData"
-?/init
-|2,1,1582248859,47,"init"
-? 1024
-|2,1,1582248064,,"1024"
-? %ld
-|2,1,1582248027,,"%ld"
-?/TmpStr
-|2,1,1582247178,47,"TmpStr"
-?/callback
-|2,1,1582246978,47,"callback"
-?/init(Auto
-|2,1,1582246773,47,"init(Auto"
-? \<createCubeMesh\>
-|2,1,1582246611,,"\\<createCubeMesh\\>"
-?/gameData->cube
-|2,1,1582246600,47,"gameData->cube"
-?/shutdown
-|2,1,1582246251,47,"shutdown"
-?/init(Shad
-|2,1,1582246237,47,"init(Shad"
-?/AutoShader
-|2,1,1582246000,47,"AutoShader"
-?/onAuto
-|2,1,1582245954,47,"onAuto"
-?/reload
-|2,1,1582245947,47,"reload"
-? \<detectAutoUniforms\>
-|2,1,1582245839,,"\\<detectAutoUniforms\\>"
-?/detectAutoUni
-|2,1,1582245835,47,"detectAutoUni"
-? \<detectAutoAttribs\>
-|2,1,1582245709,,"\\<detectAutoAttribs\\>"
-? \<AutoUniform\>
-|2,1,1582230992,,"\\<AutoUniform\\>"
-?/AutoMesh
-|2,1,1582230201,47,"AutoMesh"
-?/au
-|2,1,1582230131,47,"au"
-? \<afterProcessWindowMessages\>
-|2,1,1582228201,,"\\<afterProcessWindowMessages\\>"
-?/width
-|2,1,1582227265,47,"width"
 
 # Expression History (newest to oldest):
 
@@ -245,35 +245,62 @@ $gameState->
 
 # Registers:
 "0	LINE	0
-	            glFinish();
-|3,0,0,1,1,0,1582291136,"            glFinish();"
+	    for (int i = 0; i < TEXTURE_UNIT_COUNT; i++) {
+	        if (glState.textureUnit[i] == id) {
+	            return i;
+	        }
+	    }
+	    
+	    // Bind to unit
+	    GLint unit = glState.nextTextureUnit;
+	    glState.nextTextureUnit = (glState.nextTextureUnit + 1) % TEXTURE_UNIT_COUNT;
+	    glActiveTexture(GL_TEXTURE0 + unit);
+	    glBindTexture(GL_TEXTURE_2D, 0);
+|3,0,0,1,11,0,1582298526,"    for (int i = 0; i < TEXTURE_UNIT_COUNT; i++) {","        if (glState.textureUnit[i] == id) {","            return i;","        }","    }","    ","    // Bind to unit","    GLint unit = glState.nextTextureUnit;","    glState.nextTextureUnit = (glState.nextTextureUnit + 1) % TEXTURE_UNIT_COUNT;","    glActiveTexture(GL_TEXTURE0 + unit);","    glBindTexture(GL_TEXTURE_2D, 0);"
 ""1	LINE	0
-	    loggf("sleep for: %3.3fms \n", (float)diff*1000);
-|3,1,1,1,1,0,1582291224,"    loggf(\"sleep for: %3.3fms \\n\", (float)diff*1000);"
+	
+|3,1,1,1,1,0,1582298812,""
 "2	LINE	0
-	            glFinish();
-|3,0,2,1,1,0,1582291170,"            glFinish();"
+	    if (gameData->frameCount % (120*3) == 0) {
+	        print(&gameData->cubeMesh);
+	    }
+|3,0,2,1,3,0,1582298811,"    if (gameData->frameCount % (120*3) == 0) {","        print(&gameData->cubeMesh);","    }"
 "3	LINE	0
-	            glFinish();
-|3,0,3,1,1,0,1582291168,"            glFinish();"
+	    shutdown(&cubeMesh);
+|3,0,3,1,1,0,1582298709,"    shutdown(&cubeMesh);"
 "4	LINE	0
-	            glFinish();
-|3,0,4,1,1,0,1582291166,"            glFinish();"
+	    // Init meshes
+	    createCubeMesh(&cubeMesh, gameAlloc);
+	
+|3,0,4,1,3,0,1582298707,"    // Init meshes","    createCubeMesh(&cubeMesh, gameAlloc);",""
 "5	LINE	0
-	        loggf("V
-|3,0,5,1,1,0,1582290939,"        loggf(\"V"
+	AutoMesh cubeMesh;
+|3,0,5,1,1,0,1582298700,"AutoMesh cubeMesh;"
 "6	LINE	0
-	        gameState->windowState.hideCursor = !gameState->windowState.hideCursor;
-|3,0,6,1,1,0,1582290933,"        gameState->windowState.hideCursor = !gameState->windowState.hideCursor;"
+	            bind(&meshVao);
+	            GLint boundEbo, boundVao;
+	            glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &boundEbo);
+	            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &boundVao);
+	            assert(boundEbo == (GLint)mesh->buffer.indexBuffer.ebo, "EBOS DID NOT MATCH LOl, ebo was : %d", boundEbo);
+	            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->buffer.indexBuffer.ebo);
+	            glDrawElements(GL_TRIANGLES, mesh->buffer.indexBuffer.indexCount, GL_UNSIGNED_INT, (void*)0);
+	            
+	            //draw(&meshVao, mesh->buffer.indexBuffer.indexCount);            
+|3,0,6,1,9,0,1582298654,"            bind(&meshVao);","            GLint boundEbo, boundVao;","            glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &boundEbo);","            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &boundVao);","            assert(boundEbo == (GLint)mesh->buffer.indexBuffer.ebo, \"EBOS DID NOT MATCH LOl, ebo was : %d\", boundEbo);","            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->buffer.indexBuffer.ebo);",>107
+|<"            glDrawElements(GL_TRIANGLES, mesh->buffer.indexBuffer.indexCount, GL_UNSIGNED_INT, (void*)0);","            ","            //draw(&meshVao, mesh->buffer.indexBuffer.indexCount);            "
 "7	LINE	0
-	        loggf("Hide cursor set to: %s\n", gameState->windowState.hideCursor ? "TRUE" : "FALSE");
-|3,0,7,1,1,0,1582290933,"        loggf(\"Hide cursor set to: %s\\n\", gameState->windowState.hideCursor ? \"TRUE\" : \"FALSE\");"
+	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+|3,0,7,1,1,0,1582298638,"    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);"
 "8	LINE	0
-	        loggf("sleep for: %3.2fms\n", (float)(frameTime + gameStart - currentTime())*1000); 
-|3,0,8,1,1,0,1582289753,"        loggf(\"sleep for: %3.2fms\\n\", (float)(frameTime + gameStart - currentTime())*1000); "
+	    GLint boundEbo, boundVao;
+	    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &boundEbo);
+	    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &boundVao);
+	    assert(boundEbo == 0 && boundVao != 0, "ERROR LOL\n");
+	
+|3,0,8,1,5,0,1582298633,"    GLint boundEbo, boundVao;","    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &boundEbo);","    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &boundVao);","    assert(boundEbo == 0 && boundVao != 0, \"ERROR LOL\\n\");",""
 "9	LINE	0
-	    logg("\n");
-|3,0,9,1,1,0,1582289563,"    logg(\"\\n\");"
+	
+|3,0,9,1,1,0,1582298627,""
 "a@	CHAR	0
 	$xj0
 |3,2,10,0,1,0,1582250556,"$xj0"
@@ -284,34 +311,88 @@ $gameState->
 |<"k:w€k527GzzlllllllllllllllllllllllllllllllllciwerrorMsg:w27Gklllllllllllllllllllljlllllllllfo;ar:w109G$hhhhhhhhhhhhhhhhhi(GLchar*) :w109G143GzzOstruct ShaderProgram;l.w€kb€kb€kba /€ü €kb/€ü Forward declaration:w€k527Gjk$hhhhhhhhhhhhhhhhlllllllvlllllllxhhhhhhhhi(char+€kb*€kb*) .wu:wh%%uuuhhhhhhhhhhhhhhhhhhhhhhhvhhhhhhhhhhhhhhhhhlximaxLength:wlllllllllllllllichar€kb€kb€kb€kb(char*):w€k5165GzzllllllllllllllllllllllllciwattribCount:w181Gllllllllllllllllllllllllxxi.:
 |<w€ý,€ý.€k5181Gzzlllllllllllllllllllllllllllllj0wlllllllllllxxi.:whhhhh%%%%%€k5193Gjkka;:w€k5204GzzllllllllllllcihhhhhhhhcWuniformCount:w€k5217Gllllllllllllllllllllllllllllh0wllllxxi.:wjllllllllxhxi.:w/infonnllllclhxxi.:wj0wlllllllllllxxi.:w"
 "-	CHAR	0
-	"
-|3,0,36,0,1,0,1582291187,"\""
+	/
+|3,0,36,0,1,0,1582298669,"/"
 
 # File marks:
-'0  18  4  O:\ressources\shaders\color.vert
-|4,48,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
-'1  18  0  O:\code\win32\main.cpp
-|4,49,18,0,1582285712,"O:\\code\\win32\\main.cpp"
-'2  18  0  O:\code\win32\main.cpp
-|4,50,18,0,1582285712,"O:\\code\\win32\\main.cpp"
-'3  19  0  O:\ressources\shaders\color.vert
-|4,51,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
-'4  19  0  O:\ressources\shaders\color.vert
-|4,52,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
-'5  153  0  O:\code\game.cpp
-|4,53,153,0,1582246550,"O:\\code\\game.cpp"
-'6  149  0  O:\code\game.cpp
-|4,54,149,0,1582246550,"O:\\code\\game.cpp"
-'7  167  0  O:\code\game.cpp
-|4,55,167,0,1582246550,"O:\\code\\game.cpp"
-'8  163  0  O:\code\game.cpp
-|4,56,163,0,1582246550,"O:\\code\\game.cpp"
-'9  153  0  O:\code\game.cpp
-|4,57,153,0,1582246550,"O:\\code\\game.cpp"
+'0  162  4  O:\code\game.cpp
+|4,48,162,4,1582299155,"O:\\code\\game.cpp"
+'1  18  4  O:\ressources\shaders\color.vert
+|4,49,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
+'2  18  4  O:\ressources\shaders\color.vert
+|4,50,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
+'3  18  0  O:\code\win32\main.cpp
+|4,51,18,0,1582285712,"O:\\code\\win32\\main.cpp"
+'4  18  0  O:\code\win32\main.cpp
+|4,52,18,0,1582285712,"O:\\code\\win32\\main.cpp"
+'5  20  0  O:\ressources\shaders\color.vert
+|4,53,20,0,1582252220,"O:\\ressources\\shaders\\color.vert"
+'6  20  0  O:\ressources\shaders\color.vert
+|4,54,20,0,1582252220,"O:\\ressources\\shaders\\color.vert"
+'7  19  0  O:\ressources\shaders\color.vert
+|4,55,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
+'8  19  0  O:\ressources\shaders\color.vert
+|4,56,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
+'9  134  0  O:\code\game.cpp
+|4,57,134,0,1582246550,"O:\\code\\game.cpp"
 
 # Jumplist (newest first):
+-'  162  4  O:\code\game.cpp
+|4,39,162,4,1582299155,"O:\\code\\game.cpp"
+-'  140  36  O:\code\game.cpp
+|4,39,140,36,1582298802,"O:\\code\\game.cpp"
+-'  139  36  O:\code\game.cpp
+|4,39,139,36,1582298798,"O:\\code\\game.cpp"
+-'  130  34  O:\code\game.cpp
+|4,39,130,34,1582298798,"O:\\code\\game.cpp"
+-'  129  0  O:\code\game.cpp
+|4,39,129,0,1582298796,"O:\\code\\game.cpp"
+-'  115  0  O:\code\game.cpp
+|4,39,115,0,1582298711,"O:\\code\\game.cpp"
+-'  120  0  O:\code\game.cpp
+|4,39,120,0,1582298711,"O:\\code\\game.cpp"
+-'  112  0  O:\code\game.cpp
+|4,39,112,0,1582298703,"O:\\code\\game.cpp"
+-'  90  0  O:\code\game.cpp
+|4,39,90,0,1582298703,"O:\\code\\game.cpp"
+-'  88  9  O:\code\game.cpp
+|4,39,88,9,1582294480,"O:\\code\\game.cpp"
+-'  44  13  O:\code\game.cpp
+|4,39,44,13,1582294478,"O:\\code\\game.cpp"
+-'  220  24  O:\code\game.cpp
+|4,39,220,24,1582294477,"O:\\code\\game.cpp"
+-'  207  31  O:\code\game.cpp
+|4,39,207,31,1582294475,"O:\\code\\game.cpp"
+-'  106  4  O:\code\game.cpp
+|4,39,106,4,1582293836,"O:\\code\\game.cpp"
+-'  119  5  O:\code\game.cpp
+|4,39,119,5,1582293043,"O:\\code\\game.cpp"
+-'  108  35  O:\code\game.cpp
+|4,39,108,35,1582292015,"O:\\code\\game.cpp"
+-'  105  0  O:\code\game.cpp
+|4,39,105,0,1582291998,"O:\\code\\game.cpp"
+-'  121  0  O:\code\game.cpp
+|4,39,121,0,1582291650,"O:\\code\\game.cpp"
+-'  122  0  O:\code\game.cpp
+|4,39,122,0,1582291643,"O:\\code\\game.cpp"
+-'  118  35  O:\code\game.cpp
+|4,39,118,35,1582291643,"O:\\code\\game.cpp"
+-'  65  7  O:\code\game.cpp
+|4,39,65,7,1582291476,"O:\\code\\game.cpp"
+-'  23  0  O:\code\game.cpp
+|4,39,23,0,1582291382,"O:\\code\\game.cpp"
+-'  16  20  O:\code\game.hpp
+|4,39,16,20,1582291379,"O:\\code\\game.hpp"
+-'  1  0  O:\code\game.hpp
+|4,39,1,0,1582291366,"O:\\code\\game.hpp"
 -'  18  4  O:\ressources\shaders\color.vert
 |4,39,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
+-'  18  4  O:\ressources\shaders\color.vert
+|4,39,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
+-'  1  0  O:\ressources\shaders\color.vert
+|4,39,1,0,1582289356,"O:\\ressources\\shaders\\color.vert"
+-'  13  0  O:\code\NERD_tree_4
+|4,39,13,0,1582289356,"O:\\code\\NERD_tree_4"
 -'  1  0  O:\ressources\shaders\color.vert
 |4,39,1,0,1582289356,"O:\\ressources\\shaders\\color.vert"
 -'  13  0  O:\code\NERD_tree_4
@@ -320,10 +401,20 @@ $gameState->
 |4,39,24,2,1582289355,"O:\\code\\NERD_tree_4"
 -'  1  0  O:\code\NERD_tree_4
 |4,39,1,0,1582289355,"O:\\code\\NERD_tree_4"
+-'  24  2  O:\code\NERD_tree_4
+|4,39,24,2,1582289355,"O:\\code\\NERD_tree_4"
+-'  1  0  O:\code\NERD_tree_4
+|4,39,1,0,1582289355,"O:\\code\\NERD_tree_4"
+-'  18  0  O:\code\win32\main.cpp
+|4,39,18,0,1582285712,"O:\\code\\win32\\main.cpp"
 -'  18  0  O:\code\win32\main.cpp
 |4,39,18,0,1582285712,"O:\\code\\win32\\main.cpp"
 -'  344  0  O:\code\win32\main.cpp
 |4,39,344,0,1582284168,"O:\\code\\win32\\main.cpp"
+-'  344  0  O:\code\win32\main.cpp
+|4,39,344,0,1582284168,"O:\\code\\win32\\main.cpp"
+-'  1  0  O:\code\win32\main.cpp
+|4,39,1,0,1582283877,"O:\\code\\win32\\main.cpp"
 -'  1  0  O:\code\win32\main.cpp
 |4,39,1,0,1582283877,"O:\\code\\win32\\main.cpp"
 -'  1  0  O:\code\NERD_tree_4
@@ -332,6 +423,10 @@ $gameState->
 |4,39,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
 -'  19  0  O:\ressources\shaders\color.vert
 |4,39,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
+-'  19  0  O:\ressources\shaders\color.vert
+|4,39,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
+-'  17  4  O:\ressources\shaders\color.vert
+|4,39,17,4,1582252212,"O:\\ressources\\shaders\\color.vert"
 -'  17  4  O:\ressources\shaders\color.vert
 |4,39,17,4,1582252212,"O:\\ressources\\shaders\\color.vert"
 -'  17  4  O:\ressources\shaders\color.vert
@@ -340,6 +435,14 @@ $gameState->
 |4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
 -'  166  0  O:\code\rendering\texture.hpp
 |4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
+-'  166  0  O:\code\rendering\texture.hpp
+|4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
+-'  166  0  O:\code\rendering\texture.hpp
+|4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
+-'  1  0  O:\code\rendering\texture.hpp
+|4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
+-'  1  0  O:\code\rendering\texture.hpp
+|4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
 -'  1  0  O:\code\rendering\texture.hpp
 |4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
 -'  1  0  O:\code\rendering\texture.hpp
@@ -348,6 +451,10 @@ $gameState->
 |4,39,1,0,1582251392,"O:\\code\\NERD_tree_1"
 -'  1  0  O:\code\NERD_tree_1
 |4,39,1,0,1582251392,"O:\\code\\NERD_tree_1"
+-'  1  0  O:\code\NERD_tree_1
+|4,39,1,0,1582251392,"O:\\code\\NERD_tree_1"
+-'  144  0  O:\code\game.cpp
+|4,39,144,0,1582246550,"O:\\code\\game.cpp"
 -'  163  0  O:\code\game.cpp
 |4,39,163,0,1582246550,"O:\\code\\game.cpp"
 -'  163  0  O:\code\game.cpp
@@ -356,6 +463,8 @@ $gameState->
 |4,39,135,0,1582246360,"O:\\code\\game.cpp"
 -'  135  0  O:\code\game.cpp
 |4,39,135,0,1582246360,"O:\\code\\game.cpp"
+-'  124  0  O:\code\game.cpp
+|4,39,124,0,1582246359,"O:\\code\\game.cpp"
 -'  143  0  O:\code\game.cpp
 |4,39,143,0,1582246359,"O:\\code\\game.cpp"
 -'  143  0  O:\code\game.cpp
@@ -368,14 +477,22 @@ $gameState->
 |4,39,136,12,1582246161,"O:\\code\\game.cpp"
 -'  136  12  O:\code\game.cpp
 |4,39,136,12,1582246161,"O:\\code\\game.cpp"
+-'  86  0  O:\code\game.cpp
+|4,39,86,0,1582245923,"O:\\code\\game.cpp"
 -'  94  0  O:\code\game.cpp
 |4,39,94,0,1582245923,"O:\\code\\game.cpp"
 -'  94  0  O:\code\game.cpp
 |4,39,94,0,1582245923,"O:\\code\\game.cpp"
+-'  127  0  O:\code\game.cpp
+|4,39,127,0,1582230764,"O:\\code\\game.cpp"
 -'  146  0  O:\code\game.cpp
 |4,39,146,0,1582230764,"O:\\code\\game.cpp"
 -'  146  0  O:\code\game.cpp
 |4,39,146,0,1582230764,"O:\\code\\game.cpp"
+-'  172  43  O:\code\game.cpp
+|4,39,172,43,1582230743,"O:\\code\\game.cpp"
+-'  176  4  O:\code\game.cpp
+|4,39,176,4,1582230743,"O:\\code\\game.cpp"
 -'  191  43  O:\code\game.cpp
 |4,39,191,43,1582230743,"O:\\code\\game.cpp"
 -'  195  4  O:\code\game.cpp
@@ -384,6 +501,10 @@ $gameState->
 |4,39,191,43,1582230743,"O:\\code\\game.cpp"
 -'  195  4  O:\code\game.cpp
 |4,39,195,4,1582230743,"O:\\code\\game.cpp"
+-'  169  4  O:\code\game.cpp
+|4,39,169,4,1582230726,"O:\\code\\game.cpp"
+-'  167  36  O:\code\game.cpp
+|4,39,167,36,1582230726,"O:\\code\\game.cpp"
 -'  188  4  O:\code\game.cpp
 |4,39,188,4,1582230726,"O:\\code\\game.cpp"
 -'  186  36  O:\code\game.cpp
@@ -392,6 +513,8 @@ $gameState->
 |4,39,188,4,1582230726,"O:\\code\\game.cpp"
 -'  186  36  O:\code\game.cpp
 |4,39,186,36,1582230726,"O:\\code\\game.cpp"
+-'  217  0  O:\code\game.cpp
+|4,39,217,0,1582230677,"O:\\code\\game.cpp"
 -'  239  0  O:\code\game.cpp
 |4,39,239,0,1582230677,"O:\\code\\game.cpp"
 -'  239  0  O:\code\game.cpp
@@ -404,299 +527,694 @@ $gameState->
 |4,39,116,8,1582230611,"O:\\code\\game.cpp"
 -'  116  8  O:\code\game.cpp
 |4,39,116,8,1582230611,"O:\\code\\game.cpp"
+-'  87  45  O:\code\game.cpp
+|4,39,87,45,1582230463,"O:\\code\\game.cpp"
 -'  95  45  O:\code\game.cpp
 |4,39,95,45,1582230463,"O:\\code\\game.cpp"
 -'  95  45  O:\code\game.cpp
 |4,39,95,45,1582230463,"O:\\code\\game.cpp"
+-'  80  0  O:\code\game.cpp
+|4,39,80,0,1582230336,"O:\\code\\game.cpp"
 -'  69  0  O:\code\game.cpp
 |4,39,69,0,1582230336,"O:\\code\\game.cpp"
--'  87  0  O:\code\game.cpp
-|4,39,87,0,1582230336,"O:\\code\\game.cpp"
--'  69  0  O:\code\game.cpp
-|4,39,69,0,1582230336,"O:\\code\\game.cpp"
--'  87  0  O:\code\game.cpp
-|4,39,87,0,1582230336,"O:\\code\\game.cpp"
--'  13  0  O:\code\game.cpp
-|4,39,13,0,1582230328,"O:\\code\\game.cpp"
--'  13  0  O:\code\game.cpp
-|4,39,13,0,1582230328,"O:\\code\\game.cpp"
--'  61  0  O:\code\game.cpp
-|4,39,61,0,1582230327,"O:\\code\\game.cpp"
--'  61  0  O:\code\game.cpp
-|4,39,61,0,1582230327,"O:\\code\\game.cpp"
--'  54  0  O:\code\game.cpp
-|4,39,54,0,1582230326,"O:\\code\\game.cpp"
--'  54  0  O:\code\game.cpp
-|4,39,54,0,1582230326,"O:\\code\\game.cpp"
--'  58  0  O:\code\game.cpp
-|4,39,58,0,1582230325,"O:\\code\\game.cpp"
--'  66  0  O:\code\game.cpp
-|4,39,66,0,1582230325,"O:\\code\\game.cpp"
--'  58  0  O:\code\game.cpp
-|4,39,58,0,1582230325,"O:\\code\\game.cpp"
--'  66  0  O:\code\game.cpp
-|4,39,66,0,1582230325,"O:\\code\\game.cpp"
--'  4  0  O:\code\game.cpp
-|4,39,4,0,1582230250,"O:\\code\\game.cpp"
--'  4  0  O:\code\game.cpp
-|4,39,4,0,1582230250,"O:\\code\\game.cpp"
--'  1  0  O:\code\game.cpp
-|4,39,1,0,1582230187,"O:\\code\\game.cpp"
--'  1  0  O:\code\game.cpp
-|4,39,1,0,1582230187,"O:\\code\\game.cpp"
--'  313  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  313  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  313  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  313  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  4  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,4,0,1582230148,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  4  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,4,0,1582230148,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  4  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,4,0,1582230148,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  4  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,4,0,1582230148,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  1  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,1,0,1582230144,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  1  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,1,0,1582230144,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  7  0  O:\code\NERD_tree_1
-|4,39,7,0,1582230144,"O:\\code\\NERD_tree_1"
--'  1  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,1,0,1582230144,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582230144,"O:\\code\\NERD_tree_1"
--'  1  0  O:\code\rendering\autoShaderProgram.hpp
-|4,39,1,0,1582230144,"O:\\code\\rendering\\autoShaderProgram.hpp"
--'  8  0  O:\code\NERD_tree_1
-|4,39,8,0,1582230144,"O:\\code\\NERD_tree_1"
--'  21  2  O:\code\NERD_tree_1
-|4,39,21,2,1582230141,"O:\\code\\NERD_tree_1"
--'  22  2  O:\code\NERD_tree_1
-|4,39,22,2,1582230141,"O:\\code\\NERD_tree_1"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582230141,"O:\\code\\NERD_tree_1"
--'  2  0  O:\code\rendering\autoMesh.hpp
-|4,39,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
--'  2  0  O:\code\rendering\autoMesh.hpp
-|4,39,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
--'  2  0  O:\code\rendering\autoMesh.hpp
-|4,39,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
--'  2  0  O:\code\rendering\autoMesh.hpp
-|4,39,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
--'  1  0  O:\code\rendering\autoMesh.hpp
-|4,39,1,0,1582230132,"O:\\code\\rendering\\autoMesh.hpp"
--'  1  0  O:\code\rendering\autoMesh.hpp
-|4,39,1,0,1582230132,"O:\\code\\rendering\\autoMesh.hpp"
--'  6  5  O:\code\NERD_tree_1
-|4,39,6,5,1582230132,"O:\\code\\NERD_tree_1"
--'  1  0  O:\code\rendering\autoMesh.hpp
-|4,39,1,0,1582230132,"O:\\code\\rendering\\autoMesh.hpp"
--'  1  0  O:\code\rendering\autoMesh.hpp
-|4,39,1,0,1582230132,"O:\\code\\rendering\\autoMesh.hpp"
--'  7  5  O:\code\NERD_tree_1
-|4,39,7,5,1582230132,"O:\\code\\NERD_tree_1"
--'  5  0  O:\code\NERD_tree_1
-|4,39,5,0,1582230131,"O:\\code\\NERD_tree_1"
--'  6  0  O:\code\NERD_tree_1
-|4,39,6,0,1582230131,"O:\\code\\NERD_tree_1"
--'  22  2  O:\code\NERD_tree_1
-|4,39,22,2,1582230130,"O:\\code\\NERD_tree_1"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582230130,"O:\\code\\NERD_tree_1"
--'  1055  15  O:\code\win32\main.cpp
-|4,39,1055,15,1582228306,"O:\\code\\win32\\main.cpp"
 
 # History of marks within files (newest to oldest):
 
-> O:\ressources\shaders\color.vert
-	*	1582291279	0
-	"	18	4
-	^	18	5
-	.	18	4
-	+	25	4
-	+	23	20
-	+	23	35
-	+	25	0
+> O:\code\game.cpp
+	*	1582299154	0
+	"	162	4
+	^	128	34
+	.	129	0
+	+	158	41
+	+	162	0
+	+	167	0
+	+	162	30
+	+	167	30
+	+	163	35
+	+	165	43
+	+	163	38
+	+	158	23
+	+	168	23
+	+	163	37
+	+	168	36
+	+	170	43
+	+	159	0
+	+	164	41
+	+	165	45
+	+	89	19
+	+	114	20
+	+	42	23
+	+	42	54
+	+	65	0
+	+	42	0
+	+	86	0
+	+	42	0
+	+	65	0
+	+	91	44
+	+	91	0
+	+	118	0
+	+	118	33
+	+	118	0
+	+	104	35
+	+	104	21
+	+	104	66
+	+	104	0
+	+	107	34
+	+	108	34
+	+	105	34
+	+	118	51
+	+	118	32
+	+	118	35
+	+	193	0
+	+	118	0
+	+	118	5
+	+	118	9
+	+	130	5
+	+	118	8
+	+	118	4
+	+	86	0
+	+	86	63
+	+	104	38
+	+	105	0
+	+	105	32
+	+	105	0
+	+	107	0
+	+	107	35
+	+	108	0
+	+	108	35
+	+	86	0
+	+	118	0
+	+	104	0
+	+	105	0
+	+	107	0
+	+	108	0
+	+	118	4
+	+	120	0
+	+	116	0
+	+	119	0
+	+	117	0
+	+	119	0
+	+	117	0
+	+	119	5
+	+	91	0
+	+	128	39
+	+	129	0
+	+	129	24
+	+	129	0
+	+	130	5
+	+	112	0
+	+	105	0
+	+	130	24
+	+	129	9
+	+	109	6
+	+	111	3
+	+	109	2
+	+	110	29
+	+	130	42
+	+	129	24
+	+	88	0
+	+	105	0
+	+	117	0
+	+	128	33
+	+	129	0
+
+> O:\code\NERD_tree_1
+	*	1582299153	0
+	"	10	0
+	.	1	0
+	+	1	0
+
+> O:\code\rendering\mesh.hpp
+	*	1582298680	0
+	"	343	0
+	.	343	0
+	+	384	0
+	+	383	38
+	+	385	0
+	+	386	37
+	+	387	51
+	+	388	0
+	+	393	0
+	+	392	25
+	+	393	0
+	+	391	0
+	+	397	0
+	+	402	0
+	+	396	20
+	+	401	0
+	+	400	3
+	+	373	0
+	+	371	11
+	+	373	0
+	+	400	21
+	+	396	9
+	+	373	0
+	+	372	32
+	+	370	35
+	+	372	73
+	+	400	53
+	+	372	69
+	+	391	25
+	+	11	14
+	+	286	60
+	+	287	46
+	+	285	0
+	+	295	0
+	+	337	7
+	+	331	10
+	+	332	26
+	+	332	0
+	+	336	0
+	+	337	0
+	+	336	16
+	+	302	4
+	+	302	0
+	+	302	27
+	+	313	0
+	+	314	52
+	+	315	31
+	+	302	0
+	+	298	0
+	+	297	0
+	+	298	0
+	+	300	0
+	+	299	0
+	+	299	23
+	+	299	61
+	+	299	0
+	+	299	32
+	+	299	41
+	+	299	50
+	+	299	0
+	+	299	17
+	+	299	13
+	+	299	27
+	+	299	0
+	+	299	47
+	+	299	0
+	+	345	0
+	+	344	0
+	+	359	0
+	+	312	23
+	+	314	0
+	+	349	29
+	+	357	52
+	+	353	23
+	+	40	0
+	+	38	0
+	+	40	0
+	+	26	17
+	+	27	25
+	+	29	25
+	+	31	27
+	+	33	23
+	+	35	27
+	+	37	27
+	+	39	27
+	+	26	0
+	+	23	30
+	+	343	44
+	+	372	0
+	+	339	0
+	+	339	57
+	+	227	0
+	+	226	0
+	+	227	0
+	+	227	92
+	+	227	0
+	+	339	0
+	+	343	0
+
+> O:\code\rendering\autoMesh.hpp
+	*	1582298679	0
+	"	94	26
+	.	104	12
+	+	41	0
+	+	44	0
+	+	27	0
+	+	41	28
+	+	55	81
+	+	56	55
+	+	35	20
+	+	36	17
+	+	38	23
+	+	39	23
+	+	41	23
+	+	37	32
+	+	56	23
+	+	42	31
+	+	51	28
+	+	55	5
+	+	56	5
+	+	42	0
+	+	30	0
+	+	51	0
+	+	27	0
+	+	14	30
+	+	15	52
+	+	27	0
+	+	12	24
+	+	17	0
+	+	27	0
+	+	17	33
+	+	22	0
+	+	18	57
+	+	17	16
+	+	18	16
+	+	19	51
 	+	23	0
-	+	23	35
+	+	20	59
+	+	21	56
+	+	16	21
+	+	17	32
+	+	18	44
+	+	19	41
+	+	27	0
+	+	24	0
+	+	110	0
+	+	113	33
+	+	114	0
+	+	111	0
+	+	112	0
+	+	110	0
+	+	113	0
+	+	113	68
+	+	113	0
+	+	113	81
+	+	113	61
+	+	116	15
+	+	113	0
+	+	116	0
+	+	116	16
+	+	116	0
+	+	105	0
+	+	102	39
+	+	105	0
+	+	105	12
+	+	105	0
+	+	105	13
+	+	105	75
+	+	105	23
+	+	105	12
+	+	105	13
+	+	105	0
+	+	104	0
+	+	105	12
+	+	105	18
+	+	105	51
+	+	105	26
+	+	105	62
+	+	105	60
+	+	105	12
+	+	105	48
+	+	105	83
+	+	105	14
+	+	105	37
+	+	105	0
+	+	105	115
+	+	105	48
+	+	105	29
+	+	105	59
+	+	105	0
+	+	104	12
+
+> O:\ressources\shaders\color.vert
+	*	1582298677	0
+	"	18	5
+	^	18	6
+	.	18	5
+	+	26	4
+	+	24	20
+	+	24	35
+	+	26	0
+	+	24	0
+	+	24	35
 	+	14	0
 	+	14	56
-	+	23	67
-	+	23	0
+	+	24	67
+	+	24	0
 	+	14	0
-	+	23	42
+	+	24	42
 	+	14	13
 	+	16	33
 	+	14	0
 	+	11	0
-	+	19	0
-	+	23	0
-	+	25	0
+	+	20	0
+	+	24	0
+	+	26	0
 	+	17	0
-	+	25	0
+	+	26	0
 	+	12	1
 	+	16	5
 	+	12	0
 	+	16	4
-	+	23	0
-	+	21	0
-	+	23	35
+	+	24	0
+	+	22	0
+	+	24	35
 	+	6	0
 	+	5	12
 	+	16	15
-	+	21	4
+	+	22	4
 	+	17	4
 	+	8	17
-	+	24	5
-	+	23	36
-	+	22	0
-	+	22	20
-	+	22	0
-	+	22	4
-	+	22	7
+	+	25	5
+	+	24	36
+	+	23	0
+	+	23	20
+	+	23	0
+	+	23	4
+	+	23	7
+	+	22	5
 	+	21	5
-	+	20	5
-	+	22	8
-	+	22	15
-	+	23	33
-	+	22	0
-	+	23	35
+	+	23	8
+	+	23	15
+	+	24	33
+	+	23	0
+	+	24	35
 	+	17	4
 	+	17	0
 	+	18	4
-	+	20	4
-	+	21	5
-	+	18	5
 	+	21	4
-	+	23	35
+	+	22	5
 	+	18	5
-	+	23	33
+	+	22	4
+	+	24	35
+	+	18	5
+	+	24	33
 	+	7	1
-	+	23	5
-	+	24	21
-	+	18	5
 	+	24	5
-	+	23	4
+	+	25	21
+	+	18	5
+	+	25	5
+	+	24	4
 	+	7	0
-	+	23	35
+	+	24	35
 	+	17	0
 	+	18	4
+	+	19	5
+	+	18	5
+	+	19	4
+	+	18	4
+	+	19	5
+	+	18	5
 
-> O:\code\game.cpp
-	*	1582291278	0
-	"	82	0
-	^	184	46
-	.	184	45
-	+	95	28
-	+	120	62
-	+	135	4
-	+	147	0
-	+	50	0
-	+	97	0
-	+	112	43
-	+	139	0
-	+	138	26
-	+	112	22
-	+	125	0
-	+	96	0
-	+	97	10
-	+	125	0
-	+	122	0
-	+	125	0
-	+	115	17
-	+	116	38
-	+	139	0
-	+	147	0
-	+	149	41
-	+	148	34
-	+	149	20
-	+	147	4
-	+	149	41
-	+	14	20
-	+	44	5
-	+	43	3
-	+	44	13
-	+	42	10
-	+	43	51
-	+	214	3
-	+	213	51
-	+	114	0
-	+	93	0
-	+	70	0
-	+	69	48
-	+	113	48
-	+	131	0
-	+	130	50
-	+	132	13
-	+	134	0
-	+	138	5
-	+	117	44
-	+	121	0
-	+	123	0
-	+	121	46
-	+	123	46
-	+	43	32
-	+	130	18
-	+	129	56
-	+	149	5
-	+	53	0
-	+	7	18
-	+	7	0
-	+	8	0
-	+	4	0
-	+	249	0
-	+	53	0
-	+	52	0
-	+	53	0
+> O:\code\rendering\autoShaderProgram.hpp
+	*	1582298621	0
+	"	255	16
+	^	246	18
+	.	246	17
+	+	285	62
+	+	317	13
+	+	319	24
+	+	324	74
+	+	327	74
+	+	330	74
+	+	333	58
+	+	336	54
+	+	345	67
+	+	353	17
+	+	346	0
+	+	5	32
+	+	345	44
+	+	373	55
+	+	373	27
+	+	373	54
+	+	373	21
+	+	373	37
+	+	373	17
+	+	373	23
+	+	373	22
+	+	373	5
+	+	373	16
+	+	373	4
+	+	213	0
+	+	212	58
+	+	339	37
+	+	340	21
+	+	365	0
+	+	364	0
+	+	215	41
+	+	218	42
+	+	279	24
+	+	285	27
+	+	305	32
+	+	312	40
+	+	314	36
+	+	317	20
+	+	305	43
+	+	336	43
+	+	373	0
+	+	184	0
+	+	162	34
+	+	163	60
+	+	169	0
+	+	167	15
+	+	164	13
+	+	166	27
+	+	167	16
+	+	44	0
+	+	42	0
+	+	28	0
+	+	28	25
+	+	30	24
+	+	32	30
+	+	34	23
+	+	36	22
+	+	38	23
+	+	40	17
+	+	29	33
+	+	30	0
+	+	32	0
+	+	34	0
+	+	36	0
+	+	38	0
 	+	40	0
-	+	40	15
-	+	40	0
-	+	3	0
-	+	7	0
-	+	15	0
-	+	53	0
-	+	7	0
-	+	53	0
-	+	15	0
-	+	3	0
-	+	239	0
-	+	248	17
-	+	247	21
-	+	248	19
-	+	147	5
-	+	148	0
-	+	149	4
-	+	176	30
+	+	42	0
+	+	42	30
+	+	43	18
+	+	167	70
+	+	163	19
+	+	170	46
+	+	172	36
+	+	177	65
+	+	183	0
+	+	179	45
+	+	183	0
 	+	180	0
-	+	178	40
-	+	179	44
-	+	177	41
-	+	181	0
-	+	186	0
-	+	181	30
-	+	186	30
-	+	182	35
-	+	184	43
-	+	182	38
-	+	177	23
-	+	187	23
-	+	182	37
-	+	187	36
-	+	189	43
-	+	178	0
-	+	183	41
-	+	184	45
+	+	171	4
+	+	177	0
+	+	178	9
+	+	168	11
+	+	175	11
+	+	182	11
+	+	181	67
+	+	25	35
+	+	42	0
+	+	43	31
+	+	215	53
+	+	286	0
+	+	284	0
+	+	289	0
+	+	288	4
+	+	289	4
+	+	266	23
+	+	267	20
+	+	268	22
+	+	264	33
+	+	212	17
+	+	246	17
 
-> O:\code\NERD_tree_1
-	*	1582291270	0
-	"	9	8
+> O:\code\rendering\openGLState.hpp
+	*	1582298612	0
+	"	28	17
+	^	18	0
+	.	17	23
+	+	1	27
+	+	2	6
+	+	61	5
+	+	7	0
+	+	61	0
+	+	15	0
+	+	28	0
+	+	61	0
+	+	61	21
+	+	61	0
+	+	61	43
+	+	61	0
+	+	16	0
+	+	5	8
+	+	5	29
+	+	20	18
+	+	20	22
+	+	21	16
+	+	25	0
+	+	25	9
+	+	21	15
+	+	23	0
+	+	22	49
+	+	23	0
+	+	23	34
+	+	22	0
+	+	22	49
+	+	23	0
+	+	25	0
+	+	23	38
+	+	17	23
+
+> O:\code\NERD_tree_5
+	*	1582298428	0
+	"	11	0
 	.	1	0
 	+	1	0
+
+> O:\code\win32\win32_gameHooks.cpp
+	*	1582295664	0
+	"	32	4
+	^	120	23
+	.	114	0
+	+	1	27
+	+	2	8
+	+	28	15
+	+	91	18
+	+	100	20
+	+	105	18
+	+	112	18
+	+	118	18
+	+	28	0
+	+	90	31
+	+	94	19
+	+	123	84
+	+	126	0
+	+	124	26
+	+	125	35
+	+	28	0
+	+	27	0
+	+	28	0
+	+	72	0
+	+	84	0
+	+	72	0
+	+	84	0
+	+	74	23
+	+	75	23
+	+	77	0
+	+	76	0
+	+	77	96
+	+	79	0
+	+	81	46
+	+	83	0
+	+	81	45
+	+	80	0
+	+	78	10
+	+	82	30
+	+	82	0
+	+	77	97
+	+	137	8
+	+	138	8
+	+	96	22
+	+	106	23
+	+	113	23
+	+	120	22
+	+	109	0
+	+	106	0
+	+	107	0
+	+	106	0
+	+	108	0
+	+	113	0
+	+	114	0
+
+> O:\code\NERD_tree_2
+	*	1582294082	0
+	"	7	0
+	.	1	0
+	+	1	0
+
+> O:\code\NERD_tree_4
+	*	1582294081	0
+	"	7	0
+	.	1	0
+	+	1	0
+
+> O:\ressources\shaders\image.vert
+	*	1582293923	0
+	"	4	0
+	^	12	16
+	.	6	7
+	+	1	5
+	+	3	13
+	+	6	13
+	+	9	0
+	+	4	12
+	+	5	0
+	+	13	0
+	+	8	18
+	+	11	39
+	+	12	15
+	+	6	7
+
+> O:\code\NERD_tree_3
+	*	1582293920	0
+	"	15	0
+	.	1	0
+	+	1	0
+
+> O:\code\game.hpp
+	*	1582291378	0
+	"	16	20
+	^	16	21
+	.	16	20
+	+	2	19
+	+	37	5
+	+	13	0
+	+	24	0
+	+	13	15
+	+	13	0
+	+	8	1
+	+	6	52
+	+	8	0
+	+	7	38
+	+	13	0
+	+	13	10
+	+	13	18
+	+	24	0
+	+	13	0
+	+	24	0
+	+	13	0
+	+	24	0
+	+	13	0
+	+	13	39
+	+	13	21
+	+	13	22
+	+	13	15
+	+	13	0
+	+	13	17
+	+	13	0
+	+	13	52
+	+	13	54
+	+	13	36
+	+	13	49
+	+	13	52
+	+	13	0
+	+	24	0
+	+	13	0
+	+	20	18
+	+	13	22
+	+	24	0
+	+	23	9
+	+	24	0
+	+	13	16
+	+	25	0
+	+	13	0
+	+	9	0
+	+	21	19
+	+	13	0
+	+	9	0
+	+	13	0
+	+	10	0
+	+	12	0
+	+	13	0
+	+	28	0
+	+	15	19
+	+	16	20
 
 > O:\code\platform.hpp
 	*	1582291267	0
@@ -965,50 +1483,6 @@ $gameState->
 	+	214	21
 	+	39	8
 
-> O:\code\win32\win32_gameHooks.cpp
-	*	1582289428	0
-	"	229	0
-	^	138	9
-	.	138	8
-	+	1	27
-	+	2	8
-	+	28	15
-	+	91	18
-	+	100	20
-	+	105	18
-	+	112	18
-	+	118	18
-	+	28	0
-	+	90	31
-	+	94	19
-	+	123	84
-	+	126	0
-	+	124	26
-	+	125	35
-	+	28	0
-	+	27	0
-	+	28	0
-	+	72	0
-	+	84	0
-	+	72	0
-	+	84	0
-	+	74	23
-	+	75	23
-	+	77	0
-	+	76	0
-	+	77	96
-	+	79	0
-	+	81	46
-	+	83	0
-	+	81	45
-	+	80	0
-	+	78	10
-	+	82	30
-	+	82	0
-	+	77	97
-	+	137	8
-	+	138	8
-
 > O:\code\win32\win32_fileListener.cpp
 	*	1582289425	0
 	"	292	0
@@ -1101,68 +1575,6 @@ $gameState->
 	+	122	90
 	+	123	0
 	+	13	0
-
-> O:\code\NERD_tree_4
-	*	1582289417	0
-	"	13	0
-	.	1	0
-	+	1	0
-
-> O:\code\game.hpp
-	*	1582289315	0
-	"	21	0
-	.	28	0
-	+	2	19
-	+	37	5
-	+	13	0
-	+	24	0
-	+	13	15
-	+	13	0
-	+	8	1
-	+	6	52
-	+	8	0
-	+	7	38
-	+	13	0
-	+	13	10
-	+	13	18
-	+	24	0
-	+	13	0
-	+	24	0
-	+	13	0
-	+	24	0
-	+	13	0
-	+	13	39
-	+	13	21
-	+	13	22
-	+	13	15
-	+	13	0
-	+	13	17
-	+	13	0
-	+	13	52
-	+	13	54
-	+	13	36
-	+	13	49
-	+	13	52
-	+	13	0
-	+	24	0
-	+	13	0
-	+	20	18
-	+	13	22
-	+	24	0
-	+	23	9
-	+	24	0
-	+	13	16
-	+	25	0
-	+	13	0
-	+	9	0
-	+	21	19
-	+	13	0
-	+	9	0
-	+	13	0
-	+	10	0
-	+	12	0
-	+	13	0
-	+	28	0
 
 > O:\code\rendering\shaderprogram.hpp
 	*	1582289035	0
@@ -1341,12 +1753,6 @@ $gameState->
 	+	6	17
 	+	7	0
 
-> O:\code\NERD_tree_2
-	*	1582288966	0
-	"	11	0
-	.	1	0
-	+	1	0
-
 > O:\code\NERD_tree_6
 	*	1582288796	0
 	"	12	0
@@ -1396,23 +1802,11 @@ $gameState->
 	+	25	0
 	+	26	0
 
-> O:\code\NERD_tree_5
-	*	1582288319	0
-	"	9	0
-	.	1	0
-	+	1	0
-
 > O:\code\utils\fileIO.hpp
 	*	1582288289	0
 	"	6	10
 	.	6	10
 	+	6	10
-
-> O:\code\NERD_tree_3
-	*	1582288249	0
-	"	9	0
-	.	1	0
-	+	1	0
 
 > O:\code\utils\sound.hpp
 	*	1582285819	0
@@ -1610,280 +2004,6 @@ $gameState->
 	+	10	7
 	+	11	27
 
-> O:\code\rendering\openGLState.hpp
-	*	1582251236	0
-	"	52	0
-	^	5	30
-	.	5	29
-	+	1	27
-	+	2	6
-	+	54	5
-	+	7	0
-	+	54	0
-	+	15	0
-	+	21	0
-	+	54	0
-	+	54	21
-	+	54	0
-	+	54	43
-	+	54	0
-	+	16	0
-	+	5	8
-	+	5	29
-
-> O:\code\rendering\mesh.hpp
-	*	1582251224	0
-	"	294	7
-	^	23	31
-	.	23	30
-	+	379	23
-	+	380	19
-	+	381	0
-	+	403	0
-	+	375	0
-	+	388	0
-	+	383	1
-	+	388	0
-	+	306	0
-	+	383	0
-	+	388	0
-	+	383	41
-	+	388	0
-	+	384	0
-	+	383	38
-	+	385	0
-	+	386	37
-	+	387	51
-	+	388	0
-	+	393	0
-	+	392	25
-	+	393	0
-	+	391	0
-	+	397	0
-	+	402	0
-	+	396	20
-	+	401	0
-	+	400	3
-	+	373	0
-	+	371	11
-	+	373	0
-	+	400	21
-	+	396	9
-	+	373	0
-	+	372	32
-	+	370	35
-	+	372	73
-	+	400	53
-	+	372	69
-	+	391	25
-	+	11	14
-	+	286	60
-	+	287	46
-	+	285	0
-	+	295	0
-	+	337	7
-	+	331	10
-	+	332	26
-	+	332	0
-	+	336	0
-	+	337	0
-	+	336	16
-	+	302	4
-	+	302	0
-	+	302	27
-	+	313	0
-	+	314	52
-	+	315	31
-	+	302	0
-	+	298	0
-	+	297	0
-	+	298	0
-	+	300	0
-	+	299	0
-	+	299	23
-	+	299	61
-	+	299	0
-	+	299	32
-	+	299	41
-	+	299	50
-	+	299	0
-	+	299	17
-	+	299	13
-	+	299	27
-	+	299	0
-	+	299	47
-	+	299	0
-	+	345	0
-	+	344	0
-	+	359	0
-	+	312	23
-	+	314	0
-	+	349	29
-	+	357	52
-	+	353	23
-	+	40	0
-	+	38	0
-	+	40	0
-	+	26	17
-	+	27	25
-	+	29	25
-	+	31	27
-	+	33	23
-	+	35	27
-	+	37	27
-	+	39	27
-	+	26	0
-	+	23	30
-
-> O:\code\rendering\autoMesh.hpp
-	*	1582251223	0
-	"	31	0
-	^	42	6
-	.	37	0
-	+	1	25
-	+	2	7
-	+	109	5
-	+	5	0
-	+	6	0
-	+	4	31
-	+	18	59
-	+	19	0
-	+	28	0
-	+	21	17
-	+	22	15
-	+	19	101
-	+	22	22
-	+	24	21
-	+	23	32
-	+	24	49
-	+	25	44
-	+	27	0
-	+	30	0
-	+	12	0
-	+	27	28
-	+	41	81
-	+	42	55
-	+	21	20
-	+	22	17
-	+	24	23
-	+	25	23
-	+	27	23
-	+	23	32
-	+	42	23
-	+	28	31
-	+	37	28
-	+	41	5
-	+	42	5
-	+	28	0
-	+	16	0
-	+	37	0
-
-> O:\code\rendering\autoShaderProgram.hpp
-	*	1582250524	0
-	"	268	25
-	^	264	34
-	.	264	33
-	+	314	48
-	+	155	6
-	+	285	62
-	+	317	13
-	+	319	24
-	+	324	74
-	+	327	74
-	+	330	74
-	+	333	58
-	+	336	54
-	+	345	67
-	+	353	17
-	+	346	0
-	+	5	32
-	+	345	44
-	+	373	55
-	+	373	27
-	+	373	54
-	+	373	21
-	+	373	37
-	+	373	17
-	+	373	23
-	+	373	22
-	+	373	5
-	+	373	16
-	+	373	4
-	+	213	0
-	+	212	58
-	+	339	37
-	+	340	21
-	+	365	0
-	+	364	0
-	+	215	41
-	+	218	42
-	+	279	24
-	+	285	27
-	+	305	32
-	+	312	40
-	+	314	36
-	+	317	20
-	+	305	43
-	+	336	43
-	+	373	0
-	+	184	0
-	+	162	34
-	+	163	60
-	+	169	0
-	+	167	15
-	+	164	13
-	+	166	27
-	+	167	16
-	+	44	0
-	+	42	0
-	+	28	0
-	+	28	25
-	+	30	24
-	+	32	30
-	+	34	23
-	+	36	22
-	+	38	23
-	+	40	17
-	+	29	33
-	+	30	0
-	+	32	0
-	+	34	0
-	+	36	0
-	+	38	0
-	+	40	0
-	+	42	0
-	+	42	30
-	+	43	18
-	+	167	70
-	+	163	19
-	+	170	46
-	+	172	36
-	+	177	65
-	+	183	0
-	+	179	45
-	+	183	0
-	+	180	0
-	+	171	4
-	+	177	0
-	+	178	9
-	+	168	11
-	+	175	11
-	+	182	11
-	+	181	67
-	+	25	35
-	+	42	0
-	+	43	31
-	+	215	53
-	+	286	0
-	+	284	0
-	+	289	0
-	+	288	4
-	+	289	4
-	+	266	23
-	+	267	20
-	+	268	22
-	+	264	33
-
 > O:\ressources\shaders\sky.vert
 	*	1582250029	0
 	"	4	7
@@ -1928,23 +2048,6 @@ $gameState->
 	+	17	29
 	+	14	5
 	+	15	26
-
-> O:\ressources\shaders\image.vert
-	*	1582250014	0
-	"	7	0
-	^	12	16
-	.	6	7
-	+	1	5
-	+	3	13
-	+	6	13
-	+	9	0
-	+	4	12
-	+	5	0
-	+	13	0
-	+	8	18
-	+	11	39
-	+	12	15
-	+	6	7
 
 > O:\ressources\shaders\color.frag
 	*	1582246646	0
