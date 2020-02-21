@@ -1,18 +1,19 @@
-#ifndef __GAME_HPP__
-#define __GAME_HPP__
+#ifndef __PLATFORM_HPP__
+#define __PLATFORM_HPP__
 
 #include "uppLib.hpp"
 
-// Things that need to be defined in the platformSpecifics.hpp
-struct Pixel; // Has to contain bytes r, g, b and a. Is defined by the platform
-#ifndef DECLARE_EXPORT
-#error "Macro DeclareExport was not defined"
-#endif
-
-// Defines
+// DEFINES
 #define NUM_KEYS 256
 #define NUM_MOUSE_KEYS 3
 
+// PLATFORM CALLBACKS
+typedef int ListenerToken;
+typedef void (*listenerCallbackFunc)(const char* filename, void* userData);
+ListenerToken createFileListener(const char* path, listenerCallbackFunc callback, void* userData);
+void deleteFileListener(ListenerToken token);
+
+// PLATFORM STRUCTS
 struct Input
 {
     byte keyDown[NUM_KEYS]; // If the key is currently down
@@ -74,14 +75,6 @@ struct GameState
     SoundInfo soundInfo;
     WindowState windowState;
 };
-
-typedef void (*gameInitFunc)(GameState* state); // Gets called once at program startup
-typedef void (*gameTickFunc)(GameState* state); // Gets called every tick 
-typedef void (*gameShutdownFunc)(GameState* state); // Gets called at program end
-typedef void (*gameAudioFunc)(GameState* state, byte* stream, int length); // Gets called on each audio stream
-typedef void (*gameBeforeResetFunc)(GameState* state); // Gets called before each reset
-typedef void (*gameAfterResetFunc)(GameState* state); // Gets called after each reset
-typedef void (*gameLoadFunctionPtrsFunc)(void** functions); // Gets called each time game loads
 
 typedef enum
 {

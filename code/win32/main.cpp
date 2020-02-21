@@ -1,4 +1,3 @@
-#include "platformSpecific.cpp"
 #include "..\platform.hpp"
 
 #include <uppLib.hpp>
@@ -26,7 +25,7 @@
 // ---------------
 GameState gameState = {};
 
-// WindowState
+// WindowState needs to be global because it is used in message callback
 struct ActualWinState
 {
     int width;
@@ -335,6 +334,14 @@ LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
 // ------------------------------
 // --- DYNAMIC GAME RELOADING ---
 // ------------------------------
+typedef void (*gameInitFunc)(GameState* state); // Gets called once at program startup
+typedef void (*gameTickFunc)(GameState* state); // Gets called every tick 
+typedef void (*gameShutdownFunc)(GameState* state); // Gets called at program end
+typedef void (*gameAudioFunc)(GameState* state, byte* stream, int length); // Gets called on each audio stream
+typedef void (*gameBeforeResetFunc)(GameState* state); // Gets called before each reset
+typedef void (*gameAfterResetFunc)(GameState* state); // Gets called after each reset
+typedef void (*gameLoadFunctionPtrsFunc)(void** functions); // Gets called each time game loads
+
 gameInitFunc gameInit;
 gameTickFunc gameTick;
 gameShutdownFunc gameShutdown;
@@ -951,9 +958,11 @@ bool handleGameRequests(HWND hwnd)
     if (o->vsync != actual->vsync) {
         actual->vsync = o->vsync;
         if (o->vsync) {
+            loggf("Vsync set to on\n");
             wglSwapIntervalEXT(-1);
         }
         else {
+            loggf("Vsync set to off\n");
             wglSwapIntervalEXT(0);
         }
     }
@@ -1190,7 +1199,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
 
         // Show buffer (Hint: Maybe wait for vblanc to swap?)
         if (actualWinState.continuousDraw || actualWinState.redraw) {
-            glFinish();
+            //glFinish(); // (Hint: maybe do this sometimes?);
             SwapBuffers(deviceContext);
             actualWinState.redraw = false;
         }

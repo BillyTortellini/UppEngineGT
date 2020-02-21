@@ -3,8 +3,7 @@
 
 #include "uppLib.hpp"
 #include "../utils/tmpAlloc.hpp"
-#include "../fileIO.hpp"
-#include "../fileListener.hpp"
+#include "../utils/fileIO.hpp"
 
 // Render includes
 #include "openGLState.hpp"

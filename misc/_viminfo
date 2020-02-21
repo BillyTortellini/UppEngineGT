@@ -11,33 +11,45 @@
 # hlsearch on (H) or off (h):
 ~h
 # Last Search Pattern:
-~MSle0~/gameInit
+~MSle0~/sleep
 
 # Last Substitute Search Pattern:
-~MSle0&1024
+~MSle0&gameState.
 
 # Last Substitute String:
-$4096
+$gameState->
 
 # Command Line History (newest to oldest):
-:wqa
-|2,0,1582252220,,"wqa"
-:w
-|2,0,1582252214,,"w"
 :q
-|2,0,1582251270,,"q"
+|2,0,1582291280,,"q"
+:wq
+|2,0,1582291279,,"wq"
+:w
+|2,0,1582291225,,"w"
+:'<,'>s/gameState./gameState->/g
+|2,0,1582291029,,"'<,'>s/gameState./gameState->/g"
+:wjj
+|2,0,1582288533,,"wjj"
+:wqa
+|2,0,1582285712,,"wqa"
+:waa
+|2,0,1582285711,,"waa"
+:%s/DECLARE_EXPORT/__declspec(dllexport)/gc
+|2,0,1582284015,,"%s/DECLARE_EXPORT/__declspec(dllexport)/gc"
+:register
+|2,0,1582283790,,"register"
+:only
+|2,0,1582283495,,"only"
+:a
+|2,0,1582283219,,"a"
 :'<,'>/\//gc
 |2,0,1582250550,,"'<,'>/\\//gc"
-:wq
-|2,0,1582249078,,"wq"
 :%s/1024/4096/gc
 |2,0,1582248064,,"%s/1024/4096/gc"
 :%s/%ld/%llu/gc
 |2,0,1582248027,,"%s/%ld/%llu/gc"
 :vsplit
 |2,0,1582245983,,"vsplit"
-:only
-|2,0,1582224311,,"only"
 :'<,'>s/\\//g
 |2,0,1582221841,,"'<,'>s/\\\\//g"
 :%s/actualWinState\./actual->/gc
@@ -74,6 +86,48 @@ $4096
 |2,0,1581967249,,"qa"
 
 # Search String History (newest to oldest):
+?/sleep
+|2,1,1582291222,47,"sleep"
+? gameState.
+|2,1,1582291029,,"gameState."
+?/gameTick
+|2,1,1582290917,47,"gameTick"
+?/renderS
+|2,1,1582289966,47,"renderS"
+? \<sleepUntil\>
+|2,1,1582289954,,"\\<sleepUntil\\>"
+? \<wglSwapIntervalEXT\>
+|2,1,1582289917,,"\\<wglSwapIntervalEXT\\>"
+?/vsyn
+|2,1,1582289901,47,"vsyn"
+?/SwapB
+|2,1,1582289567,47,"SwapB"
+?/handle
+|2,1,1582289521,47,"handle"
+?/INVALID_
+|2,1,1582289027,47,"INVALID_"
+?/createFileL
+|2,1,1582288855,47,"createFileL"
+? \<_createFileListener\>
+|2,1,1582288851,,"\\<_createFileListener\\>"
+?/INVALID_TOK
+|2,1,1582288553,47,"INVALID_TOK"
+?/INVALID_TOKEN
+|2,1,1582288450,47,"INVALID_TOKEN"
+?/createFile
+|2,1,1582288425,47,"createFile"
+? \<initGlobals\>
+|2,1,1582288024,,"\\<initGlobals\\>"
+?/#error
+|2,1,1582285647,47,"#error"
+? \<initUniforms\>
+|2,1,1582284271,,"\\<initUniforms\\>"
+? DECLARE_EXPORT
+|2,1,1582284015,,"DECLARE_EXPORT"
+?/%
+|2,1,1582284004,47,"%"
+? \<Pixel\>
+|2,1,1582283958,,"\\<Pixel\\>"
 ?/gameInit
 |2,1,1582251860,47,"gameInit"
 ? \<cubeMesh\>
@@ -130,54 +184,24 @@ $4096
 |2,1,1582230131,47,"au"
 ? \<afterProcessWindowMessages\>
 |2,1,1582228201,,"\\<afterProcessWindowMessages\\>"
-?/handle
-|2,1,1582227372,47,"handle"
 ?/width
 |2,1,1582227265,47,"width"
-?/glViewport
-|2,1,1582227153,47,"glViewport"
-? \<createGameAlloc\>
-|2,1,1582227101,,"\\<createGameAlloc\\>"
-?/u_MVP
-|2,1,1582226882,47,"u_MVP"
-? \<draw\>
-|2,1,1582226730,,"\\<draw\\>"
-?/SwapBu
-|2,1,1582226603,47,"SwapBu"
-? \<setGameFunctionPtrs\>
-|2,1,1582226486,,"\\<setGameFunctionPtrs\\>"
-? \<loadGameFunctions\>
-|2,1,1582226484,,"\\<loadGameFunctions\\>"
-? \<initDynamicReloading\>
-|2,1,1582226481,,"\\<initDynamicReloading\\>"
-?/dataAnd
-|2,1,1582226355,47,"dataAnd"
-?/update
-|2,1,1582226167,47,"update"
-?/gameTick
-|2,1,1582226144,47,"gameTick"
-?/gameAlloc = 
-|2,1,1582226052,47,"gameAlloc = "
-? \<wasMoved\>
-|2,1,1582224906,,"\\<wasMoved\\>"
-?/wasMove
-|2,1,1582224879,47,"wasMove"
-?/handleGame
-|2,1,1582224742,47,"handleGame"
-?/debugGame
-|2,1,1582224625,47,"debugGame"
-?/handleGameRe
-|2,1,1582224411,47,"handleGameRe"
-?/handleGameRE
-|2,1,1582224407,47,"handleGameRE"
-?/game
-|2,1,1582224301,47,"game"
-?/full
-|2,1,1582224293,47,"full"
 
 # Expression History (newest to oldest):
 
 # Input Line History (newest to oldest):
+@O:\code\utils\fileIO.hpp
+|2,3,1582285816,,"O:\\code\\utils\\fileIO.hpp"
+@O:\code\utils\sound.hpp
+|2,3,1582285777,,"O:\\code\\utils\\sound.hpp"
+@O:\code\win32\win32_gameHooks.cpp
+|2,3,1582284087,,"O:\\code\\win32\\win32_gameHooks.cpp"
+@O:\code\
+|2,3,1582283454,,"O:\\code\\"
+@O:\code\win32\gameLoader.cpp
+|2,3,1582283329,,"O:\\code\\win32\\gameLoader.cpp"
+@O:\code\game.hpp
+|2,3,1582282739,,"O:\\code\\game.hpp"
 @O:\code\gameHook.cpp
 |2,3,1582225347,,"O:\\code\\gameHook.cpp"
 @O:\code\win32\gameHook.cpp
@@ -221,39 +245,35 @@ $4096
 
 # Registers:
 "0	LINE	0
-	    addResetFunction([](){shutdown(&cubeMesh);});
-|3,0,0,1,1,0,1582252084,"    addResetFunction([](){shutdown(&cubeMesh);});"
-"1	LINE	0
-	void add
-|3,0,1,1,1,0,1582251928,"void add"
+	            glFinish();
+|3,0,0,1,1,0,1582291136,"            glFinish();"
+""1	LINE	0
+	    loggf("sleep for: %3.3fms \n", (float)diff*1000);
+|3,1,1,1,1,0,1582291224,"    loggf(\"sleep for: %3.3fms \\n\", (float)diff*1000);"
 "2	LINE	0
-	    gameData
-|3,0,2,1,1,0,1582251922,"    gameData"
+	            glFinish();
+|3,0,2,1,1,0,1582291170,"            glFinish();"
 "3	LINE	0
-	    //draw(&colorShader, &cubeMesh, vec3(0.0f));
-|3,0,3,1,1,0,1582251188,"    //draw(&colorShader, &cubeMesh, vec3(0.0f));"
+	            glFinish();
+|3,0,3,1,1,0,1582291168,"            glFinish();"
 "4	LINE	0
-	    //draw(&colorShader, &testMesh, vec3(0.0f));
-|3,0,4,1,1,0,1582251187,"    //draw(&colorShader, &testMesh, vec3(0.0f));"
+	            glFinish();
+|3,0,4,1,1,0,1582291166,"            glFinish();"
 "5	LINE	0
-	    // Color shader
-|3,0,5,1,1,0,1582251179,"    // Color shader"
+	        loggf("V
+|3,0,5,1,1,0,1582290939,"        loggf(\"V"
 "6	LINE	0
-	
-|3,0,6,1,1,0,1582251177,""
+	        gameState->windowState.hideCursor = !gameState->windowState.hideCursor;
+|3,0,6,1,1,0,1582290933,"        gameState->windowState.hideCursor = !gameState->windowState.hideCursor;"
 "7	LINE	0
-	    // Test shader
-|3,0,7,1,1,0,1582251177,"    // Test shader"
+	        loggf("Hide cursor set to: %s\n", gameState->windowState.hideCursor ? "TRUE" : "FALSE");
+|3,0,7,1,1,0,1582290933,"        loggf(\"Hide cursor set to: %s\\n\", gameState->windowState.hideCursor ? \"TRUE\" : \"FALSE\");"
 "8	LINE	0
-	    bind(&testShader);
-	    bind(&testMesh);
-	    update(&gameData->camera, gameData->frameCount);
-	    setUniform(&testShader, "u_MVP", gameData->camera.vp);
-	    //draw(&testMesh);
-|3,0,8,1,5,0,1582251175,"    bind(&testShader);","    bind(&testMesh);","    update(&gameData->camera, gameData->frameCount);","    setUniform(&testShader, \"u_MVP\", gameData->camera.vp);","    //draw(&testMesh);"
+	        loggf("sleep for: %3.2fms\n", (float)(frameTime + gameStart - currentTime())*1000); 
+|3,0,8,1,1,0,1582289753,"        loggf(\"sleep for: %3.2fms\\n\", (float)(frameTime + gameStart - currentTime())*1000); "
 "9	LINE	0
-	
-|3,0,9,1,1,0,1582251164,""
+	    logg("\n");
+|3,0,9,1,1,0,1582289563,"    logg(\"\\n\");"
 "a@	CHAR	0
 	$xj0
 |3,2,10,0,1,0,1582250556,"$xj0"
@@ -263,57 +283,103 @@ $4096
 |3,0,19,0,1,0,1582133984,>750
 |<"k:w€k527GzzlllllllllllllllllllllllllllllllllciwerrorMsg:w27Gklllllllllllllllllllljlllllllllfo;ar:w109G$hhhhhhhhhhhhhhhhhi(GLchar*) :w109G143GzzOstruct ShaderProgram;l.w€kb€kb€kba /€ü €kb/€ü Forward declaration:w€k527Gjk$hhhhhhhhhhhhhhhhlllllllvlllllllxhhhhhhhhi(char+€kb*€kb*) .wu:wh%%uuuhhhhhhhhhhhhhhhhhhhhhhhvhhhhhhhhhhhhhhhhhlximaxLength:wlllllllllllllllichar€kb€kb€kb€kb(char*):w€k5165GzzllllllllllllllllllllllllciwattribCount:w181Gllllllllllllllllllllllllxxi.:
 |<w€ý,€ý.€k5181Gzzlllllllllllllllllllllllllllllj0wlllllllllllxxi.:whhhhh%%%%%€k5193Gjkka;:w€k5204GzzllllllllllllcihhhhhhhhcWuniformCount:w€k5217Gllllllllllllllllllllllllllllh0wllllxxi.:wjllllllllxhxi.:w/infonnllllclhxxi.:wj0wlllllllllllxxi.:w"
-""-	CHAR	0
-	/
-|3,1,36,0,1,0,1582252213,"/"
+"-	CHAR	0
+	"
+|3,0,36,0,1,0,1582291187,"\""
 
 # File marks:
-'0  19  0  O:\ressources\shaders\color.vert
-|4,48,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
-'1  167  0  O:\code\game.cpp
-|4,49,167,0,1582246550,"O:\\code\\game.cpp"
-'2  163  0  O:\code\game.cpp
-|4,50,163,0,1582246550,"O:\\code\\game.cpp"
-'3  366  0  O:\code\rendering\autoShaderProgram.hpp
-|4,51,366,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
-'4  317  0  O:\code\rendering\autoShaderProgram.hpp
-|4,52,317,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
-'5  362  0  O:\code\rendering\autoShaderProgram.hpp
-|4,53,362,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
-'6  313  0  O:\code\rendering\autoShaderProgram.hpp
-|4,54,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
-'7  2  0  O:\code\rendering\autoMesh.hpp
-|4,55,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
-'8  2  0  O:\code\rendering\autoMesh.hpp
-|4,56,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
-'9  2  0  O:\code\rendering\autoMesh.hpp
-|4,57,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
+'0  18  4  O:\ressources\shaders\color.vert
+|4,48,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
+'1  18  0  O:\code\win32\main.cpp
+|4,49,18,0,1582285712,"O:\\code\\win32\\main.cpp"
+'2  18  0  O:\code\win32\main.cpp
+|4,50,18,0,1582285712,"O:\\code\\win32\\main.cpp"
+'3  19  0  O:\ressources\shaders\color.vert
+|4,51,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
+'4  19  0  O:\ressources\shaders\color.vert
+|4,52,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
+'5  153  0  O:\code\game.cpp
+|4,53,153,0,1582246550,"O:\\code\\game.cpp"
+'6  149  0  O:\code\game.cpp
+|4,54,149,0,1582246550,"O:\\code\\game.cpp"
+'7  167  0  O:\code\game.cpp
+|4,55,167,0,1582246550,"O:\\code\\game.cpp"
+'8  163  0  O:\code\game.cpp
+|4,56,163,0,1582246550,"O:\\code\\game.cpp"
+'9  153  0  O:\code\game.cpp
+|4,57,153,0,1582246550,"O:\\code\\game.cpp"
 
 # Jumplist (newest first):
+-'  18  4  O:\ressources\shaders\color.vert
+|4,39,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
+-'  1  0  O:\ressources\shaders\color.vert
+|4,39,1,0,1582289356,"O:\\ressources\\shaders\\color.vert"
+-'  13  0  O:\code\NERD_tree_4
+|4,39,13,0,1582289356,"O:\\code\\NERD_tree_4"
+-'  24  2  O:\code\NERD_tree_4
+|4,39,24,2,1582289355,"O:\\code\\NERD_tree_4"
+-'  1  0  O:\code\NERD_tree_4
+|4,39,1,0,1582289355,"O:\\code\\NERD_tree_4"
+-'  18  0  O:\code\win32\main.cpp
+|4,39,18,0,1582285712,"O:\\code\\win32\\main.cpp"
+-'  344  0  O:\code\win32\main.cpp
+|4,39,344,0,1582284168,"O:\\code\\win32\\main.cpp"
+-'  1  0  O:\code\win32\main.cpp
+|4,39,1,0,1582283877,"O:\\code\\win32\\main.cpp"
+-'  1  0  O:\code\NERD_tree_4
+|4,39,1,0,1582283877,"O:\\code\\NERD_tree_4"
+-'  19  0  O:\ressources\shaders\color.vert
+|4,39,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
 -'  19  0  O:\ressources\shaders\color.vert
 |4,39,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
 -'  17  4  O:\ressources\shaders\color.vert
 |4,39,17,4,1582252212,"O:\\ressources\\shaders\\color.vert"
+-'  17  4  O:\ressources\shaders\color.vert
+|4,39,17,4,1582252212,"O:\\ressources\\shaders\\color.vert"
+-'  166  0  O:\code\rendering\texture.hpp
+|4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
 -'  166  0  O:\code\rendering\texture.hpp
 |4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
 -'  1  0  O:\code\rendering\texture.hpp
 |4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
+-'  1  0  O:\code\rendering\texture.hpp
+|4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
+-'  1  0  O:\code\NERD_tree_1
+|4,39,1,0,1582251392,"O:\\code\\NERD_tree_1"
 -'  1  0  O:\code\NERD_tree_1
 |4,39,1,0,1582251392,"O:\\code\\NERD_tree_1"
 -'  163  0  O:\code\game.cpp
 |4,39,163,0,1582246550,"O:\\code\\game.cpp"
+-'  163  0  O:\code\game.cpp
+|4,39,163,0,1582246550,"O:\\code\\game.cpp"
+-'  135  0  O:\code\game.cpp
+|4,39,135,0,1582246360,"O:\\code\\game.cpp"
 -'  135  0  O:\code\game.cpp
 |4,39,135,0,1582246360,"O:\\code\\game.cpp"
 -'  143  0  O:\code\game.cpp
 |4,39,143,0,1582246359,"O:\\code\\game.cpp"
+-'  143  0  O:\code\game.cpp
+|4,39,143,0,1582246359,"O:\\code\\game.cpp"
+-'  132  0  O:\code\game.cpp
+|4,39,132,0,1582246339,"O:\\code\\game.cpp"
 -'  132  0  O:\code\game.cpp
 |4,39,132,0,1582246339,"O:\\code\\game.cpp"
 -'  136  12  O:\code\game.cpp
 |4,39,136,12,1582246161,"O:\\code\\game.cpp"
+-'  136  12  O:\code\game.cpp
+|4,39,136,12,1582246161,"O:\\code\\game.cpp"
+-'  94  0  O:\code\game.cpp
+|4,39,94,0,1582245923,"O:\\code\\game.cpp"
 -'  94  0  O:\code\game.cpp
 |4,39,94,0,1582245923,"O:\\code\\game.cpp"
 -'  146  0  O:\code\game.cpp
 |4,39,146,0,1582230764,"O:\\code\\game.cpp"
+-'  146  0  O:\code\game.cpp
+|4,39,146,0,1582230764,"O:\\code\\game.cpp"
+-'  191  43  O:\code\game.cpp
+|4,39,191,43,1582230743,"O:\\code\\game.cpp"
+-'  195  4  O:\code\game.cpp
+|4,39,195,4,1582230743,"O:\\code\\game.cpp"
 -'  191  43  O:\code\game.cpp
 |4,39,191,43,1582230743,"O:\\code\\game.cpp"
 -'  195  4  O:\code\game.cpp
@@ -322,40 +388,84 @@ $4096
 |4,39,188,4,1582230726,"O:\\code\\game.cpp"
 -'  186  36  O:\code\game.cpp
 |4,39,186,36,1582230726,"O:\\code\\game.cpp"
+-'  188  4  O:\code\game.cpp
+|4,39,188,4,1582230726,"O:\\code\\game.cpp"
+-'  186  36  O:\code\game.cpp
+|4,39,186,36,1582230726,"O:\\code\\game.cpp"
+-'  239  0  O:\code\game.cpp
+|4,39,239,0,1582230677,"O:\\code\\game.cpp"
 -'  239  0  O:\code\game.cpp
 |4,39,239,0,1582230677,"O:\\code\\game.cpp"
 -'  131  8  O:\code\game.cpp
 |4,39,131,8,1582230661,"O:\\code\\game.cpp"
+-'  131  8  O:\code\game.cpp
+|4,39,131,8,1582230661,"O:\\code\\game.cpp"
 -'  116  8  O:\code\game.cpp
 |4,39,116,8,1582230611,"O:\\code\\game.cpp"
+-'  116  8  O:\code\game.cpp
+|4,39,116,8,1582230611,"O:\\code\\game.cpp"
+-'  95  45  O:\code\game.cpp
+|4,39,95,45,1582230463,"O:\\code\\game.cpp"
 -'  95  45  O:\code\game.cpp
 |4,39,95,45,1582230463,"O:\\code\\game.cpp"
 -'  69  0  O:\code\game.cpp
 |4,39,69,0,1582230336,"O:\\code\\game.cpp"
 -'  87  0  O:\code\game.cpp
 |4,39,87,0,1582230336,"O:\\code\\game.cpp"
+-'  69  0  O:\code\game.cpp
+|4,39,69,0,1582230336,"O:\\code\\game.cpp"
+-'  87  0  O:\code\game.cpp
+|4,39,87,0,1582230336,"O:\\code\\game.cpp"
+-'  13  0  O:\code\game.cpp
+|4,39,13,0,1582230328,"O:\\code\\game.cpp"
 -'  13  0  O:\code\game.cpp
 |4,39,13,0,1582230328,"O:\\code\\game.cpp"
 -'  61  0  O:\code\game.cpp
 |4,39,61,0,1582230327,"O:\\code\\game.cpp"
+-'  61  0  O:\code\game.cpp
+|4,39,61,0,1582230327,"O:\\code\\game.cpp"
+-'  54  0  O:\code\game.cpp
+|4,39,54,0,1582230326,"O:\\code\\game.cpp"
 -'  54  0  O:\code\game.cpp
 |4,39,54,0,1582230326,"O:\\code\\game.cpp"
 -'  58  0  O:\code\game.cpp
 |4,39,58,0,1582230325,"O:\\code\\game.cpp"
 -'  66  0  O:\code\game.cpp
 |4,39,66,0,1582230325,"O:\\code\\game.cpp"
+-'  58  0  O:\code\game.cpp
+|4,39,58,0,1582230325,"O:\\code\\game.cpp"
+-'  66  0  O:\code\game.cpp
+|4,39,66,0,1582230325,"O:\\code\\game.cpp"
 -'  4  0  O:\code\game.cpp
 |4,39,4,0,1582230250,"O:\\code\\game.cpp"
+-'  4  0  O:\code\game.cpp
+|4,39,4,0,1582230250,"O:\\code\\game.cpp"
+-'  1  0  O:\code\game.cpp
+|4,39,1,0,1582230187,"O:\\code\\game.cpp"
 -'  1  0  O:\code\game.cpp
 |4,39,1,0,1582230187,"O:\\code\\game.cpp"
 -'  313  0  O:\code\rendering\autoShaderProgram.hpp
 |4,39,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
 -'  313  0  O:\code\rendering\autoShaderProgram.hpp
 |4,39,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
+-'  313  0  O:\code\rendering\autoShaderProgram.hpp
+|4,39,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
+-'  313  0  O:\code\rendering\autoShaderProgram.hpp
+|4,39,313,0,1582230184,"O:\\code\\rendering\\autoShaderProgram.hpp"
 -'  4  0  O:\code\rendering\autoShaderProgram.hpp
 |4,39,4,0,1582230148,"O:\\code\\rendering\\autoShaderProgram.hpp"
 -'  4  0  O:\code\rendering\autoShaderProgram.hpp
 |4,39,4,0,1582230148,"O:\\code\\rendering\\autoShaderProgram.hpp"
+-'  4  0  O:\code\rendering\autoShaderProgram.hpp
+|4,39,4,0,1582230148,"O:\\code\\rendering\\autoShaderProgram.hpp"
+-'  4  0  O:\code\rendering\autoShaderProgram.hpp
+|4,39,4,0,1582230148,"O:\\code\\rendering\\autoShaderProgram.hpp"
+-'  1  0  O:\code\rendering\autoShaderProgram.hpp
+|4,39,1,0,1582230144,"O:\\code\\rendering\\autoShaderProgram.hpp"
+-'  1  0  O:\code\rendering\autoShaderProgram.hpp
+|4,39,1,0,1582230144,"O:\\code\\rendering\\autoShaderProgram.hpp"
+-'  7  0  O:\code\NERD_tree_1
+|4,39,7,0,1582230144,"O:\\code\\NERD_tree_1"
 -'  1  0  O:\code\rendering\autoShaderProgram.hpp
 |4,39,1,0,1582230144,"O:\\code\\rendering\\autoShaderProgram.hpp"
 -'  1  0  O:\code\NERD_tree_1
@@ -364,6 +474,8 @@ $4096
 |4,39,1,0,1582230144,"O:\\code\\rendering\\autoShaderProgram.hpp"
 -'  8  0  O:\code\NERD_tree_1
 |4,39,8,0,1582230144,"O:\\code\\NERD_tree_1"
+-'  21  2  O:\code\NERD_tree_1
+|4,39,21,2,1582230141,"O:\\code\\NERD_tree_1"
 -'  22  2  O:\code\NERD_tree_1
 |4,39,22,2,1582230141,"O:\\code\\NERD_tree_1"
 -'  1  0  O:\code\NERD_tree_1
@@ -372,12 +484,24 @@ $4096
 |4,39,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
 -'  2  0  O:\code\rendering\autoMesh.hpp
 |4,39,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
+-'  2  0  O:\code\rendering\autoMesh.hpp
+|4,39,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
+-'  2  0  O:\code\rendering\autoMesh.hpp
+|4,39,2,0,1582230134,"O:\\code\\rendering\\autoMesh.hpp"
+-'  1  0  O:\code\rendering\autoMesh.hpp
+|4,39,1,0,1582230132,"O:\\code\\rendering\\autoMesh.hpp"
+-'  1  0  O:\code\rendering\autoMesh.hpp
+|4,39,1,0,1582230132,"O:\\code\\rendering\\autoMesh.hpp"
+-'  6  5  O:\code\NERD_tree_1
+|4,39,6,5,1582230132,"O:\\code\\NERD_tree_1"
 -'  1  0  O:\code\rendering\autoMesh.hpp
 |4,39,1,0,1582230132,"O:\\code\\rendering\\autoMesh.hpp"
 -'  1  0  O:\code\rendering\autoMesh.hpp
 |4,39,1,0,1582230132,"O:\\code\\rendering\\autoMesh.hpp"
 -'  7  5  O:\code\NERD_tree_1
 |4,39,7,5,1582230132,"O:\\code\\NERD_tree_1"
+-'  5  0  O:\code\NERD_tree_1
+|4,39,5,0,1582230131,"O:\\code\\NERD_tree_1"
 -'  6  0  O:\code\NERD_tree_1
 |4,39,6,0,1582230131,"O:\\code\\NERD_tree_1"
 -'  22  2  O:\code\NERD_tree_1
@@ -386,116 +510,14 @@ $4096
 |4,39,1,0,1582230130,"O:\\code\\NERD_tree_1"
 -'  1055  15  O:\code\win32\main.cpp
 |4,39,1055,15,1582228306,"O:\\code\\win32\\main.cpp"
--'  1055  15  O:\code\win32\main.cpp
-|4,39,1055,15,1582228306,"O:\\code\\win32\\main.cpp"
--'  1180  38  O:\code\win32\main.cpp
-|4,39,1180,38,1582228213,"O:\\code\\win32\\main.cpp"
--'  1180  38  O:\code\win32\main.cpp
-|4,39,1180,38,1582228213,"O:\\code\\win32\\main.cpp"
--'  1049  5  O:\code\win32\main.cpp
-|4,39,1049,5,1582228201,"O:\\code\\win32\\main.cpp"
--'  1049  5  O:\code\win32\main.cpp
-|4,39,1049,5,1582228201,"O:\\code\\win32\\main.cpp"
--'  1053  4  O:\code\win32\main.cpp
-|4,39,1053,4,1582228197,"O:\\code\\win32\\main.cpp"
--'  1065  4  O:\code\win32\main.cpp
-|4,39,1065,4,1582228197,"O:\\code\\win32\\main.cpp"
--'  1058  0  O:\code\win32\main.cpp
-|4,39,1058,0,1582228164,"O:\\code\\win32\\main.cpp"
--'  1063  21  O:\code\win32\main.cpp
-|4,39,1063,21,1582228163,"O:\\code\\win32\\main.cpp"
--'  1064  7  O:\code\win32\main.cpp
-|4,39,1064,7,1582228163,"O:\\code\\win32\\main.cpp"
--'  1040  4  O:\code\win32\main.cpp
-|4,39,1040,4,1582228163,"O:\\code\\win32\\main.cpp"
--'  1039  55  O:\code\win32\main.cpp
-|4,39,1039,55,1582228163,"O:\\code\\win32\\main.cpp"
--'  1059  33  O:\code\win32\main.cpp
-|4,39,1059,33,1582228162,"O:\\code\\win32\\main.cpp"
--'  1066  0  O:\code\win32\main.cpp
-|4,39,1066,0,1582228074,"O:\\code\\win32\\main.cpp"
--'  1051  0  O:\code\win32\main.cpp
-|4,39,1051,0,1582228066,"O:\\code\\win32\\main.cpp"
--'  1199  8  O:\code\win32\main.cpp
-|4,39,1199,8,1582228041,"O:\\code\\win32\\main.cpp"
--'  917  0  O:\code\win32\main.cpp
-|4,39,917,0,1582227997,"O:\\code\\win32\\main.cpp"
--'  1183  8  O:\code\win32\main.cpp
-|4,39,1183,8,1582227928,"O:\\code\\win32\\main.cpp"
--'  1045  4  O:\code\win32\main.cpp
-|4,39,1045,4,1582227897,"O:\\code\\win32\\main.cpp"
--'  1177  8  O:\code\win32\main.cpp
-|4,39,1177,8,1582227581,"O:\\code\\win32\\main.cpp"
--'  916  5  O:\code\win32\main.cpp
-|4,39,916,5,1582227373,"O:\\code\\win32\\main.cpp"
--'  277  12  O:\code\win32\main.cpp
-|4,39,277,12,1582227372,"O:\\code\\win32\\main.cpp"
--'  310  41  O:\code\win32\main.cpp
-|4,39,310,41,1582227363,"O:\\code\\win32\\main.cpp"
--'  32  8  O:\code\win32\main.cpp
-|4,39,32,8,1582227266,"O:\\code\\win32\\main.cpp"
--'  1194  22  O:\code\win32\main.cpp
-|4,39,1194,22,1582227265,"O:\\code\\win32\\main.cpp"
--'  1188  8  O:\code\win32\main.cpp
-|4,39,1188,8,1582226603,"O:\\code\\win32\\main.cpp"
--'  456  5  O:\code\win32\main.cpp
-|4,39,456,5,1582226489,"O:\\code\\win32\\main.cpp"
--'  361  5  O:\code\win32\main.cpp
-|4,39,361,5,1582226486,"O:\\code\\win32\\main.cpp"
--'  511  5  O:\code\win32\main.cpp
-|4,39,511,5,1582226486,"O:\\code\\win32\\main.cpp"
--'  510  5  O:\code\win32\main.cpp
-|4,39,510,5,1582226484,"O:\\code\\win32\\main.cpp"
--'  1158  4  O:\code\win32\main.cpp
-|4,39,1158,4,1582226481,"O:\\code\\win32\\main.cpp"
--'  2  0  O:\code\win32\main.cpp
-|4,39,2,0,1582226473,"O:\\code\\win32\\main.cpp"
--'  17  2  O:\code\NERD_tree_1
-|4,39,17,2,1582226473,"O:\\code\\NERD_tree_1"
--'  27  2  O:\code\NERD_tree_1
-|4,39,27,2,1582226472,"O:\\code\\NERD_tree_1"
--'  1  2  O:\code\NERD_tree_1
-|4,39,1,2,1582226472,"O:\\code\\NERD_tree_1"
--'  43  0  O:\code\platform.hpp
-|4,39,43,0,1582194144,"O:\\code\\platform.hpp"
--'  34  0  O:\code\platform.hpp
-|4,39,34,0,1582194142,"O:\\code\\platform.hpp"
--'  58  6  O:\code\platform.hpp
-|4,39,58,6,1582194128,"O:\\code\\platform.hpp"
--'  46  0  O:\code\platform.hpp
-|4,39,46,0,1582194122,"O:\\code\\platform.hpp"
--'  59  0  O:\code\platform.hpp
-|4,39,59,0,1582194122,"O:\\code\\platform.hpp"
--'  52  0  O:\code\platform.hpp
-|4,39,52,0,1582193650,"O:\\code\\platform.hpp"
--'  1  0  O:\code\platform.hpp
-|4,39,1,0,1582193394,"O:\\code\\platform.hpp"
--'  12  0  O:\code\NERD_tree_6
-|4,39,12,0,1582193394,"O:\\code\\NERD_tree_6"
--'  13  2  O:\code\NERD_tree_6
-|4,39,13,2,1582193392,"O:\\code\\NERD_tree_6"
--'  1  0  O:\code\NERD_tree_6
-|4,39,1,0,1582193392,"O:\\code\\NERD_tree_6"
--'  255  5  O:\code\game.cpp
-|4,39,255,5,1582156068,"O:\\code\\game.cpp"
--'  190  0  O:\code\game.cpp
-|4,39,190,0,1582155954,"O:\\code\\game.cpp"
--'  188  8  O:\code\game.cpp
-|4,39,188,8,1582155936,"O:\\code\\game.cpp"
--'  183  0  O:\code\game.cpp
-|4,39,183,0,1582155920,"O:\\code\\game.cpp"
--'  2  0  O:\code\game.cpp
-|4,39,2,0,1582155907,"O:\\code\\game.cpp"
--'  259  29  O:\code\game.cpp
-|4,39,259,29,1582155905,"O:\\code\\game.cpp"
 
 # History of marks within files (newest to oldest):
 
 > O:\ressources\shaders\color.vert
-	*	1582252217	0
-	"	19	0
-	^	18	4
-	.	18	3
+	*	1582291279	0
+	"	18	4
+	^	18	5
+	.	18	4
 	+	25	4
 	+	23	20
 	+	23	35
@@ -563,13 +585,904 @@ $4096
 	+	7	0
 	+	23	35
 	+	17	0
-	+	18	3
+	+	18	4
 
-> O:\code\NERD_tree_7
-	*	1582252209	0
+> O:\code\game.cpp
+	*	1582291278	0
+	"	82	0
+	^	184	46
+	.	184	45
+	+	95	28
+	+	120	62
+	+	135	4
+	+	147	0
+	+	50	0
+	+	97	0
+	+	112	43
+	+	139	0
+	+	138	26
+	+	112	22
+	+	125	0
+	+	96	0
+	+	97	10
+	+	125	0
+	+	122	0
+	+	125	0
+	+	115	17
+	+	116	38
+	+	139	0
+	+	147	0
+	+	149	41
+	+	148	34
+	+	149	20
+	+	147	4
+	+	149	41
+	+	14	20
+	+	44	5
+	+	43	3
+	+	44	13
+	+	42	10
+	+	43	51
+	+	214	3
+	+	213	51
+	+	114	0
+	+	93	0
+	+	70	0
+	+	69	48
+	+	113	48
+	+	131	0
+	+	130	50
+	+	132	13
+	+	134	0
+	+	138	5
+	+	117	44
+	+	121	0
+	+	123	0
+	+	121	46
+	+	123	46
+	+	43	32
+	+	130	18
+	+	129	56
+	+	149	5
+	+	53	0
+	+	7	18
+	+	7	0
+	+	8	0
+	+	4	0
+	+	249	0
+	+	53	0
+	+	52	0
+	+	53	0
+	+	40	0
+	+	40	15
+	+	40	0
+	+	3	0
+	+	7	0
+	+	15	0
+	+	53	0
+	+	7	0
+	+	53	0
+	+	15	0
+	+	3	0
+	+	239	0
+	+	248	17
+	+	247	21
+	+	248	19
+	+	147	5
+	+	148	0
+	+	149	4
+	+	176	30
+	+	180	0
+	+	178	40
+	+	179	44
+	+	177	41
+	+	181	0
+	+	186	0
+	+	181	30
+	+	186	30
+	+	182	35
+	+	184	43
+	+	182	38
+	+	177	23
+	+	187	23
+	+	182	37
+	+	187	36
+	+	189	43
+	+	178	0
+	+	183	41
+	+	184	45
+
+> O:\code\NERD_tree_1
+	*	1582291270	0
+	"	9	8
+	.	1	0
+	+	1	0
+
+> O:\code\platform.hpp
+	*	1582291267	0
+	"	94	4
+	^	12	36
+	.	12	35
+	+	50	0
+	+	50	23
+	+	45	0
+	+	50	0
+	+	45	0
+	+	50	0
+	+	50	30
+	+	50	0
+	+	50	23
+	+	47	15
+	+	50	23
+	+	50	0
+	+	51	0
+	+	53	0
+	+	51	69
+	+	37	0
+	+	50	25
+	+	51	22
+	+	52	93
+	+	50	65
+	+	53	33
+	+	53	20
+	+	53	0
+	+	53	71
+	+	50	0
+	+	32	0
+	+	35	0
+	+	50	0
+	+	53	0
+	+	53	50
+	+	53	0
+	+	74	22
+	+	17	0
+	+	71	14
+	+	59	23
+	+	32	28
+	+	32	29
+	+	33	63
+	+	37	20
+	+	38	0
+	+	34	0
+	+	30	51
+	+	36	32
+	+	34	18
+	+	33	9
+	+	33	0
+	+	50	0
+	+	50	15
+	+	52	103
+	+	33	12
+	+	33	0
+	+	32	0
+	+	33	0
+	+	42	0
+	+	32	0
+	+	42	0
+	+	34	20
+	+	33	18
+	+	32	20
+	+	31	41
+	+	42	0
+	+	44	0
+	+	43	0
+	+	41	0
+	+	40	18
+	+	41	0
+	+	69	0
+	+	77	0
+	+	5	0
+	+	6	0
+	+	5	0
+	+	6	6
+	+	5	0
+	+	6	43
+	+	47	19
+	+	59	0
+	+	53	0
+	+	50	0
+	+	53	0
+	+	49	0
+	+	53	0
+	+	74	30
+	+	78	0
+	+	6	0
+	+	1	23
+	+	2	23
+	+	10	16
+	+	11	0
+	+	13	0
+	+	10	4
+	+	6	9
+	+	10	20
+	+	17	0
+	+	16	18
+	+	11	15
+	+	16	14
+	+	16	15
+	+	16	0
+	+	11	0
+	+	12	35
+
+> O:\code\NERD_tree_9
+	*	1582291252	0
+	"	11	0
+	.	1	0
+	+	1	0
+
+> O:\code\win32\main.cpp
+	*	1582291250	0
+	"	547	0
+	^	1202	63
+	.	550	0
+	+	318	35
+	+	1114	9
+	+	1115	37
+	+	974	33
+	+	989	0
+	+	976	0
+	+	988	0
+	+	976	0
+	+	1054	0
+	+	934	0
+	+	925	13
+	+	930	20
+	+	935	45
+	+	977	30
+	+	989	0
+	+	976	0
+	+	989	0
+	+	989	30
+	+	989	0
+	+	989	12
+	+	989	32
+	+	989	0
+	+	1114	8
+	+	1115	9
+	+	325	0
+	+	326	0
+	+	324	0
+	+	323	16
+	+	324	0
+	+	973	44
+	+	989	0
+	+	978	0
+	+	973	53
+	+	974	52
+	+	976	0
+	+	984	28
+	+	985	0
+	+	986	0
+	+	987	0
+	+	985	20
+	+	986	24
+	+	987	25
+	+	986	35
+	+	987	37
+	+	985	27
+	+	1177	0
+	+	1176	25
+	+	1196	9
+	+	1197	8
+	+	1203	22
+	+	307	66
+	+	308	68
+	+	304	40
+	+	305	41
+	+	1054	0
+	+	1054	8
+	+	1054	9
+	+	1054	0
+	+	1054	8
+	+	1054	31
+	+	1054	0
+	+	1192	0
+	+	1192	26
+	+	1058	35
+	+	1075	0
+	+	1189	36
+	+	1192	0
+	+	1060	0
+	+	1058	34
+	+	1060	0
+	+	1075	0
+	+	1058	40
+	+	1068	0
+	+	1073	0
+	+	1050	0
+	+	1063	0
+	+	1065	69
+	+	1066	67
+	+	1065	0
+	+	1189	38
+	+	1064	15
+	+	337	0
+	+	344	0
+	+	1	0
+	+	337	25
+	+	337	0
+	+	28	71
+	+	962	31
+	+	961	38
+	+	965	34
+	+	1175	0
+	+	1209	0
+	+	550	5
+	+	962	31
+	+	550	4
+	+	1203	12
+	+	1204	0
+	+	1202	60
+	+	550	0
+	t	1058	5
+
+> O:\code\win32\win32_glFunctions.hpp
+	*	1582289431	0
+	"	221	0
+	^	39	9
+	.	39	8
+	+	4	0
+	+	123	0
+	+	123	72
+	+	124	84
+	+	134	102
+	+	135	0
+	+	201	0
+	+	200	36
+	+	201	0
+	+	200	37
+	+	201	27
+	+	202	31
+	+	212	37
+	+	200	36
+	+	201	0
+	+	200	39
+	+	212	35
+	+	201	0
+	+	123	76
+	+	201	18
+	+	123	76
+	+	47	21
+	+	50	26
+	+	52	0
+	+	49	0
+	+	45	0
+	+	46	0
+	+	52	0
+	+	48	0
+	+	50	39
+	+	51	42
+	+	38	4
+	+	39	4
+	+	37	0
+	+	57	0
+	+	52	0
+	+	57	0
+	+	25	40
+	+	39	0
+	+	38	84
+	+	215	0
+	+	214	21
+	+	39	8
+
+> O:\code\win32\win32_gameHooks.cpp
+	*	1582289428	0
+	"	229	0
+	^	138	9
+	.	138	8
+	+	1	27
+	+	2	8
+	+	28	15
+	+	91	18
+	+	100	20
+	+	105	18
+	+	112	18
+	+	118	18
+	+	28	0
+	+	90	31
+	+	94	19
+	+	123	84
+	+	126	0
+	+	124	26
+	+	125	35
+	+	28	0
+	+	27	0
+	+	28	0
+	+	72	0
+	+	84	0
+	+	72	0
+	+	84	0
+	+	74	23
+	+	75	23
+	+	77	0
+	+	76	0
+	+	77	96
+	+	79	0
+	+	81	46
+	+	83	0
+	+	81	45
+	+	80	0
+	+	78	10
+	+	82	30
+	+	82	0
+	+	77	97
+	+	137	8
+	+	138	8
+
+> O:\code\win32\win32_fileListener.cpp
+	*	1582289425	0
+	"	292	0
+	^	6	49
+	.	13	0
+	+	13	18
+	+	13	12
+	+	44	0
+	+	48	0
+	+	47	0
+	+	55	0
+	+	50	34
+	+	51	13
+	+	50	33
+	+	53	0
+	+	52	31
+	+	272	71
+	+	273	13
+	+	240	9
+	+	241	0
+	+	272	13
+	+	273	12
+	+	52	93
+	+	53	0
+	+	53	69
+	+	181	36
+	+	30	0
+	+	52	24
+	+	53	0
+	+	52	60
+	+	137	0
+	+	181	0
+	+	181	33
+	+	261	0
+	+	271	38
+	+	275	0
+	+	41	0
+	+	80	0
+	+	214	0
+	+	260	0
+	+	135	34
+	+	181	43
+	+	192	19
+	+	192	0
+	+	192	21
+	+	189	30
+	+	182	0
+	+	184	20
+	+	181	0
+	+	180	25
+	+	187	0
+	+	185	26
+	+	186	14
+	+	183	18
+	+	188	0
+	+	192	29
+	+	190	11
+	+	189	11
+	+	190	35
+	+	192	0
+	+	191	35
+	+	185	22
+	+	190	54
+	+	276	0
+	+	265	0
+	+	260	0
+	+	65	0
+	+	135	0
+	+	48	22
+	+	52	25
+	+	272	12
+	+	52	93
+	+	88	26
+	+	89	86
+	+	90	84
+	+	90	0
+	+	91	0
+	+	90	64
+	+	14	23
+	+	89	26
+	+	90	68
+	+	273	12
+	+	14	18
+	+	87	0
+	+	121	0
+	+	123	0
+	+	121	0
+	+	123	12
+	+	123	0
+	+	122	90
+	+	123	0
+	+	13	0
+
+> O:\code\NERD_tree_4
+	*	1582289417	0
 	"	13	0
 	.	1	0
 	+	1	0
+
+> O:\code\game.hpp
+	*	1582289315	0
+	"	21	0
+	.	28	0
+	+	2	19
+	+	37	5
+	+	13	0
+	+	24	0
+	+	13	15
+	+	13	0
+	+	8	1
+	+	6	52
+	+	8	0
+	+	7	38
+	+	13	0
+	+	13	10
+	+	13	18
+	+	24	0
+	+	13	0
+	+	24	0
+	+	13	0
+	+	24	0
+	+	13	0
+	+	13	39
+	+	13	21
+	+	13	22
+	+	13	15
+	+	13	0
+	+	13	17
+	+	13	0
+	+	13	52
+	+	13	54
+	+	13	36
+	+	13	49
+	+	13	52
+	+	13	0
+	+	24	0
+	+	13	0
+	+	20	18
+	+	13	22
+	+	24	0
+	+	23	9
+	+	24	0
+	+	13	16
+	+	25	0
+	+	13	0
+	+	9	0
+	+	21	19
+	+	13	0
+	+	9	0
+	+	13	0
+	+	10	0
+	+	12	0
+	+	13	0
+	+	28	0
+
+> O:\code\rendering\shaderprogram.hpp
+	*	1582289035	0
+	"	316	8
+	^	289	6
+	.	316	0
+	+	399	14
+	+	420	0
+	+	412	0
+	+	397	65
+	+	187	0
+	+	158	10
+	+	160	39
+	+	161	9
+	+	160	9
+	+	161	32
+	+	164	0
+	+	163	26
+	+	165	56
+	+	168	0
+	+	187	0
+	+	167	36
+	+	177	0
+	+	171	45
+	+	177	0
+	+	174	48
+	+	173	38
+	+	175	40
+	+	177	0
+	+	177	20
+	+	177	0
+	+	175	39
+	+	177	0
+	+	187	0
+	+	178	50
+	+	180	41
+	+	178	51
+	+	133	0
+	+	160	28
+	+	346	24
+	+	172	13
+	+	170	13
+	+	172	27
+	+	179	9
+	+	181	0
+	+	182	24
+	+	184	0
+	+	173	24
+	+	184	38
+	+	185	38
+	+	175	0
+	+	262	60
+	+	264	47
+	+	290	0
+	+	285	0
+	+	265	38
+	+	37	47
+	+	63	0
+	+	73	63
+	+	311	33
+	+	311	50
+	+	312	30
+	+	41	24
+	+	44	29
+	+	47	29
+	+	50	29
+	+	53	29
+	+	57	74
+	+	67	67
+	+	63	45
+	+	86	52
+	+	88	85
+	+	311	35
+	+	274	0
+	+	271	13
+	+	270	5
+	+	271	5
+	+	270	4
+	+	271	4
+	+	273	4
+	+	274	4
+	+	275	4
+	+	276	4
+	+	277	4
+	+	278	4
+	+	271	0
+	+	278	5
+	+	278	0
+	+	277	44
+	+	270	4
+	+	271	4
+	+	278	4
+	+	284	4
+	+	285	4
+	+	266	27
+	+	267	17
+	+	277	0
+	+	289	5
+	+	290	0
+	+	288	67
+	+	289	4
+	+	290	4
+	+	291	4
+	+	290	0
+	+	289	4
+	+	316	0
+
+> O:\code\NERD_tree_8
+	*	1582289024	0
+	"	13	0
+	.	1	0
+	+	1	0
+
+> O:\code\rendering\renderer.hpp
+	*	1582289022	0
+	"	10	0
+	^	6	18
+	.	7	0
+	+	36	0
+	+	36	21
+	+	36	23
+	+	36	22
+	+	36	0
+	+	36	22
+	+	36	51
+	+	36	33
+	+	36	37
+	+	36	25
+	+	36	38
+	+	36	37
+	+	36	48
+	+	36	0
+	+	36	72
+	+	36	52
+	+	36	51
+	+	36	72
+	+	36	57
+	+	36	76
+	+	36	77
+	+	36	78
+	+	36	29
+	+	36	0
+	+	36	89
+	+	36	95
+	+	36	92
+	+	36	0
+	+	36	23
+	+	36	0
+	+	36	14
+	+	18	0
+	+	36	0
+	+	15	25
+	+	36	0
+	+	36	47
+	+	36	0
+	+	36	33
+	+	36	22
+	+	36	37
+	+	36	72
+	+	36	54
+	+	36	47
+	+	36	62
+	+	36	0
+	+	15	0
+	+	9	8
+	+	8	17
+	+	9	25
+	+	10	18
+	+	7	0
+	+	11	0
+	+	7	0
+	+	12	31
+	+	13	21
+	+	13	18
+	+	14	21
+	+	6	17
+	+	7	0
+
+> O:\code\NERD_tree_2
+	*	1582288966	0
+	"	11	0
+	.	1	0
+	+	1	0
+
+> O:\code\NERD_tree_6
+	*	1582288796	0
+	"	12	0
+	.	1	0
+	+	1	0
+
+> O:\code\NERD_tree_7
+	*	1582288673	0
+	"	12	0
+	.	1	0
+	+	1	0
+
+> O:\code\win32\platformBuild.cpp
+	*	1582288672	0
+	"	12	0
+	.	26	0
+	+	27	18
+	+	28	22
+	+	7	0
+	+	12	0
+	+	12	29
+	+	27	0
+	+	27	12
+	+	12	0
+	+	12	62
+	+	12	16
+	+	28	24
+	+	12	0
+	+	23	0
+	+	24	0
+	+	27	0
+	+	12	0
+	+	1	0
+	+	7	0
+	+	1	0
+	+	2	0
+	+	4	50
+	+	6	0
+	+	25	25
+	+	27	0
+	+	25	0
+	+	27	0
+	+	6	0
+	+	12	0
+	+	24	0
+	+	27	0
+	+	25	0
+	+	26	0
+
+> O:\code\NERD_tree_5
+	*	1582288319	0
+	"	9	0
+	.	1	0
+	+	1	0
+
+> O:\code\utils\fileIO.hpp
+	*	1582288289	0
+	"	6	10
+	.	6	10
+	+	6	10
+
+> O:\code\NERD_tree_3
+	*	1582288249	0
+	"	9	0
+	.	1	0
+	+	1	0
+
+> O:\code\utils\sound.hpp
+	*	1582285819	0
+	"	1	0
+
+> O:\build\buildGameDllWnd.bat
+	*	1582285134	0
+	"	1	0
+	^	2	25
+	.	2	24
+	+	2	24
+
+> O:\build\buildGameDll.bat
+	*	1582285132	0
+	"	18	15
+	^	18	28
+	.	18	15
+	+	10	64
+	+	19	19
+	+	21	0
+	+	10	65
+	+	12	61
+	+	18	15
+
+> O:\code\fileListener.hpp
+	*	1582283588	0
+	"	11	0
+
+> O:\code\fileIO.hpp
+	*	1582283511	0
+	"	88	0
+	^	88	0
+	.	87	39
+	+	6	15
+	+	23	52
+	+	44	50
+	+	64	0
+	+	65	0
+	+	44	4
+	+	46	0
+	+	55	18
+	+	58	0
+	+	59	0
+	+	58	7
+	+	44	3
+	+	56	16
+	+	58	24
+	+	56	17
+	+	58	0
+	+	60	36
+	+	57	26
+	+	56	40
+	+	44	38
+	+	63	16
+	+	93	0
+	+	89	35
+	+	93	0
+	+	91	0
+	+	90	37
+	+	91	16
+	+	92	15
+	+	11	34
+	+	36	82
+	+	61	81
+	+	82	81
+	+	36	0
+	+	61	0
+	+	82	0
+	+	4	0
+	+	87	39
 
 > O:\code\rendering\texture.hpp
 	*	1582252192	0
@@ -677,113 +1590,6 @@ $4096
 	+	177	6
 	+	173	34
 
-> O:\code\game.cpp
-	*	1582252191	0
-	"	140	0
-	^	163	6
-	.	163	5
-	+	13	32
-	+	13	0
-	+	13	37
-	+	13	18
-	+	13	0
-	+	114	0
-	+	114	1
-	+	114	6
-	+	114	12
-	+	114	45
-	+	114	33
-	+	114	18
-	+	114	54
-	+	114	38
-	+	114	20
-	+	114	39
-	+	114	9
-	+	114	0
-	+	6	0
-	+	114	0
-	+	4	0
-	+	5	0
-	+	8	0
-	+	9	0
-	+	10	0
-	+	161	0
-	+	161	18
-	+	161	5
-	+	161	41
-	+	110	17
-	+	139	31
-	+	148	23
-	+	139	17
-	+	161	24
-	+	241	35
-	+	161	0
-	+	161	39
-	+	163	42
-	+	161	0
-	+	163	5
-	+	161	4
-	+	237	0
-	+	241	0
-	+	109	28
-	+	134	62
-	+	149	4
-	+	161	0
-	+	59	0
-	+	111	0
-	+	126	43
-	+	153	0
-	+	152	26
-	+	126	22
-	+	139	0
-	+	110	0
-	+	111	10
-	+	139	0
-	+	136	0
-	+	139	0
-	+	129	17
-	+	130	38
-	+	153	0
-	+	161	0
-	+	163	41
-	+	162	34
-	+	163	20
-	+	161	4
-	+	163	41
-	+	23	20
-	+	53	5
-	+	52	3
-	+	53	13
-	+	51	10
-	+	52	51
-	+	213	3
-	+	212	51
-	+	128	0
-	+	107	0
-	+	84	0
-	+	83	48
-	+	127	48
-	+	145	0
-	+	144	50
-	+	146	13
-	+	148	0
-	+	152	5
-	+	131	44
-	+	135	0
-	+	137	0
-	+	135	46
-	+	137	46
-	+	52	32
-	+	144	18
-	+	143	56
-	+	163	5
-
-> O:\code\NERD_tree_1
-	*	1582251873	0
-	"	16	0
-	.	1	0
-	+	1	0
-
 > O:\ressources\shaders\image.frag
 	*	1582251268	0
 	"	1	0
@@ -824,124 +1630,6 @@ $4096
 	+	16	0
 	+	5	8
 	+	5	29
-
-> O:\code\NERD_tree_6
-	*	1582251234	0
-	"	14	0
-	.	1	0
-	+	1	0
-
-> O:\code\NERD_tree_2
-	*	1582251227	0
-	"	15	0
-	.	1	0
-	+	1	0
-
-> O:\code\rendering\shaderprogram.hpp
-	*	1582251225	0
-	"	400	0
-	^	289	6
-	.	289	4
-	+	421	14
-	+	400	14
-	+	421	0
-	+	413	0
-	+	398	65
-	+	187	0
-	+	158	10
-	+	160	39
-	+	161	9
-	+	160	9
-	+	161	32
-	+	164	0
-	+	163	26
-	+	165	56
-	+	168	0
-	+	187	0
-	+	167	36
-	+	177	0
-	+	171	45
-	+	177	0
-	+	174	48
-	+	173	38
-	+	175	40
-	+	177	0
-	+	177	20
-	+	177	0
-	+	175	39
-	+	177	0
-	+	187	0
-	+	178	50
-	+	180	41
-	+	178	51
-	+	133	0
-	+	160	28
-	+	347	24
-	+	172	13
-	+	170	13
-	+	172	27
-	+	179	9
-	+	181	0
-	+	182	24
-	+	184	0
-	+	173	24
-	+	184	38
-	+	185	38
-	+	175	0
-	+	262	60
-	+	264	47
-	+	290	0
-	+	285	0
-	+	265	38
-	+	37	47
-	+	63	0
-	+	73	63
-	+	311	33
-	+	311	50
-	+	312	30
-	+	41	24
-	+	44	29
-	+	47	29
-	+	50	29
-	+	53	29
-	+	57	74
-	+	67	67
-	+	63	45
-	+	86	52
-	+	88	85
-	+	311	35
-	+	274	0
-	+	271	13
-	+	270	5
-	+	271	5
-	+	270	4
-	+	271	4
-	+	273	4
-	+	274	4
-	+	275	4
-	+	276	4
-	+	277	4
-	+	278	4
-	+	271	0
-	+	278	5
-	+	278	0
-	+	277	44
-	+	270	4
-	+	271	4
-	+	278	4
-	+	284	4
-	+	285	4
-	+	266	27
-	+	267	17
-	+	277	0
-	+	289	5
-	+	290	0
-	+	288	67
-	+	289	4
-	+	290	4
-	+	291	4
-	+	290	0
-	+	289	4
 
 > O:\code\rendering\mesh.hpp
 	*	1582251224	0
@@ -1090,110 +1778,6 @@ $4096
 	+	16	0
 	+	37	0
 
-> O:\code\rendering\renderer.hpp
-	*	1582250960	0
-	"	15	21
-	^	15	22
-	.	15	21
-	+	37	0
-	+	37	21
-	+	37	23
-	+	37	22
-	+	37	0
-	+	37	22
-	+	37	51
-	+	37	33
-	+	37	37
-	+	37	25
-	+	37	38
-	+	37	37
-	+	37	48
-	+	37	0
-	+	37	72
-	+	37	52
-	+	37	51
-	+	37	72
-	+	37	57
-	+	37	76
-	+	37	77
-	+	37	78
-	+	37	29
-	+	37	0
-	+	37	89
-	+	37	95
-	+	37	92
-	+	37	0
-	+	37	23
-	+	37	0
-	+	37	14
-	+	19	0
-	+	37	0
-	+	16	25
-	+	37	0
-	+	37	47
-	+	37	0
-	+	37	33
-	+	37	22
-	+	37	37
-	+	37	72
-	+	37	54
-	+	37	47
-	+	37	62
-	+	37	0
-	+	16	0
-	+	10	8
-	+	9	17
-	+	10	25
-	+	11	18
-	+	8	0
-	+	12	0
-	+	8	0
-	+	13	31
-	+	14	21
-	+	14	18
-	+	15	21
-
-> O:\code\fileIO.hpp
-	*	1582250948	0
-	"	82	0
-	^	82	82
-	.	82	0
-	+	6	15
-	+	23	52
-	+	44	50
-	+	64	0
-	+	65	0
-	+	44	4
-	+	46	0
-	+	55	18
-	+	58	0
-	+	59	0
-	+	58	7
-	+	44	3
-	+	56	16
-	+	58	24
-	+	56	17
-	+	58	0
-	+	60	36
-	+	57	26
-	+	56	40
-	+	44	38
-	+	63	16
-	+	92	0
-	+	88	35
-	+	92	0
-	+	90	0
-	+	89	37
-	+	90	16
-	+	91	15
-	+	11	34
-	+	36	82
-	+	61	81
-	+	82	81
-	+	36	0
-	+	61	0
-	+	82	0
-
 > O:\code\rendering\autoShaderProgram.hpp
 	*	1582250524	0
 	"	268	25
@@ -1300,12 +1884,6 @@ $4096
 	+	268	22
 	+	264	33
 
-> O:\code\NERD_tree_3
-	*	1582250495	0
-	"	14	0
-	.	1	0
-	+	1	0
-
 > O:\ressources\shaders\sky.vert
 	*	1582250029	0
 	"	4	7
@@ -1368,18 +1946,6 @@ $4096
 	+	12	15
 	+	6	7
 
-> O:\code\NERD_tree_5
-	*	1582249383	0
-	"	9	0
-	.	1	0
-	+	1	0
-
-> O:\code\NERD_tree_4
-	*	1582248932	0
-	"	9	0
-	.	1	0
-	+	1	0
-
 > O:\ressources\shaders\color.frag
 	*	1582246646	0
 	"	1	0
@@ -1430,102 +1996,6 @@ $4096
 	+	5	0
 	+	8	0
 	+	7	19
-
-> O:\code\win32\main.cpp
-	*	1582228305	0
-	"	1055	15
-	^	1055	16
-	.	1055	15
-	+	1045	0
-	+	1045	14
-	+	1045	16
-	+	1045	0
-	+	1045	18
-	+	318	31
-	+	319	31
-	+	318	35
-	+	319	35
-	+	1105	9
-	+	1106	37
-	+	965	33
-	+	980	0
-	+	967	0
-	+	979	0
-	+	967	0
-	+	1045	0
-	+	927	0
-	+	918	13
-	+	923	20
-	+	928	45
-	+	968	30
-	+	980	0
-	+	967	0
-	+	980	0
-	+	980	30
-	+	980	0
-	+	980	12
-	+	980	32
-	+	980	0
-	+	1105	8
-	+	1106	9
-	+	326	0
-	+	327	0
-	+	325	0
-	+	324	16
-	+	325	0
-	+	964	44
-	+	980	0
-	+	969	0
-	+	964	53
-	+	965	52
-	+	967	0
-	+	975	28
-	+	976	0
-	+	977	0
-	+	978	0
-	+	976	20
-	+	977	24
-	+	978	25
-	+	977	35
-	+	978	37
-	+	976	27
-	+	1168	0
-	+	1167	25
-	+	1187	9
-	+	1188	8
-	+	1193	22
-	+	308	66
-	+	309	68
-	+	305	40
-	+	306	41
-	+	1045	0
-	+	1045	8
-	+	1045	9
-	+	1045	0
-	+	1045	8
-	+	1045	31
-	+	1045	0
-	+	1183	0
-	+	1183	26
-	+	1049	35
-	+	1066	0
-	+	1180	36
-	+	1183	0
-	+	1051	0
-	+	1049	34
-	+	1051	0
-	+	1066	0
-	+	1049	40
-	+	1059	0
-	+	1064	0
-	+	1041	0
-	+	1054	0
-	+	1056	69
-	+	1057	67
-	+	1056	0
-	+	1180	38
-	+	1055	15
-	t	1049	5
 
 > O:\code\gameHook.cpp
 	*	1582227131	0
@@ -1629,148 +2099,6 @@ $4096
 	+	23	36
 	+	26	32
 
-> O:\code\platform.hpp
-	*	1582224156	0
-	"	21	4
-	^	73	31
-	.	73	30
-	+	133	18
-	+	134	16
-	+	38	0
-	+	52	0
-	+	49	14
-	+	49	0
-	+	49	23
-	+	44	0
-	+	49	0
-	+	44	0
-	+	49	0
-	+	49	30
-	+	49	0
-	+	49	23
-	+	46	15
-	+	49	23
-	+	49	0
-	+	50	0
-	+	52	0
-	+	50	69
-	+	36	0
-	+	49	25
-	+	50	22
-	+	51	93
-	+	49	65
-	+	52	33
-	+	52	20
-	+	52	0
-	+	52	71
-	+	49	0
-	+	31	0
-	+	34	0
-	+	49	0
-	+	52	0
-	+	52	50
-	+	52	0
-	+	73	22
-	+	16	0
-	+	70	14
-	+	58	23
-	+	31	28
-	+	31	29
-	+	32	63
-	+	36	20
-	+	37	0
-	+	33	0
-	+	29	51
-	+	35	32
-	+	33	18
-	+	32	9
-	+	32	0
-	+	49	0
-	+	49	15
-	+	51	103
-	+	32	12
-	+	32	0
-	+	31	0
-	+	32	0
-	+	41	0
-	+	31	0
-	+	41	0
-	+	33	20
-	+	32	18
-	+	31	20
-	+	30	41
-	+	41	0
-	+	43	0
-	+	42	0
-	+	40	0
-	+	39	18
-	+	40	0
-	+	68	0
-	+	76	0
-	+	5	0
-	+	12	0
-	+	5	0
-	+	9	6
-	+	5	0
-	+	9	43
-	+	46	19
-	+	58	0
-	+	52	0
-	+	49	0
-	+	52	0
-	+	48	0
-	+	52	0
-	+	73	30
-
-> O:\code\win32\win32_glFunctions.hpp
-	*	1582218236	0
-	"	24	0
-	^	39	9
-	.	39	8
-	+	4	0
-	+	123	0
-	+	123	72
-	+	124	84
-	+	134	102
-	+	135	0
-	+	201	0
-	+	200	36
-	+	201	0
-	+	200	37
-	+	201	27
-	+	202	31
-	+	212	37
-	+	200	36
-	+	201	0
-	+	200	39
-	+	212	35
-	+	201	0
-	+	123	76
-	+	201	18
-	+	123	76
-	+	47	21
-	+	50	26
-	+	52	0
-	+	49	0
-	+	45	0
-	+	46	0
-	+	52	0
-	+	48	0
-	+	50	39
-	+	51	42
-	+	38	4
-	+	39	4
-	+	37	0
-	+	57	0
-	+	52	0
-	+	57	0
-	+	25	40
-	+	39	0
-	+	38	84
-	+	215	0
-	+	214	21
-	+	39	8
-
 > O:\code\rendering\openGLFunctions.hpp
 	*	1582218035	0
 	"	80	33
@@ -1799,89 +2127,6 @@ $4096
 	+	94	0
 	+	82	33
 	+	79	43
-
-> O:\code\win32\win32_fileListener.cpp
-	*	1582193291	0
-	"	275	42
-	^	280	14
-	.	280	12
-	+	14	18
-	+	13	12
-	+	45	0
-	+	49	0
-	+	48	0
-	+	56	0
-	+	51	34
-	+	52	13
-	+	51	33
-	+	54	0
-	+	53	31
-	+	279	71
-	+	280	13
-	+	247	9
-	+	248	0
-	+	279	13
-	+	280	12
-	+	53	93
-	+	54	0
-	+	54	69
-	+	188	36
-	+	31	0
-	+	53	24
-	+	54	0
-	+	53	60
-	+	144	0
-	+	188	0
-	+	188	33
-	+	268	0
-	+	278	38
-	+	282	0
-	+	42	0
-	+	81	0
-	+	221	0
-	+	267	0
-	+	142	34
-	+	188	43
-	+	199	19
-	+	199	0
-	+	199	21
-	+	196	30
-	+	189	0
-	+	191	20
-	+	188	0
-	+	187	25
-	+	194	0
-	+	192	26
-	+	193	14
-	+	190	18
-	+	195	0
-	+	199	29
-	+	197	11
-	+	196	11
-	+	197	35
-	+	199	0
-	+	198	35
-	+	192	22
-	+	197	54
-	+	283	0
-	+	272	0
-	+	267	0
-	+	66	0
-	+	142	0
-	+	49	22
-	+	53	25
-	+	279	12
-	+	53	93
-	+	94	26
-	+	95	86
-	+	96	84
-	+	96	0
-	+	97	0
-	+	96	64
-	+	15	23
-	+	95	26
-	+	96	68
-	+	280	12
 
 > O:\code\utils\arcBallController.hpp
 	*	1582191214	0
@@ -1950,12 +2195,6 @@ $4096
 > O:\code\NERD_tree_10
 	*	1582155352	0
 	"	8	0
-	.	1	0
-	+	1	0
-
-> O:\code\NERD_tree_9
-	*	1582153663	0
-	"	4	0
 	.	1	0
 	+	1	0
 
@@ -2038,12 +2277,6 @@ $4096
 	+	113	24
 	+	107	31
 
-> O:\code\NERD_tree_8
-	*	1582152736	0
-	"	4	0
-	.	1	0
-	+	1	0
-
 > O:\uppLib\datastructures\datastructures.hpp
 	*	1582150938	0
 	"	125	0
@@ -2059,18 +2292,6 @@ $4096
 	.	1	0
 	+	1	0
 
-> O:\build\buildGameDll.bat
-	*	1582136697	0
-	"	18	15
-	^	18	29
-	.	18	15
-	+	10	64
-	+	19	19
-	+	21	0
-	+	10	65
-	+	12	61
-	+	18	15
-
 > O:\code\utils\string_utils.hpp
 	*	1582136661	0
 	"	2	21
@@ -2078,10 +2299,6 @@ $4096
 	.	2	21
 	+	1	21
 	+	2	21
-
-> O:\code\win32\platformBuild.cpp
-	*	1582136352	0
-	"	8	18
 
 > O:\code\win32\platformSpecific.cpp
 	*	1582136313	0
@@ -2299,10 +2516,6 @@ $4096
 	.	1	0
 	+	1	0
 
-> O:\code\fileListener.hpp
-	*	1582059307	0
-	"	3	0
-
 > O:\uppLib\math\matrices.hpp
 	*	1582054017	0
 	"	183	28
@@ -2440,13 +2653,6 @@ $4096
 	^	2	35
 	.	2	34
 	+	2	34
-
-> O:\build\buildGameDllWnd.bat
-	*	1581967017	0
-	"	2	24
-	^	2	25
-	.	2	24
-	+	2	24
 
 > O:\build\build.bat
 	*	1581966982	0

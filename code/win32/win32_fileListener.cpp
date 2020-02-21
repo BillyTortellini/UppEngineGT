@@ -10,9 +10,8 @@
 //     - Use GetOverlappedResults to check if files have changed
 
 // INCLUDES
-#include "../fileListener.hpp"
 #include "../utils/tmpAlloc.hpp"
-#include "../fileIO.hpp"
+#include "../utils/fileIO.hpp"
 #include <cstdlib>
 
 // MAKROS
@@ -85,11 +84,6 @@ ListenerToken createFileListener(
         listenerCallbackFunc callback, 
         void* userData)
 {
-    // Check if max listeners is reached
-    if (tracker.count+1 == MAX_FILE_LISTENERS) {
-        loggf("Create file listener max listener reached!\n");
-        return INVALID_TOKEN; 
-    }
 
     // Check if file exists
     assert(file_exists(path), 
@@ -124,9 +118,8 @@ ListenerToken createFileListener(
     // Get FileListener from tracker
     FileListener* listener;
     {
-        if (tracker.count + 1 >= MAX_FILE_LISTENERS) {
-            return INVALID_TOKEN;
-        }
+        // Check if max listeners is reached
+        assert(tracker.count+1 < MAX_FILE_LISTENERS, "Max file listener count reached!\n"); 
 
         listener = &(tracker.listeners[tracker.count]);
         tracker.count++;

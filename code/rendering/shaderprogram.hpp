@@ -313,7 +313,6 @@ bool init(ShaderProgram* p, std::initializer_list<const char*> filenames,
         p->filepaths.push_back(filepath);
         ListenerToken token = 
             createFileListener(filepath.c_str(), &onShaderFileChanged, p);
-        assert(token != INVALID_TOKEN, "createFileListener failed!\n");
         p->tokens.push_back(token);
     }
 

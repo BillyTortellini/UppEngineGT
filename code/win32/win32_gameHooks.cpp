@@ -1,3 +1,6 @@
+#ifndef __WIN32_GAME_HOOKS__
+#define __WIN32_GAME_HOOKS__
+
 // GameAllocator
 struct GameDataAndAlloc
 {
@@ -22,7 +25,7 @@ struct GameDataAndAlloc
 };
 GameDataAndAlloc* gameDataAndAlloc;
 
-void initUniforms(GameState* state) 
+void initGlobals(GameState* state) 
 {
     gameState = state;
     gameDataAndAlloc = (GameDataAndAlloc*) gameState->memory.data;
@@ -65,44 +68,64 @@ void createGameAlloc()
     d->gameAlloc.init(32, &d->_b32, &d->_seg64);
 }
 
+// PLATFORM CALLBACKS
+typedef ListenerToken (*createFileListenerFunc)(const char* path, listenerCallbackFunc callback, void* userData);
+typedef void (*deleteFileListenerFunc)(ListenerToken token);
+createFileListenerFunc _createFileListener;
+deleteFileListenerFunc _deleteFileListener;
+
+ListenerToken createFileListener(const char* path, listenerCallbackFunc callback, void* userData) {
+    return _createFileListener(path, callback, userData);
+}
+
+void deleteFileListener(ListenerToken token) {
+    _deleteFileListener(token);
+}
+
 // BINDINGS FOR DLL LOADING
 extern "C"
 {
-    DECLARE_EXPORT void gameAudio(GameState* state, byte* stream, int length) {}
-    DECLARE_EXPORT void gameInit(GameState* state) 
+    __declspec(dllexport) void gameInit(GameState* state) 
     {
-        initUniforms(state);
+        // Set important globals
+        initGlobals(state);
         createGameAlloc();
         initTmpAlloc(gameDataAndAlloc->_tmpAllocBlk);
+        // Init game
         gameInit();
         gameAfterReset();
     }
 
-    DECLARE_EXPORT void gameTick(GameState* state) {
-        //initUniforms(state);
+    __declspec(dllexport) void gameTick(GameState* state) {
+        //initGlobals(state);
         gameTick();
     }
 
-    DECLARE_EXPORT void gameShutdown(GameState* state) {
-        initUniforms(state);
+    __declspec(dllexport) void gameShutdown(GameState* state) {
+        initGlobals(state);
         shutdownTmpAlloc();
         gameBeforeReset();
         gameShutdown();
     }
 
-    DECLARE_EXPORT void gameBeforeReset(GameState* state) {
-        initUniforms(state);
+    __declspec(dllexport) void gameBeforeReset(GameState* state) {
+        initGlobals(state);
         shutdownTmpAlloc();
         gameBeforeReset();
     }
 
-    DECLARE_EXPORT void gameAfterReset(GameState* state) {
-        initUniforms(state);
+    __declspec(dllexport) void gameAfterReset(GameState* state) {
+        initGlobals(state);
         initTmpAlloc(gameDataAndAlloc->_tmpAllocBlk);
         gameAfterReset();
     }
 
-    DECLARE_EXPORT void gameLoadFunctionPtrs(void** functions) 
+    __declspec(dllexport) void gameAudio(GameState* state, int length, byte* data) {
+        initGlobals(state);
+        gameAudioTick(length, data);
+    }
+
+    __declspec(dllexport) void gameLoadFunctionPtrs(void** functions) 
     {
         int i = 0;
         loggFunc loggFuncPtr = (loggFunc)functions[i++];
@@ -111,8 +134,8 @@ extern "C"
         //loggf("GameLoadFunctionPtrs\n");
         i++; // Init file listener
         i++; // check file changed
-        createFileListener = (createFileListenerFunc) functions[i++];
-        deleteFileListener = (deleteFileListenerFunc) functions[i++];
+        _createFileListener = (createFileListenerFunc) functions[i++];
+        _deleteFileListener = (deleteFileListenerFunc) functions[i++];
         glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC) functions[i++];
         glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC) functions[i++];
         glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC) functions[i++];
@@ -200,3 +223,7 @@ extern "C"
 
 
 
+
+
+
+#endif 

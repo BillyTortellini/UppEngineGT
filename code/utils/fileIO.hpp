@@ -3,7 +3,7 @@
 
 #include <cstdio>
 #include "uppLib.hpp"
-#include "utils/tmpAlloc.hpp"
+#include "tmpAlloc.hpp"
 
 u64 get_file_size(const char* filepath) 
 {
@@ -84,7 +84,8 @@ void load_file(const char* filepath, const Blk& memory)
     return;
 }
 
-bool file_exists(const char* filepath) {
+bool file_exists(const char* filepath) 
+{
     FILE* file = fopen(filepath, "r");
     if (file == nullptr) return false;
     fclose(file);

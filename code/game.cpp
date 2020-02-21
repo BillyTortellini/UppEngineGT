@@ -1,19 +1,10 @@
 #ifndef __GAME_CPP__
 #define __GAME_CPP__
 
-char _assert_line_num_buf[4096];
-char _assert_line_helper[4096];
-#define assert(x, y, ...) \
-{ \
-snprintf(_assert_line_num_buf, 4096, (y), __VA_ARGS__); \
-snprintf(_assert_line_helper, 4096, "Line: %d, file: %s:\n", __LINE__, __FILE__); \
-strncat(_assert_line_helper, _assert_line_num_buf, 4096); \
-assert((x), _assert_line_helper); \
-} 
-
 // Own file includes
 #include "uppLib.hpp"
 #include "platform.hpp"
+
 #include "utils/tmpAlloc.hpp"
 #include "rendering/openGLFunctions.hpp"
 #include "rendering/renderer.hpp"
@@ -58,11 +49,6 @@ struct GameData
     AutoMesh quadMesh;
     int frameCount;
 };
-
-// Global uniforms (DONT CHANGE, these are set in gameHook.cpp)
-GameData* gameData;
-GameState* gameState;
-Allocator* gameAlloc;
 
 void draw(AutoShaderProgram* p, AutoMesh* m, const vec3& pos)
 {
@@ -158,9 +144,9 @@ void renderScene()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    draw(&colorShader, &cubeMesh, vec3(5.0f));
+    //draw(&colorShader, &cubeMesh, vec3(5.0f));
     setUniform(&imageShader.program, "image", &testTexture);
-    //draw(&imageShader, &gameData->cubeMesh, vec3(0.0f));
+    draw(&imageShader, &gameData->cubeMesh, vec3(0.0f));
     
     //draw(&skyShader, &testMesh, vec3(0.0f));
 
@@ -186,6 +172,21 @@ void gameTick()
     if (input->keyPressed[KEY_F5]) {
         gameState->windowState.hideCursor = !gameState->windowState.hideCursor;
         loggf("Hide cursor set to: %s\n", gameState->windowState.hideCursor ? "TRUE" : "FALSE");
+    }
+    if (input->keyPressed[KEY_Y]) {
+        loggf("FPS: 60,  VSYNC = FALSE\n");
+        gameState->renderOptions.fps = 60;
+        gameState->renderOptions.vsync = false;
+    }
+    if (input->keyPressed[KEY_X]) {
+        loggf("FPS: 120, VSYNC = FALSE\n");
+        gameState->renderOptions.fps = 120;
+        gameState->renderOptions.vsync = false;
+    }
+    if (input->keyPressed[KEY_C]) {
+        loggf("FPS: 60,  VSYNC = TRUE\n");
+        gameState->renderOptions.fps = 60;
+        gameState->renderOptions.vsync = true;
     }
     if (input->keyPressed[KEY_F11]) {
         gameState->windowState.fullscreen = !gameState->windowState.fullscreen;
@@ -243,7 +244,7 @@ void gameShutdown()
     shutdown(&gameData->quadMesh);
 }
 
-
-#include "gameHook.cpp"
+// Stub for game sound
+void gameAudioTick(int size, byte* data){};
 
 #endif
