@@ -15,11 +15,8 @@
 
 // TODO:
 // -----
-//  - Break up renderer into -> OpenGLState, ShaderProgram, Mesh
-//  - AutoShaderProgram instead of ShaderProgram --> Try to get extern GameState state out of renderer!
-//  - 3D Transform with Quaternions
+//  - 3D Transform with Quaternions (Or just from rotation vector) 
 //  - Phong shading
-//  - If OpenGL render layer is finished, maybe move from game compile to normal compile
 //  - Textures + Framebuffer rendering
 //  - Textures from Shaderfiles
 //  - What would be nice:
@@ -35,7 +32,6 @@
 //    - Shadow mapping
 //    - Normal mapping
 //    - Multisampling 
-//    - Texture loading/saving and stuff (header stuff)
 
 struct GameData
 {
@@ -85,11 +81,24 @@ GLuint createFramebuffer()
 
 AutoShaderProgram colorShader;
 AutoShaderProgram imageShader;
+AutoShaderProgram skyShader;
 Texture testTexture;
 void gameAfterReload() 
 {
+    // Set game options
     gameState->renderOptions.vsync = true;
+    gameState->renderOptions.continuousDraw = true;
     gameState->renderOptions.fps = 60;
+
+    // Set to second monitor
+    gameState->windowState.x = -1000;
+    gameState->windowState.y = 50;
+    gameState->windowState.width = 800;
+    gameState->windowState.height = 600;
+    gameState->windowState.fullscreen = true;
+
+    // Init framecount
+    gameData->frameCount = 0;
 
     // Init renderer
     initOpenGLState();
@@ -105,10 +114,9 @@ void gameAfterReload()
     // Init shaders
     init(&imageShader, {"image.vert", "image.frag"}, gameAlloc);
     init(&colorShader, {"color.vert", "color.frag"}, gameAlloc);
-    //init(&skyShader, {"sky.vert", "sky.frag"}, gameAlloc, gameState);
-   
-    print(&gameData->cubeMesh);
-    
+    init(&skyShader, {"sky.vert", "sky.frag"}, gameAlloc);
+
+    print(&gameData->planeMesh);
 }
 
 void gameBeforeReload() 
@@ -116,36 +124,43 @@ void gameBeforeReload()
     shutdown(&testTexture);
     shutdown(&imageShader);
     shutdown(&colorShader);
-    //shutdown(&skyShader);
+    shutdown(&skyShader);
 }
 
 void renderScene() 
 {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    gameData->frameCount++;
+
+    // Draw sky
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    draw(&skyShader, &gameData->cubeMesh, vec3(0.0f));
+
+
+    // Draw meshes
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    draw(&colorShader, &gameData->cubeMesh, vec3(0.0f));
+    draw(&colorShader, &gameData->cubeMesh, vec3(3.0f));
     setUniform(&imageShader.program, "image", &testTexture);
-    draw(&imageShader, &gameData->cubeMesh, vec3(3.0f));
+    draw(&imageShader, &gameData->planeMesh, vec3(0.0f));
     
-    //draw(&skyShader, &testMesh, vec3(0.0f));
 
     //prepare(&imageShader, &gameData->planeMesh, Transform(vec3(0)));
     //GLint loc = bind(&testTexture);
     ////setUniform(&imageShader, "image", loc);
     //draw(&gameData->planeMesh);
 
-    //draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f));
-    //draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f, -3.0f, 3.0f));
-    //draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
-    //draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
+    draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f));
+    draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f, -3.0f, 3.0f));
+    draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
+    draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
 }
 
 void gameTick() 
 {
-    gameData->frameCount++;
-
     Input* input = &gameState->input;
     if (input->keyPressed[KEY_ESCAPE]) {
         gameState->windowState.quit = true;
@@ -190,19 +205,6 @@ void gameTick()
 
 void gameInit() 
 {
-    // Set game options
-    gameState->renderOptions.continuousDraw = true;
-    gameState->renderOptions.fps = 60;
-
-    // Set to second monitor
-    gameState->windowState.x = -1000;
-    gameState->windowState.y = 50;
-    gameState->windowState.width = 800;
-    gameState->windowState.height = 600;
-
-    // Init framecount
-    gameData->frameCount = 0;
-
     // Create mesh
     createCubeMesh(&gameData->cubeMesh, gameAlloc);
     createPlaneMesh(&gameData->planeMesh, gameAlloc);

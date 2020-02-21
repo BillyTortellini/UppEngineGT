@@ -708,7 +708,8 @@ void customDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLs
 {
     // Ignore unecessary warniings
     // 131186 Performace warnings with static_draw using video memory
-    if (id == 0 || id == 131185) return;
+    // 131218 Performance wanring vertex shader ins being recompiled (TODO: Check what this means)
+    if (id == 0 || id == 131185 || id == 131218) return;
 
     loggf("CustomDebugProc: ERROR ID: %d:, msg: \"%s\"\n", id, message);
     switch (source)
@@ -959,7 +960,7 @@ bool handleGameRequests(HWND hwnd)
         actual->vsync = o->vsync;
         if (o->vsync) {
             loggf("Vsync set to on\n");
-            wglSwapIntervalEXT(-1);
+            wglSwapIntervalEXT(1);
         }
         else {
             loggf("Vsync set to off\n");
@@ -1199,8 +1200,13 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
 
         // Show buffer (Hint: Maybe wait for vblanc to swap?)
         if (actualWinState.continuousDraw || actualWinState.redraw) {
-            //glFinish(); // (Hint: maybe do this sometimes?);
+            if (actualWinState.vsync) {
+                glFinish(); 
+            }
             SwapBuffers(deviceContext);
+            //if (actualWinState.vsync) {
+            //    glFinish(); 
+            //}
             actualWinState.redraw = false;
         }
 

@@ -269,7 +269,7 @@ void checkFilesChanged()
     {
         FileListener* listener = &(tracker.listeners[i]);
         if (checkFileChanged(listener)) {
-            loggf("Calling callback of file: %s\n", listener->filename);
+            //loggf("Calling callback of file: %s\n", listener->filename);
             listener->callback(listener->filename, listener->userData);
         }
     }

@@ -20,6 +20,8 @@ struct GameDataAndAlloc
     SegregateAllocator<BlockAllocator, decltype(_seg1024)> _seg256;
     SegregateAllocator<BlockAllocator, decltype(_seg256)> _seg64;
     SegregateAllocator<BlockAllocator, decltype(_seg64)> gameAlloc;
+    // Testing
+    u64 oldGameDataSize;
     // Game Data
     GameData gameData;
 };
@@ -111,11 +113,30 @@ extern "C"
     __declspec(dllexport) void gameBeforeReset(GameState* state) {
         initGlobals(state);
         gameBeforeReload();
+        gameDataAndAlloc->oldGameDataSize = sizeof(GameData);
         shutdownTmpAlloc();
     }
 
-    __declspec(dllexport) void gameAfterReset(GameState* state) {
+    __declspec(dllexport) void gameAfterReset(GameState* state) 
+    {
         initGlobals(state);
+
+        // Check if gameData size has changed
+        if (gameDataAndAlloc->oldGameDataSize != sizeof(GameData)) 
+        {
+            loggf("RESET GAME\n");
+            // Finish shutdown after gameBeforeReset
+            gameShutdown();
+            shutdownTmpAlloc();
+
+            // Initialize everything again
+            createGameAlloc();
+            initTmpAlloc(gameDataAndAlloc->_tmpAllocBlk);
+            gameInit();
+            gameAfterReload();
+            return;
+        }
+
         initTmpAlloc(gameDataAndAlloc->_tmpAllocBlk);
         gameAfterReload();
     }
@@ -218,6 +239,7 @@ extern "C"
 
 
 
+// Implmenentat of STB_IMAGE
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 

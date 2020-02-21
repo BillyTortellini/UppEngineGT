@@ -14,10 +14,10 @@ void createPlaneMeshData(MeshData* m, Allocator* alloc)
     };
 
     Vertex vertexData[] = {
-        Vertex(vec3(-1, 0, -1), vec3(0, 1, 0), vec2(-1, -1)),
-        Vertex(vec3(-1, 0, 1), vec3(0, 1, 0), vec2(-1, 1)),
+        Vertex(vec3(-1, 0, -1), vec3(0, 1, 0), vec2(0, 0)),
+        Vertex(vec3(-1, 0, 1), vec3(0, 1, 0), vec2(0, 1)),
         Vertex(vec3(1, 0, 1), vec3(0, 1, 0), vec2(1, 1)),
-        Vertex(vec3(1, 0, -1), vec3(0, 1, 0), vec2(1, -1))
+        Vertex(vec3(1, 0, -1), vec3(0, 1, 0), vec2(1, 0))
     };
     u32 indexData[] = {
         0, 1, 2,
@@ -26,7 +26,7 @@ void createPlaneMeshData(MeshData* m, Allocator* alloc)
 
     using namespace MeshAttrib;
     init(m, alloc);
-    setAttribs(m, 4, vertexData, {POS3, UV, NORMAL});
+    setAttribs(m, 4, vertexData, {POS3, NORMAL, UV});
     setIndices(m, 6, indexData);
 }
 
