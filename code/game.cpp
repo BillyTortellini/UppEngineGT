@@ -58,30 +58,97 @@ void draw(AutoShaderProgram* p, Mesh* m, const vec3& pos)
     draw(m);
 }
 
-GLuint createFramebuffer()
+// What does a framebuffer need?
+//  - width height
+//  - resizable
+//  - Color attachment (Either RGBA or just RGB or stuff
+//  - Depth attachment
+//  - Depth-Stencil attachment
+//  - 
+//
+// // How i would like it to work
+// -- render into (e.g. deferred shading)
+// Framebuffer f;
+// init(&f, 512, 512, {GL_RGBA, GL_DEPTH_COMPONENT, GL_STENCIL_INDEX, GL_DEPTH_STENCIL}
+//
+// Either rendering into
+//  - width, h
+struct Framebuffer
 {
-    //GLuint fbo; // Framebuffer object
-    //glGenFramebuffer(1, &fbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    GLuint fbo;
+    GLuint colorTexture;
+    GLuint depthTexture;
+    int width, height;
+};
 
-    //assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer not complete\n");
+void init(Framebuffer* f, int width, int height) 
+{
+    f->width = width;
+    f->height = height;
 
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-    //GLuint rbo; // Renderbuffer object
-    //glGenRenderbuffers(1, &rbo);
-    //glDeleteRenderbuffers(1, &rbo);
+    glGenTextures(1, &f->colorTexture);
+    glGenTextures(1, &f->depthTexture);
+    assert(f->colorTexture != 0 && f->depthTexture != 0, "glGenTextures failed\n");
 
-    //glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
-    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    // Generate gpu storage
+    bindTexture2D(f->colorTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, 
+            GL_RGBA, GL_UNSIGNED_BYTE, nullptr); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    bindTexture2D(f->depthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, 
+            GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    //glDeleteFramebuffers(1, &fbo);
-    return 0;
+    // Generate framebuffer
+    glGenFramebuffers(1, &f->fbo);
+    assert(f->fbo != 0, "glGenFramebuffer failed!\n");
+    bindFbo(f->fbo);
+
+    // Attach depth and color texture
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, f->colorTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, f->depthTexture, 0);
+
+    // Check if finished
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer not complete\n");
+
+    // Unbind framebuffer so nothing can mess with the data
+    bindFbo(0);
+}
+
+void shutdown(Framebuffer* f) 
+{
+    bindFbo(0); // Make sure this framebuffer is not bound
+    glDeleteTextures(1, &f->colorTexture);
+    glDeleteTextures(1, &f->depthTexture);
+    glDeleteFramebuffers(1, &f->fbo);
+}
+
+void bind(Framebuffer* f) {
+    bindFbo(f->fbo);
+}
+
+void setUniform(ShaderProgram* p, const char* name, Framebuffer* t)
+{
+    bindProgram(p->id); 
+    UniformInfo* info = getUniformInfo(p, name); 
+    if (info == nullptr) { 
+        loggf("Uniform \"%s\" not in shaderprogram\n", name); 
+        return; 
+    } 
+    if (info->type != GL_SAMPLER_2D) { 
+        loggf("Uniform \"%s\" type did not match\n", name); 
+        return; 
+    } 
+    glUniform1i(info->location, bindTexture2D(t->colorTexture)); 
 }
 
 AutoShaderProgram colorShader;
 AutoShaderProgram imageShader;
 AutoShaderProgram skyShader;
+Framebuffer testFramebuffer;
 Texture testTexture;
 void gameAfterReload() 
 {
@@ -95,13 +162,16 @@ void gameAfterReload()
     gameState->windowState.y = 50;
     gameState->windowState.width = 800;
     gameState->windowState.height = 600;
-    gameState->windowState.fullscreen = true;
+    gameState->windowState.fullscreen = false;
 
     // Init framecount
     gameData->frameCount = 0;
 
     // Init renderer
     initOpenGLState();
+
+    // Init framebuffers
+    init(&testFramebuffer, 1024, 1024);
     
     // Set default options
     glClearColor(0, 0, 0, 0);
@@ -115,8 +185,6 @@ void gameAfterReload()
     init(&imageShader, {"image.vert", "image.frag"}, gameAlloc);
     init(&colorShader, {"color.vert", "color.frag"}, gameAlloc);
     init(&skyShader, {"sky.vert", "sky.frag"}, gameAlloc);
-
-    print(&gameData->planeMesh);
 }
 
 void gameBeforeReload() 
@@ -125,6 +193,7 @@ void gameBeforeReload()
     shutdown(&imageShader);
     shutdown(&colorShader);
     shutdown(&skyShader);
+    shutdown(&testFramebuffer);
 }
 
 void renderScene() 
@@ -137,7 +206,6 @@ void renderScene()
     glDisable(GL_CULL_FACE);
 
     draw(&skyShader, &gameData->cubeMesh, vec3(0.0f));
-
 
     // Draw meshes
     glEnable(GL_DEPTH_TEST);
@@ -196,7 +264,21 @@ void gameTick()
     }
 
     update(&gameData->controller, gameState);
+
+    // Render to framebuffer
+    bind(&testFramebuffer);
+    glViewport(0, 0, testFramebuffer.width, testFramebuffer.height);
     renderScene();
+    bindFbo(0);
+
+    // Render normally
+    gameData->frameCount++;
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
+    
+    setUniform(&imageShader.program, "image", &testFramebuffer);
+    draw(&imageShader, &gameData->planeMesh, vec3(0.0f));
+    draw(&colorShader, &gameData->cubeMesh, vec3(0, 2, 0));
 
     //float t = (float)gameState->time.now;
     //vec3 pos = vec3(sinf(t), 0, cosf(t)) * 5;

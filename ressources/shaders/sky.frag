@@ -13,10 +13,45 @@ float d2r(float d) {
 vec3 groundColor = vec3(0.4, 0.22, 0.05);
 vec3 skyColor = vec3(0.10, 0.10, 0.7);
 
-float N21(vec2 v)
-{
+float R21(vec2 v) {
     return fract(343 * fract(sin(v.x*1432.345 + 114.44)*3453.4) + 
                  -22.3434*fract(sin(v.y*5543.123 - 3453.213)*-5344));
+}
+
+float R11(float f) {
+    return fract(342.346 * fract(sin(f * 1343.3433)*-2343.333));
+}
+
+float octave(vec2 v, float factor)
+{
+    v.x /= d2r(180)/(32*factor);
+    v.y /= d2r(180)/(64*factor);
+    vec2 uv = fract(v);
+    vec2 id = floor(v);
+    id.x = mod(id.x, (64*factor));
+
+    vec2 id_lb = id;
+    vec2 id_rb = id + vec2(1, 0);
+    vec2 id_lt = id + vec2(0, 1);
+    vec2 id_rt = id + vec2(1, 1);
+    id_rb.x = mod(id_rb.x, (64*factor));
+    id_rt.x = mod(id_rb.x, (64*factor));
+
+    float lr_t = mix(R21(id_lt), R21(id_rt), uv.x);
+    float lr_b = mix(R21(id_lb), R21(id_rb), uv.x);
+    float final = mix(lr_b, lr_t, uv.y);
+    return final;
+}
+
+float N21(vec2 v)
+{
+    return octave(v, .5) * .5 +
+           octave(v, 1) * .25 + 
+           octave(v, 2) * .125 +
+           octave(v, 4) * .0725;
+
+    //return lr_b;
+    //return final;
 }
 
 void main()

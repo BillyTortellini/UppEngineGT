@@ -9,6 +9,7 @@ struct OpenGLState
 {
     GLuint vao;
     GLuint program;
+    GLuint fbo;
     GLuint textureUnit[TEXTURE_UNIT_COUNT];
     int nextTextureUnit;
 };
@@ -19,6 +20,7 @@ void initOpenGLState()
     memset(&glState, 0, sizeof(OpenGLState));
     glBindVertexArray(0);
     glUseProgram(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     for (int i = 0; i < TEXTURE_UNIT_COUNT; i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -39,6 +41,13 @@ void bindProgram(GLuint id) {
     }
 }
 
+void bindFbo(GLuint fbo) {
+    if (glState.fbo != fbo) {
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glState.fbo = fbo;
+    }
+}
+
 // Returns bound texture unit
 GLint bindTexture2D(GLuint id) 
 {
@@ -53,7 +62,7 @@ GLint bindTexture2D(GLuint id)
     GLint unit = glState.nextTextureUnit;
     glState.nextTextureUnit = (glState.nextTextureUnit + 1) % TEXTURE_UNIT_COUNT;
     glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, id);
 
     return unit;
 }
