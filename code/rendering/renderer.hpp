@@ -11,6 +11,8 @@
 #include "mesh.hpp"
 #include "shaderProgram.hpp"
 #include "autoShaderProgram.hpp"
+#include "autoMesh.hpp"
+#include "texture.hpp"
 
 // Next steps:
 //  - Mesh creation in new file

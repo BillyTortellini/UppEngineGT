@@ -1,6 +1,16 @@
 #ifndef __GAME_CPP__
 #define __GAME_CPP__
 
+char _assert_line_num_buf[4096];
+char _assert_line_helper[4096];
+#define assert(x, y, ...) \
+{ \
+snprintf(_assert_line_num_buf, 4096, (y), __VA_ARGS__); \
+snprintf(_assert_line_helper, 4096, "Line: %d, file: %s:\n", __LINE__, __FILE__); \
+strncat(_assert_line_helper, _assert_line_num_buf, 4096); \
+assert((x), _assert_line_helper); \
+} 
+
 // Own file includes
 #include "uppLib.hpp"
 #include "platform.hpp"
@@ -10,6 +20,7 @@
 #include "utils/meshGenerators.hpp"
 #include "utils/camera.hpp"
 #include "utils/arcBallController.hpp"
+#include <functional>
 
 // TODO:
 // -----
@@ -37,6 +48,9 @@
 
 struct GameData
 {
+    // Test
+    DynArr<std::function<void()>> gameResetFunctions; 
+    // GameDat
     Camera3D camera;
     ArcBallController controller;
     AutoMesh cubeMesh;
@@ -65,6 +79,10 @@ void draw(AutoShaderProgram* p, Mesh* m, const vec3& pos)
     draw(m);
 }
 
+void addResetFunction(std::function<void()> func) {
+    gameData->gameResetFunctions.push_back(func);
+}
+
 GLuint createFramebuffer()
 {
     //GLuint fbo; // Framebuffer object
@@ -86,12 +104,16 @@ GLuint createFramebuffer()
     return 0;
 }
 
+
 AutoShaderProgram colorShader;
-Mesh testMesh;
-MeshData testMeshData;
-ShaderProgram testShader;
+AutoShaderProgram imageShader;
+AutoMesh cubeMesh;
+Texture testTexture;
 void gameAfterReset() 
 {
+    gameState->renderOptions.vsync = true;
+    gameState->renderOptions.fps = 60;
+
     // Init renderer
     initOpenGLState();
     
@@ -100,35 +122,95 @@ void gameAfterReset()
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
 
+    // Init textures
+    init(&testTexture, "test.bmp", gameAlloc);
+    addResetFunction([](){shutdown(&testTexture);});
+
+    // Init meshes
+    createCubeMesh(&cubeMesh, gameAlloc);
+    addResetFunction([](){shutdown(&cubeMesh);});
+
     // Init shaders
-    //init(&imageShader, {"image.vert", "image.frag"}, gameAlloc, gameState);
+    init(&imageShader, {"image.vert", "image.frag"}, gameAlloc);
+    addResetFunction([](){shutdown(&imageShader);});
+    init(&colorShader, {"color.vert", "color.frag"}, gameAlloc);
+    addResetFunction([](){shutdown(&colorShader);});
     //init(&skyShader, {"sky.vert", "sky.frag"}, gameAlloc, gameState);
-    init(&testShader, {"testShader.vert", "testShader.frag"}, gameAlloc);
-
-    createCubeMeshData(&testMeshData, gameAlloc);
-    init(&testMesh, &testMeshData, {
-            AttribLocation(MeshAttrib::POS3, 0)},
-            gameAlloc);
-
-    //init(&colorShader, {"color.vert", "color.frag"}, gameAlloc, gameState);
-    loggf("\n----------------\n");
-    print(&testShader);
-    loggf("\n----------------\n");
 }
 
 void gameBeforeReset() 
 {
-    shutdown(&colorShader);
+    for (int i = 0; i < gameData->gameResetFunctions.size(); i++) {
+        (gameData->gameResetFunctions[i])(); // Call function
+    }
+    gameData->gameResetFunctions.reset();
+    //shutdown(&colorShader);
+    //shutdown(&cubeMesh);
     //shutdown(&imageShader);
     //shutdown(&skyShader);
     
-    shutdown(&testShader);
-    shutdown(&testMeshData);
-    shutdown(&testMesh);
+    //shutdown(&testTexture);
+}
+
+void renderScene() 
+{
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+    draw(&colorShader, &cubeMesh, vec3(5.0f));
+    setUniform(&imageShader.program, "image", &testTexture);
+    //draw(&imageShader, &gameData->cubeMesh, vec3(0.0f));
+    
+    //draw(&skyShader, &testMesh, vec3(0.0f));
+
+    //prepare(&imageShader, &gameData->planeMesh, Transform(vec3(0)));
+    //GLint loc = bind(&testTexture);
+    ////setUniform(&imageShader, "image", loc);
+    //draw(&gameData->planeMesh);
+
+    //draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f));
+    //draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f, -3.0f, 3.0f));
+    //draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
+    //draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
+}
+
+void gameTick() 
+{
+    gameData->frameCount++;
+
+    Input* input = &gameState->input;
+    if (input->keyPressed[KEY_ESCAPE]) {
+        gameState->windowState.quit = true;
+    }
+    if (input->keyPressed[KEY_F5]) {
+        gameState->windowState.hideCursor = !gameState->windowState.hideCursor;
+        loggf("Hide cursor set to: %s\n", gameState->windowState.hideCursor ? "TRUE" : "FALSE");
+    }
+    if (input->keyPressed[KEY_F11]) {
+        gameState->windowState.fullscreen = !gameState->windowState.fullscreen;
+    }
+
+    // Handle resize
+    if (gameState->windowState.wasResized) {
+        glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
+        gameData->camera.projection = projection(0.01f, 100.0f, d2r(90), 
+                (float)gameState->windowState.width/gameState->windowState.height);
+    }
+
+    update(&gameData->controller, gameState);
+    renderScene();
+
+    //float t = (float)gameState->time.now;
+    //vec3 pos = vec3(sinf(t), 0, cosf(t)) * 5;
+    //draw(&colorShader, &gameData->cubeMesh, Transform(pos));
 }
 
 void gameInit() 
 {
+    // Test
+    gameData->gameResetFunctions.init(gameAlloc, 8); 
+     
     // Set game options
     gameState->renderOptions.continuousDraw = true;
     gameState->renderOptions.fps = 60;
@@ -161,61 +243,6 @@ void gameShutdown()
     shutdown(&gameData->quadMesh);
 }
 
-void gameTick() 
-{
-    gameData->frameCount++;
-
-    Input* input = &gameState->input;
-    if (input->keyPressed[KEY_ESCAPE]) {
-        gameState->windowState.quit = true;
-    }
-    if (input->keyPressed[KEY_F5]) {
-        gameState->windowState.hideCursor = !gameState->windowState.hideCursor;
-        loggf("Hide cursor set to: %s\n", gameState->windowState.hideCursor ? "TRUE" : "FALSE");
-    }
-    if (input->keyPressed[KEY_F11]) {
-        gameState->windowState.fullscreen = !gameState->windowState.fullscreen;
-    }
-
-    // Resize if necessary
-    if (gameState->windowState.wasResized) 
-    {
-        glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
-        loggf("width: %d, height: %d\n", gameState->windowState.width, gameState->windowState.height);
-        gameData->camera.projection = projection(0.01f, 100.0f, d2r(90), 
-                (float)gameState->windowState.width/gameState->windowState.height);
-    }
-
-    update(&gameData->controller, gameState);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-
-    bind(&testShader);
-    bind(&testMesh);
-    update(&gameData->camera, gameData->frameCount);
-    setUniform(&testShader, "u_MVP", gameData->camera.vp);
-    draw(&testMesh);
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    //draw(&skyShader, &testMesh, vec3(0.0f));
-    //draw(&colorShader, &gameData->cubeMesh, vec3(0.0f));
-
-    //prepare(&imageShader, &gameData->planeMesh, Transform(vec3(0)));
-    //GLint loc = bind(&testTexture);
-    ////setUniform(&imageShader, "image", loc);
-    //draw(&gameData->planeMesh);
-
-    //draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f));
-    //draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f, -3.0f, 3.0f));
-    //draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
-    //draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
-
-    //float t = (float)gameState->time.now;
-    //vec3 pos = vec3(sinf(t), 0, cosf(t)) * 5;
-    //draw(&colorShader, &gameData->cubeMesh, Transform(pos));
-}
 
 #include "gameHook.cpp"
 

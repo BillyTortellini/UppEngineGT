@@ -286,9 +286,9 @@ void onShaderFileChanged(const char* filename, void* userData)
 
     // Call reload callbacks
     loggf("Custom callback coutn: %d\n", p->reloadCallbacks.size());
-    //for (ShaderProgramReloadCallback callback : p->reloadCallbacks) {
-    //    callback(p);
-    //}
+    for (ShaderProgramReloadCallback callback : p->reloadCallbacks) {
+        callback(p);
+    }
 }
 
 bool init(ShaderProgram* p, std::initializer_list<const char*> filenames, 

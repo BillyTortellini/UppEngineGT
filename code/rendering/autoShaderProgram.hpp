@@ -20,6 +20,29 @@ namespace AutoUniformType
     };
 }
 
+const char* toStr(AutoUniformType::ENUM type)
+{
+    using namespace AutoUniformType;
+    switch(type)
+    {
+        case MODEL_MATRIX:
+            return "MODEL_MATRIX";
+        case VIEW_MATRIX:
+            return "VIEW_MATRIX";
+        case PROJECTION_MATRIX:
+            return "PROJECTION_MATRIX";
+        case MVP_MATRIX:
+            return "MVP_MATRIX";
+        case VP_MATRIX:
+            return "VP_MATRIX";
+        case CAMERA_POS:
+            return "CAMERA_POS";
+        case TIME:
+            return "TIME";
+    }
+    return "INVALID_AUTO_UNIFORM";
+}
+
 struct AutoUniform
 {
     GLint location;
@@ -134,6 +157,32 @@ struct AutoShaderProgram
     DynArr<AttribLocation> attribLocs; // Sorted by location
 };
 
+void print(AutoShaderProgram* p)
+{
+    loggf("AutoShaderProgram: \n");
+    loggf("PerModel: (count %d)\n", p->perModel.size());
+    int i = 0;
+    for (AutoUniform& u : p->perModel) {
+        loggf("  #%d\n", i);
+        loggf("\t Type: %s, location=%d\n", toStr(u.type), u.location);
+        i++;
+    }
+    loggf("PerFrame: (count %d)\n", p->perFrame.size());
+    i = 0;
+    for (AutoUniform& u : p->perFrame) {
+        loggf("  #%d\n", i);
+        loggf("\t Type: %s, location=%d\n", toStr(u.type), u.location);
+        i++;
+    }
+    loggf("Attrib locations: (count %d)\n", p->attribLocs.size());
+    i = 0;
+    for (AttribLocation& loc : p->attribLocs) {
+        loggf("  #%d\n", i);
+        loggf("\t Attrib: %s, location=%d\n", toStr(loc.attrib), loc.location);
+        i++;
+    }
+}
+
 void detectAutoUniforms(AutoShaderProgram* p)
 {
     if (p->program.id == 0) {
@@ -163,7 +212,7 @@ void detectAutoUniforms(AutoShaderProgram* p)
                 loggf("Detected uniform: %s\n", info.name);
                 AutoUniform* uniform;
                 if (sup.perFrame) {
-                    uniform = &p->perFrame[p->perModel.size()];
+                    uniform = &p->perFrame[p->perFrame.size()];
                 }
                 else {
                     uniform = &p->perModel[p->perModel.size()];
@@ -212,7 +261,11 @@ void detectAutoAttribs(AutoShaderProgram* p)
 
 void onAutoShaderReload(ShaderProgram* sp)
 {
+    loggf("AUTO_SHADER_RELOAD\n");
     AutoShaderProgram* p = (AutoShaderProgram*) sp;
+    p->perModel.reset();
+    p->perFrame.reset();
+    p->attribLocs.reset();
     if (p->program.id == 0) {
         return;
     }
@@ -228,8 +281,8 @@ void init(AutoShaderProgram* p,
     init(&p->program, shaderFiles, alloc);
     p->perModel.init(alloc, 4);
     p->perFrame.init(alloc, 4);
-    p->lastUpdateFrame = -1;
     p->attribLocs.init(alloc, 4);
+    p->lastUpdateFrame = -1;
     p->program.reloadCallbacks.push_back(&onAutoShaderReload);
 
     detectAutoUniforms(p);
@@ -314,95 +367,6 @@ void updatePerModelUniforms(AutoShaderProgram* program, Camera3D* cam, const Tra
         }
     }
 }
-
-
-
-// Auto mesh
-struct AutoMesh
-{
-    MeshGPUBuffer buffer;
-    DynArr<MeshVao> meshVaos;
-};
-
-void init(AutoMesh* mesh, MeshData* meshData, Allocator* alloc)
-{
-    init(&mesh->buffer, meshData, alloc); 
-    mesh->meshVaos.init(alloc, 4);
-}
-
-void shutdown(AutoMesh* mesh)
-{
-    for (MeshVao& m : mesh->meshVaos) {
-        shutdown(&m);
-    }
-    mesh->meshVaos.shutdown();
-    shutdown(&mesh->buffer);
-}
-
-bool isCompatible(MeshVao* meshVao, AutoShaderProgram* p)
-{
-    // Check if vao has enough attribs
-    if (meshVao->attribLocs.size() < p->attribLocs.size())
-        return false;
-
-    // Loop over all shader attributes
-    int meshIndex = 0;
-    int shaderIndex = 0;
-    bool quit = false;
-    while (!quit) 
-    {
-        AttribLocation* meshLoc = &meshVao->attribLocs[meshIndex];
-        AttribLocation* shaderLoc = &p->attribLocs[shaderIndex];
-        // If it fits, advance both indices
-        if (meshLoc->location == shaderLoc->location &&
-                meshLoc->attrib == shaderLoc->attrib) {
-            meshIndex++;
-            shaderIndex++;
-        }
-        else { 
-            // Advance mesh index, because meshes can 
-            // have more data then the shader needs
-            meshIndex++; 
-        }
-        if (meshIndex == meshVao->attribLocs.size() ||
-                shaderIndex == p->attribLocs.size()) {
-            quit = true;
-        }
-    }
-
-    if (shaderIndex == p->attribLocs.size()) {
-        return true;
-    }
-    return false;
-}
-
-void draw(AutoMesh* mesh, AutoShaderProgram* p)
-{
-    if (p->program.id == 0) {
-        return;
-    }
-    bind(p);
-
-    // Loop through vaos if one fits
-    for (MeshVao& meshVao : mesh->meshVaos)
-    {
-        if (isCompatible(&meshVao, p)) {
-            draw(&meshVao, mesh->buffer.indexBuffer.indexCount);            
-            return;
-        }
-    }
-
-    // Else create new vao
-    MeshVao meshVao;
-    int attribLocCount = p->attribLocs.size();
-    AttribLocation* attribLocs = (AttribLocation*)p->attribLocs.data.data;
-    init(&meshVao, &mesh->buffer, attribLocCount, attribLocs, p->program.alloc);
-    mesh->meshVaos.push_back(meshVao);
-
-    draw(&meshVao, mesh->buffer.indexBuffer.indexCount);
-}
-
-
 
 
 

@@ -18,6 +18,27 @@ namespace MeshAttrib
     };
 };
 
+const char* toStr(MeshAttrib::ENUM attrib)
+{
+    using namespace MeshAttrib;
+    switch(attrib)
+    {
+        case POS2:
+            return "POS2";
+        case POS3:
+            return "POS3";
+        case NORMAL:
+            return "NORMAL";
+        case UV:
+            return "UV";
+        case COLOR3:
+            return "COLOR3";
+        case COLOR4:
+            return "COLOR4";
+    }
+    return "INVALID_ATTRIB";
+}
+
 struct MeshAttribInfo
 {
     MeshAttribInfo(){};

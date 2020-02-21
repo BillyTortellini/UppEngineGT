@@ -12,10 +12,12 @@ struct Image
     int numChannels;
     byte* data;    
     Blk blk;
+    Allocator* alloc;
 };
 
-void init(Image* img, const char* filename) 
+void init(Image* img, const char* filename, Allocator* alloc) 
 {
+    img->alloc = alloc;
     TmpStr filepath = "ressources/textures/";
     filepath = filepath + filename;
 
@@ -27,13 +29,13 @@ void init(Image* img, const char* filename)
 
     // Copy data to renderAlloc
     u64 size = img->numChannels * img->width * img->height;
-    img->blk = renderAlloc->alloc(img->numChannels * img->width * img->height);
+    img->blk = alloc->alloc(img->numChannels * img->width * img->height);
     memcpy(img->blk.data, data, size);
     img->data = (byte*) img->blk.data;
 }
 
 void shutdown(Image* img) {
-    renderAlloc->dealloc(img->blk);
+    img->alloc->dealloc(img->blk);
 }
 
 GLuint createTexture(Image* img) 
@@ -141,27 +143,39 @@ void init(Texture* tex, Image* img) {
     init(tex, img, bestFilter);
 }
 
-void init(Texture* texture, const char* name, const TextureFilterMode& filterMode) 
+void init(Texture* texture, const char* name, const TextureFilterMode& filterMode, Allocator* alloc) 
 {
     // Load image from filepath
     Image tmpImg;
-    init(&tmpImg, name);
+    init(&tmpImg, name, alloc);
     SCOPE_EXIT(shutdown(&tmpImg););
 
     // Create texture
     init(texture, &tmpImg, filterMode);
 }
 
-void init(Texture* texture, const char* name) {
-    init(texture, name, bestFilter); 
+void init(Texture* texture, const char* name, Allocator* alloc) {
+    init(texture, name, bestFilter, alloc); 
 }
 
 void shutdown(Texture* tex) {
     glDeleteTextures(1, &tex->id);
 }
 
-
-
+void setUniform(ShaderProgram* p, const char* name, Texture* t)
+{
+    bindProgram(p->id); 
+    UniformInfo* info = getUniformInfo(p, name); 
+    if (info == nullptr) { 
+        loggf("Uniform \"%s\" not in shaderprogram\n", name); 
+        return; 
+    } 
+    if (info->type != GL_SAMPLER_2D) { 
+        loggf("Uniform \"%s\" type did not match\n", name); 
+        return; 
+    } 
+    glUniform1i(info->location, bind(t)); 
+}
 
 
 

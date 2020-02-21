@@ -8,7 +8,7 @@
 u64 get_file_size(const char* filepath) 
 {
     FILE* file = fopen(filepath, "rb");
-    assert(file != nullptr, "File &s could not be openend!\n", filepath);
+    assert(file != nullptr, "File %s could not be openend!\n", filepath);
     SCOPE_EXIT(fclose(file));
 
     // Get File size
@@ -33,7 +33,7 @@ char* load_text_file_tmp(const char* filepath)
     
     // Read
     u64 readSize = (u64) fread(text, 1, fileSize, file); 
-    assert(readSize == fileSize, "fread failed, it returned %d size instead of %d fileSize\n", readSize, fileSize);
+    assert(readSize == fileSize, "fread failed, it returned %llu size instead of %llu fileSize\n", readSize, fileSize);
 
     // Add null terminator
     text[fileSize] = '\0';
@@ -58,7 +58,7 @@ Blk load_file_tmp(const char* filepath)
 
     // Read 
     u64 readSize = (u64) fread(tmpMem.data, 1, fileSize, file); 
-    assert(readSize == fileSize, "fread failed, it returned %d size instead of %d fileSize\n", readSize, fileSize);
+    assert(readSize == fileSize, "fread failed, it returned %llu size instead of %llu fileSize\n", readSize, fileSize);
 
     return tmpMem;
 }
@@ -79,7 +79,7 @@ void load_file(const char* filepath, const Blk& memory)
     
     // Read 
     u64 readSize = (u64) fread(memory.data, 1, fileSize, file); 
-    assert(readSize == fileSize, "fread failed, it returned %d size instead of %d fileSize\n", readSize, fileSize);
+    assert(readSize == fileSize, "fread failed, it returned %llu size instead of %llu fileSize\n", readSize, fileSize);
 
     return;
 }
