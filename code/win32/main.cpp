@@ -35,6 +35,7 @@ struct ActualWinState
     bool fullscreen;
     bool minimized;
     bool hideCursor;
+    bool inFocus;
 
     int fps;
     bool vsync;
@@ -290,6 +291,9 @@ LRESULT windowProc(HWND hwnd, UINT msgType, WPARAM wParam, LPARAM lParam)
                 gameState.input.mouseY  = y;
                 return 0;
             }
+        case WM_ACTIVATE:
+            actualWinState.inFocus = !(LOWORD(wParam) == WA_INACTIVE);
+            break;
 
         case WM_SIZE:
             {
@@ -843,6 +847,7 @@ void initWindowState(HWND hwnd)
     actualWinState.redraw = false;
     actualWinState.fps = 60;
     actualWinState.hideCursor = false;
+    actualWinState.inFocus = true;
 
     // Save window style
     actualWinState.savedWindowStyle = GetWindowLong(hwnd, GWL_STYLE);
@@ -864,6 +869,7 @@ void initGameState()
     w->height = actualWinState.height;
     w->x = actualWinState.x;
     w->y = actualWinState.y;
+    w->inFocus = actualWinState.inFocus;
 
     // Set input
     memset(&gameState.input, 0, sizeof(Input));
@@ -932,6 +938,7 @@ bool handleGameRequests(HWND hwnd)
     actual->redraw = o->redraw;
     actual->continuousDraw = o->continuousDraw;
     actual->fps = o->fps;
+    w->inFocus = actual->inFocus;
 
     // Reset members that get reset each frame
     w->wasResized = false;
@@ -967,13 +974,14 @@ bool handleGameRequests(HWND hwnd)
             wglSwapIntervalEXT(0);
         }
     }
-
+    
     // Handle request window move/resize
     if (actual->x != w->x || actual->y != w->y ||
         actual->width != w->width || actual->height != w->height) {
         // Ignore if fullscreen is set or if minimized
         if (!actual->fullscreen && !actual->minimized) 
         {
+            loggf("Window move/resize request!\n");
             SetWindowPos(hwnd, HWND_TOP, w->x, w->y, w->width, w->height, NULL);
             w->wasMoved = true;
             if (actual->x != w->x || actual->y != w->y) {
@@ -987,12 +995,19 @@ bool handleGameRequests(HWND hwnd)
             actual->width = w->width;
             actual->height = w->height;
         }
+        else {
+            w->x = actual->x;
+            w->y = actual->y;
+            w->width = actual->width;
+            w->height = actual->height;
+        }
     }
 
     // Handle fullscreen requests
     if (actual->fullscreen != w->fullscreen)
     {
         actual->fullscreen = w->fullscreen;
+        loggf("Window fullscreen request\n");
         if (w->fullscreen) 
         {
             // Save current window position and size
@@ -1026,6 +1041,20 @@ bool handleGameRequests(HWND hwnd)
             SetWindowPos(hwnd, HWND_TOP, r.left, r.top, 
                     r.right - r.left, r.bottom - r.top, NULL);
         }
+
+        RECT dim;
+        GetWindowRect(hwnd, &dim);
+        // Update windowPos/width height
+        w->wasResized = true;
+        w->wasMoved = true;
+        w->x = dim.left;
+        w->y = dim.top;
+        w->width = dim.right - dim.left;
+        w->height = dim.bottom - dim.top;
+        actual->x = w->x;
+        actual->y = w->y;
+        actual->width = w->width;
+        actual->height = w->height;
     }
 
     if (actual->hideCursor != w->hideCursor) 

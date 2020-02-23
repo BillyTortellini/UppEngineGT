@@ -74,21 +74,35 @@ GLuint createShaderProgram(int fileCount, const char** filepaths)
 {
     assert(fileCount < MAX_SHADER_COUNT, "CreateShaderProgram called with more than max shaders\n");
 
-    // Create program
-    GLuint id = glCreateProgram();
-    assert(id != 0, "glCreateProgram failed\n");
-
     // Compile all shaders
     int shaderCount = fileCount;
     int shaderIDs[MAX_SHADER_COUNT];
+    memset(shaderIDs, 0, sizeof(int) * MAX_SHADER_COUNT);
+    bool success = true;
     for (int i = 0; i < shaderCount; i++)
     {
         shaderIDs[i] = createShaderFromFile(filepaths[i]);
         if (shaderIDs[i] == 0) {
             loggf("Create shader program failed, could not compile file %s", filepaths[i]);
+            success = false;
             break;
         }
     }
+
+    // Rollback if error occured
+    if (!success) 
+    {
+        for (int i = 0; i < shaderCount; i++) {
+            if (shaderIDs[i] != 0) {
+                glDeleteShader(shaderIDs[i]);
+            }
+        }
+        return 0;
+    }
+
+    // Create program
+    GLuint id = glCreateProgram();
+    assert(id != 0, "glCreateProgram failed\n");
 
     // Attach all shaders
     for (int i = 0; i < shaderCount; i++) {
@@ -399,7 +413,6 @@ UniformInfo* getUniformInfo(ShaderProgram* p, const char* name)
     bindProgram(p->id); \
     UniformInfo* info = getUniformInfo(p, name); \
     if (info == nullptr) { \
-        loggf("Uniform \"%s\" not in shaderprogram\n", name); \
         return; \
     } \
     if (info->type != glType) { \

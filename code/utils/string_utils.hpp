@@ -58,7 +58,7 @@ public:
     }
 
     TmpStr(int length) {
-        assert(length > 0, "TmpStr called with length <= 0\n");
+        assert(length >= 0, "TmpStr called with length < 0\n");
         this->length = length;
         checkpoint = tmpAlloc.createCheckpoint();
         this->str = (char*) tmpAlloc.alloc(length+1);

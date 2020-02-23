@@ -14,6 +14,8 @@ namespace AutoUniformType
         MVP_MATRIX,
         VP_MATRIX,
         CAMERA_POS,
+        RESOLUTION,
+        MOUSE_POS,
         TIME,
 
         COUNT // MUST STAY LAST
@@ -39,6 +41,10 @@ const char* toStr(AutoUniformType::ENUM type)
             return "CAMERA_POS";
         case TIME:
             return "TIME";
+        case MOUSE_POS:
+            return "MOUSE_POS";
+        case RESOLUTION:
+            return "RESOLUTION";
     }
     return "INVALID_AUTO_UNIFORM";
 }
@@ -98,6 +104,17 @@ SupportedAutoUniform supportedAutoUniforms[] = {
     SupportedAutoUniform("u_time", AutoUniformType::TIME, GL_FLOAT, true),
     SupportedAutoUniform("u_t", AutoUniformType::TIME, GL_FLOAT, true),
     SupportedAutoUniform("u_now", AutoUniformType::TIME, GL_FLOAT, true),
+    
+    SupportedAutoUniform("u_resolution", AutoUniformType::RESOLUTION, GL_FLOAT_VEC2, true),
+    SupportedAutoUniform("u_res", AutoUniformType::RESOLUTION, GL_FLOAT_VEC2, true),
+    SupportedAutoUniform("u_viewport", AutoUniformType::RESOLUTION, GL_FLOAT_VEC2, true),
+    SupportedAutoUniform("u_screenSize", AutoUniformType::RESOLUTION, GL_FLOAT_VEC2, true),
+    SupportedAutoUniform("u_screen", AutoUniformType::RESOLUTION, GL_FLOAT_VEC2, true),
+    SupportedAutoUniform("u_size", AutoUniformType::RESOLUTION, GL_FLOAT_VEC2, true),
+
+    SupportedAutoUniform("u_mousepos", AutoUniformType::MOUSE_POS, GL_FLOAT_VEC2, true),
+    SupportedAutoUniform("u_mouse", AutoUniformType::MOUSE_POS, GL_FLOAT_VEC2, true),
+    SupportedAutoUniform("u_mpos", AutoUniformType::MOUSE_POS, GL_FLOAT_VEC2, true),
 };
 
 struct SupportedAutoAttrib
@@ -301,21 +318,18 @@ void bind(AutoShaderProgram* p) {
     bind(&p->program);
 }
 
-void updatePerFrameUniforms(AutoShaderProgram* program, 
-        Camera3D* cam, int frame, float time)
+void updatePerFrameUniforms(AutoShaderProgram* program, Camera3D* cam, const vec2& mousePos, float time)
 {
     if (program->program.id == 0) {
         return;
     }
 
     bind(program);
-    if (program->lastUpdateFrame == frame) 
+    if (program->lastUpdateFrame == renderState.frameCounter) 
         return;
-    program->lastUpdateFrame = frame;
+    program->lastUpdateFrame = renderState.frameCounter;
 
-    // Prepare camera
-    update(cam, frame);
-
+    mat4 vp = cam->projection * cam->view;
     for (AutoUniform& u : program->perFrame) 
     {
         switch (u.type)
@@ -327,13 +341,22 @@ void updatePerFrameUniforms(AutoShaderProgram* program,
                 glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &cam->projection);
                 break;
             case AutoUniformType::VP_MATRIX:
-                glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &cam->vp);
+                glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &vp);
                 break;
             case AutoUniformType::CAMERA_POS:
-                glUniform3fv(u.location, 3, (GLfloat*) &cam->pos);
+                glUniform3fv(u.location, 1, (GLfloat*) &cam->pos);
                 break;
             case AutoUniformType::TIME:
                 glUniform1f(u.location, time);
+                break;
+            case AutoUniformType::RESOLUTION:
+                {
+                vec2 resolution = vec2(renderState.viewportWidth, renderState.viewportHeight);
+                glUniform2fv(u.location, 1, (GLfloat*)&resolution);
+                break;
+                }
+            case AutoUniformType::MOUSE_POS: 
+                glUniform2fv(u.location, 1, (GLfloat*)&mousePos);
                 break;
             default:
                 invalid_path("ERROR");
@@ -350,7 +373,7 @@ void updatePerModelUniforms(AutoShaderProgram* program, Camera3D* cam, const Tra
     bind(program);
 
     mat4 model = transform.toModelMat();
-    mat4 mvp = cam->vp * model;
+    mat4 mvp = cam->projection * cam->view * model;
     for (AutoUniform& u : program->perModel) 
     {
         switch (u.type)
@@ -368,8 +391,39 @@ void updatePerModelUniforms(AutoShaderProgram* program, Camera3D* cam, const Tra
     }
 }
 
+void updateAutoUniforms(AutoShaderProgram* p, Camera3D* cam, const vec2& mousePos, float time, const Transform& transform)
+{
+    updatePerFrameUniforms(p, cam, mousePos, time);
+    updatePerModelUniforms(p, cam, transform);
+}
 
-
+void setUniform(AutoShaderProgram* p, const char* name, const float& f) {
+    setUniform(&p->program, name, f);
+}
+void setUniform(AutoShaderProgram* p, const char* name, const vec2& f) {
+    setUniform(&p->program, name, f);
+}
+void setUniform(AutoShaderProgram* p, const char* name, const vec3& f) {
+    setUniform(&p->program, name, f);
+}
+void setUniform(AutoShaderProgram* p, const char* name, const vec4& f) {
+    setUniform(&p->program, name, f);
+}
+void setUniform(AutoShaderProgram* p, const char* name, const mat2& f) {
+    setUniform(&p->program, name, f);
+}
+void setUniform(AutoShaderProgram* p, const char* name, const mat3& f) {
+    setUniform(&p->program, name, f);
+}
+void setUniform(AutoShaderProgram* p, const char* name, const mat4& f) {
+    setUniform(&p->program, name, f);
+}
+void setUniform(AutoShaderProgram* p, const char* name, const int& f) {
+    setUniform(&p->program, name, f);
+}
+void setUniform(AutoShaderProgram* p, const char* name, const u32& f) {
+    setUniform(&p->program, name, f);
+}
 
 
 

@@ -115,6 +115,11 @@ void draw(AutoMesh* mesh, AutoShaderProgram* p)
     mesh->meshVaos.push_back(meshVao);
 }
 
+void draw(AutoMesh* m, AutoShaderProgram* p, Camera3D* cam, const vec2& mousePos, float time, const Transform& transform)
+{
+    updateAutoUniforms(p, cam, mousePos, time, transform);
+    draw(m, p);
+}
 
 
 

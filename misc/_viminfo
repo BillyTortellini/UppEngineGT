@@ -11,27 +11,39 @@
 # hlsearch on (H) or off (h):
 ~h
 # Last Search Pattern:
-~Msle0~/\<renderScene\>
+~MSle0~/gameTick
 
 # Last Substitute Search Pattern:
-~MSle0&gameState.
+~MSle0&glState
 
 # Last Substitute String:
-$gameState->
+$renderState
 
 # Command Line History (newest to oldest):
-:q
-|2,0,1582310327,,"q"
+:wqa
+|2,0,1582485009,,"wqa"
 :w
-|2,0,1582310241,,"w"
+|2,0,1582484938,,"w"
+:.,.+1w
+|2,0,1582482337,,".,.+1w"
+:q
+|2,0,1582464637,,"q"
+:registers
+|2,0,1582401866,,"registers"
+:%s/glState/renderState/gc
+|2,0,1582401427,,"%s/glState/renderState/gc"
+:'<,'>s/16/32/g
+|2,0,1582398964,,"'<,'>s/16/32/g"
+:%s/img/textureData/gc
+|2,0,1582396258,,"%s/img/textureData/gc"
+:wa)
+|2,0,1582395892,,"wa)"
 :wq
 |2,0,1582304454,,"wq"
 :'<,'>s/gameState./gameState->/g
 |2,0,1582291029,,"'<,'>s/gameState./gameState->/g"
 :wjj
 |2,0,1582288533,,"wjj"
-:wqa
-|2,0,1582285712,,"wqa"
 :waa
 |2,0,1582285711,,"waa"
 :%s/DECLARE_EXPORT/__declspec(dllexport)/gc
@@ -72,8 +84,6 @@ $gameState->
 |2,0,1582056214,,"s/gameData->sky/gameData->skyShader/gc"
 :w+
 |2,0,1582046944,,"w+"
-:registers
-|2,0,1582040088,,"registers"
 :'<,'>s/;/,
 |2,0,1582040069,,"'<,'>s/;/,"
 :buffers
@@ -86,8 +96,92 @@ $gameState->
 |2,0,1581967249,,"qa"
 
 # Search String History (newest to oldest):
+?/gameTick
+|2,1,1582465103,47,"gameTick"
+?/Dete
+|2,1,1582464992,47,"Dete"
+?/found
+|2,1,1582464988,47,"found"
+?/updateAutoU
+|2,1,1582464434,47,"updateAutoU"
 ? \<renderScene\>
-|2,1,1582310138,,"\\<renderScene\\>"
+|2,1,1582463499,,"\\<renderScene\\>"
+?/render
+|2,1,1582463485,47,"render"
+? \<materialRenderer\>
+|2,1,1582459756,,"\\<materialRenderer\\>"
+?/C
+|2,1,1582459516,47,"C"
+?/renderSce
+|2,1,1582458660,47,"renderSce"
+?/handleGa
+|2,1,1582455851,47,"handleGa"
+?/handleGame
+|2,1,1582455302,47,"handleGame"
+?/windowStyle
+|2,1,1582454654,47,"windowStyle"
+? \<inFocus\>
+|2,1,1582454452,,"\\<inFocus\\>"
+? \<actualWinState\>
+|2,1,1582454311,,"\\<actualWinState\\>"
+?/Win
+|2,1,1582454167,47,"Win"
+?/GL_
+|2,1,1582417136,47,"GL_"
+?/setUni
+|2,1,1582415776,47,"setUni"
+?/resize
+|2,1,1582415008,47,"resize"
+?/struct Texture 
+|2,1,1582414330,47,"struct Texture "
+?/Texture
+|2,1,1582414323,47,"Texture"
+?/setU
+|2,1,1582413538,47,"setU"
+? \<postProcessShader\>
+|2,1,1582413214,,"\\<postProcessShader\\>"
+?/draw
+|2,1,1582411842,47,"draw"
+?/for
+|2,1,1582404786,47,"for"
+?/f
+|2,1,1582404770,47,"f"
+? \<format\>
+|2,1,1582404757,,"\\<format\\>"
+? \<Transform\>
+|2,1,1582403429,,"\\<Transform\\>"
+?/update
+|2,1,1582402827,47,"update"
+?/init(
+|2,1,1582402314,47,"init("
+?/ii
+|2,1,1582402302,47,"ii"
+? \<Texture\>
+|2,1,1582401935,,"\\<Texture\\>"
+?/defaultTe
+|2,1,1582401861,47,"defaultTe"
+?/defa
+|2,1,1582401828,47,"defa"
+?/GameSt
+|2,1,1582401533,47,"GameSt"
+? glState
+|2,1,1582401427,,"glState"
+?/glView
+|2,1,1582401189,47,"glView"
+? 16
+|2,1,1582398964,,"16"
+?/GL_R 
+|2,1,1582398661,47,"GL_R "
+? \<setFilterMode\>
+|2,1,1582398323,,"\\<setFilterMode\\>"
+?/mipmapp
+|2,1,1582397456,47,"mipmapp"
+?/bestFi
+|2,1,1582396600,47,"bestFi"
+?/img
+|2,1,1582396380,47,"img"
+? img
+|2,1,1582396258,,"img"
 ?/init
 |2,1,1582309936,47,"init"
 ? \<bind\>
@@ -102,94 +196,34 @@ $gameState->
 |2,1,1582308919,47,"bindTe"
 ?/id
 |2,1,1582307628,47,"id"
-? \<2\>
-|2,1,1582302768,,"\\<2\\>"
-?/bind
-|2,1,1582301310,47,"bind"
-?/custom
-|2,1,1582301124,47,"custom"
-?/wglSwa
-|2,1,1582300601,47,"wglSwa"
-?/gameSh
-|2,1,1582300420,47,"gameSh"
-?/gameInit
-|2,1,1582300164,47,"gameInit"
-?/quad
-|2,1,1582300159,47,"quad"
-? \<createGameAlloc\>
-|2,1,1582299863,,"\\<createGameAlloc\\>"
-? \<oldGameDataSize\>
-|2,1,1582299549,,"\\<oldGameDataSize\\>"
-?/Calling
-|2,1,1582299430,47,"Calling"
-?/LOAD GAME
-|2,1,1582299398,47,"LOAD GAME"
-?/LOAD
-|2,1,1582299394,47,"LOAD"
-?/cube
-|2,1,1582298795,47,"cube"
-?/glGetIn
-|2,1,1582298645,47,"glGetIn"
-?/glGetI
-|2,1,1582298630,47,"glGetI"
-?/glBindVertex
-|2,1,1582298433,47,"glBindVertex"
-?/gl
-|2,1,1582298423,47,"gl"
-?/glBindBuffer(GL_ELE
-|2,1,1582298052,47,"glBindBuffer(GL_ELE"
-?/glBindBuffer(GL_ELEMEN
-|2,1,1582297920,47,"glBindBuffer(GL_ELEMEN"
-?/GL_
-|2,1,1582297810,47,"GL_"
-?/bind(MeshVao
-|2,1,1582296968,47,"bind(MeshVao"
-?/draw
-|2,1,1582296311,47,"draw"
-?/glBindBuffer(GL_ELEMENT_A
-|2,1,1582295861,47,"glBindBuffer(GL_ELEMENT_A"
-?/glBufferData(GL_ELEMENT
-|2,1,1582295684,47,"glBufferData(GL_ELEMENT"
-?/glBufferData
-|2,1,1582295663,47,"glBufferData"
-? \<bindVao\>
-|2,1,1582295487,,"\\<bindVao\\>"
-?/glBindBuffer(GL_ELEMENT
-|2,1,1582295388,47,"glBindBuffer(GL_ELEMENT"
-?/AttribName
-|2,1,1582294624,47,"AttribName"
-?/AttribNAme
-|2,1,1582294615,47,"AttribNAme"
-?/Detecte
-|2,1,1582294606,47,"Detecte"
-? \<cubeMesh\>
-|2,1,1582294475,,"\\<cubeMesh\\>"
-? \<supportedAutoAttribs\>
-|2,1,1582294019,,"\\<supportedAutoAttribs\\>"
-?/struct MeshVao
-|2,1,1582293239,47,"struct MeshVao"
-?/gameAfter
-|2,1,1582291382,47,"gameAfter"
-?/sleep
-|2,1,1582291222,47,"sleep"
-? gameState.
-|2,1,1582291029,,"gameState."
-?/gameTick
-|2,1,1582290917,47,"gameTick"
-?/renderS
-|2,1,1582289966,47,"renderS"
-? \<sleepUntil\>
-|2,1,1582289954,,"\\<sleepUntil\\>"
-? \<wglSwapIntervalEXT\>
-|2,1,1582289917,,"\\<wglSwapIntervalEXT\\>"
-?/vsyn
-|2,1,1582289901,47,"vsyn"
-?/SwapB
-|2,1,1582289567,47,"SwapB"
 
 # Expression History (newest to oldest):
 
 # Input Line History (newest to oldest):
+@O:\ressources\shaders\test\test.vert
+|2,3,1582463407,,"O:\\ressources\\shaders\\test\\test.vert"
+@O:\ressources\shaders\test\test.frag
+|2,3,1582463399,,"O:\\ressources\\shaders\\test\\test.frag"
+@O:\ressources\shaders\test\
+|2,3,1582463388,,"O:\\ressources\\shaders\\test\\"
+@O:\ressources\shaders\material\phong.frag
+|2,3,1582459068,,"O:\\ressources\\shaders\\material\\phong.frag"
+@O:\ressources\shaders\material\phong.vert
+|2,3,1582459064,,"O:\\ressources\\shaders\\material\\phong.vert"
+@O:\ressources\shaders\material\
+|2,3,1582459056,,"O:\\ressources\\shaders\\material\\"
+@O:\code\materialRenderer\materialRenderer.hpp
+|2,3,1582455605,,"O:\\code\\materialRenderer\\materialRenderer.hpp"
+@O:\code\materialRenderer\
+|2,3,1582455599,,"O:\\code\\materialRenderer\\"
+@O:\ressources\shaders\postProcess.frag
+|2,3,1582411505,,"O:\\ressources\\shaders\\postProcess.frag"
+@O:\ressources\shaders\postProcess.vert
+|2,3,1582411499,,"O:\\ressources\\shaders\\postProcess.vert"
+@O:\code\rendering\renderState.hpp
+|2,3,1582401744,,"O:\\code\\rendering\\renderState.hpp"
+@O:\code\rendering\framebuffer.hpp
+|2,3,1582401658,,"O:\\code\\rendering\\framebuffer.hpp"
 @O:\code\utils\fileIO.hpp
 |2,3,1582285816,,"O:\\code\\utils\\fileIO.hpp"
 @O:\code\utils\sound.hpp
@@ -245,42 +279,46 @@ $gameState->
 
 # Registers:
 "0	LINE	0
-	    glDisable(GL_DEPTH_TEST);
-	    glDisable(GL_CULL_FACE);
-|3,0,0,1,2,0,1582310144,"    glDisable(GL_DEPTH_TEST);","    glDisable(GL_CULL_FACE);"
-"1	BLOCK	1
-	Di
-	Di
-|3,0,1,2,2,1,1582310237,"Di","Di"
-"2	BLOCK	22
-	Disable(GL_DEPTH_TEST);
-	Disable(GL_CULL_FACE);
-|3,0,2,2,2,22,1582310234,"Disable(GL_DEPTH_TEST);","Disable(GL_CULL_FACE);"
-"3	LINE	0
-	        loggf("Switched to fbo: %d\n", fbo);
-|3,0,3,1,1,0,1582310189,"        loggf(\"Switched to fbo: %d\\n\", fbo);"
+	float sphere(vec3 ro, vec3 rd, vec3 c, float r, out vec3 n) {
+|3,0,0,1,1,0,1582481491,"float sphere(vec3 ro, vec3 rd, vec3 c, float r, out vec3 n) {"
+"1	LINE	0
+	    if (ts > 0) {
+|3,0,1,1,1,0,1582482303,"    if (ts > 0) {"
+"2	LINE	0
+	    else {
+	        t = 
+	    }
+|3,0,2,1,3,0,1582482295,"    else {","        t = ","    }"
+"3	BLOCK	1
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+|3,0,3,2,7,1,1582482198,"//","//","//","//","//","//","//"
 "4	LINE	0
-	    glEnable(GL_DEPTH_TEST);
-	    glEnable(GL_CULL_FACE);
-|3,0,4,1,2,0,1582310149,"    glEnable(GL_DEPTH_TEST);","    glEnable(GL_CULL_FACE);"
+	        normal
+|3,0,4,1,1,0,1582482072,"        normal"
 "5	LINE	0
-	
-|3,0,5,1,1,0,1582310084,""
+	        col += shade(ro+rd*t, normal, ro, vec3(1));
+|3,0,5,1,1,0,1582482066,"        col += shade(ro+rd*t, normal, ro, vec3(1));"
 "6	LINE	0
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-|3,0,6,1,1,0,1582309980,"    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);"
+	    vec3 col = vec3(0);
+|3,0,6,1,1,0,1582482059,"    vec3 col = vec3(0);"
 "7	LINE	0
-	    switch
-|3,0,7,1,1,0,1582309818,"    switch"
+	    vec4 plane = vec4(0, 1, 0, 0);
+|3,0,7,1,1,0,1582481963,"    vec4 plane = vec4(0, 1, 0, 0);"
 "8	LINE	0
-	    //draw(&imageShader, &gameData->planeMesh, vec3(3.0f));
-|3,0,8,1,1,0,1582309645,"    //draw(&imageShader, &gameData->planeMesh, vec3(3.0f));"
+	    
+|3,0,8,1,1,0,1582481705,"    "
 "9	LINE	0
-	    //setUniform(&imageShader.program, "image", &testTexture);
-|3,0,9,1,1,0,1582309645,"    //setUniform(&imageShader.program, \"image\", &testTexture);"
+	    vec3 lightDir = normalize(p - lightPos);
+|3,0,9,1,1,0,1582480401,"    vec3 lightDir = normalize(p - lightPos);"
 "a@	CHAR	0
-	$xj0
-|3,2,10,0,1,0,1582250556,"$xj0"
+	$a:invalid_path"€kb("Status was kyiwj$pa\n");obreak;
+|3,2,10,0,1,0,1582404328,"$a:invalid_path\"€kb(\"Status was kyiwj$pa\\n\");obreak;"
 "j	CHAR	0
 	751
 <k:w€k527GzzlllllllllllllllllllllllllllllllllciwerrorMsg:w27Gklllllllllllllllllllljlllllllllfo;ar:w109G$hhhhhhhhhhhhhhhhhi(GLchar*) :w109G143GzzOstruct ShaderProgram;l.w€kb€kb€kba /€ü €kb/€ü Forward declaration:w€k527Gjk$hhhhhhhhhhhhhhhhlllllllvlllllllxhhhhhhhhi(char+€kb*€kb*) .wu:wh%%uuuhhhhhhhhhhhhhhhhhhhhhhhvhhhhhhhhhhhhhhhhhlximaxLength:wlllllllllllllllichar€kb€kb€kb€kb(char*):w€k5165GzzllllllllllllllllllllllllciwattribCount:w181Gllllllllllllllllllllllllxxi.:w€ý,€ý.€k5181Gzzlllllllllllllllllllllllllllllj0wlllllllllllxxi.:whhhhh%%%%%€k5193Gjkka;:w€k5204GzzllllllllllllcihhhhhhhhcWuniformCount:w€k5217Gllllllllllllllllllllllllllllh0wllllxxi.:wjllllllllxhxi.:w/infonnllllclhxxi.:wj0wlllllllllllxxi.:w
@@ -288,36 +326,146 @@ $gameState->
 |<"k:w€k527GzzlllllllllllllllllllllllllllllllllciwerrorMsg:w27Gklllllllllllllllllllljlllllllllfo;ar:w109G$hhhhhhhhhhhhhhhhhi(GLchar*) :w109G143GzzOstruct ShaderProgram;l.w€kb€kb€kba /€ü €kb/€ü Forward declaration:w€k527Gjk$hhhhhhhhhhhhhhhhlllllllvlllllllxhhhhhhhhi(char+€kb*€kb*) .wu:wh%%uuuhhhhhhhhhhhhhhhhhhhhhhhvhhhhhhhhhhhhhhhhhlximaxLength:wlllllllllllllllichar€kb€kb€kb€kb(char*):w€k5165GzzllllllllllllllllllllllllciwattribCount:w181Gllllllllllllllllllllllllxxi.:
 |<w€ý,€ý.€k5181Gzzlllllllllllllllllllllllllllllj0wlllllllllllxxi.:whhhhh%%%%%€k5193Gjkka;:w€k5204GzzllllllllllllcihhhhhhhhcWuniformCount:w€k5217Gllllllllllllllllllllllllllllh0wllllxxi.:wjllllllllxhxi.:w/infonnllllclhxxi.:wj0wlllllllllllxxi.:w"
 ""-	CHAR	0
-	s
-|3,1,36,0,1,0,1582310240,"s"
+	F
+|3,1,36,0,1,0,1582484937,"F"
 
 # File marks:
-'0  11  23  O:\ressources\shaders\image.frag
-|4,48,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
-'1  41  46  O:\ressources\shaders\sky.frag
-|4,49,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
-'2  41  46  O:\ressources\shaders\sky.frag
-|4,50,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
-'3  245  4  O:\code\game.cpp
-|4,51,245,4,1582299155,"O:\\code\\game.cpp"
-'4  230  4  O:\code\game.cpp
-|4,52,230,4,1582299155,"O:\\code\\game.cpp"
-'5  177  4  O:\code\game.cpp
-|4,53,177,4,1582299155,"O:\\code\\game.cpp"
-'6  162  4  O:\code\game.cpp
-|4,54,162,4,1582299155,"O:\\code\\game.cpp"
-'7  18  4  O:\ressources\shaders\color.vert
-|4,55,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
-'8  18  4  O:\ressources\shaders\color.vert
-|4,56,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
-'9  18  4  O:\ressources\shaders\color.vert
-|4,57,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
+'0  94  37  O:\code\game.cpp
+|4,48,94,37,1582485009,"O:\\code\\game.cpp"
+'1  17  0  O:\ressources\shaders\postProcess.frag
+|4,49,17,0,1582417494,"O:\\ressources\\shaders\\postProcess.frag"
+'2  17  0  O:\ressources\shaders\postProcess.frag
+|4,50,17,0,1582417494,"O:\\ressources\\shaders\\postProcess.frag"
+'3  11  23  O:\ressources\shaders\image.frag
+|4,51,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
+'4  11  23  O:\ressources\shaders\image.frag
+|4,52,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
+'5  11  23  O:\ressources\shaders\image.frag
+|4,53,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
+'6  11  23  O:\ressources\shaders\image.frag
+|4,54,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
+'7  41  46  O:\ressources\shaders\sky.frag
+|4,55,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
+'8  41  46  O:\ressources\shaders\sky.frag
+|4,56,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
+'9  41  46  O:\ressources\shaders\sky.frag
+|4,57,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
 
 # Jumplist (newest first):
+-'  94  37  O:\code\game.cpp
+|4,39,94,37,1582485009,"O:\\code\\game.cpp"
+-'  165  5  O:\code\game.cpp
+|4,39,165,5,1582465103,"O:\\code\\game.cpp"
+-'  146  4  O:\code\game.cpp
+|4,39,146,4,1582465103,"O:\\code\\game.cpp"
+-'  60  0  O:\code\game.cpp
+|4,39,60,0,1582464942,"O:\\code\\game.cpp"
+-'  161  4  O:\code\game.cpp
+|4,39,161,4,1582464939,"O:\\code\\game.cpp"
+-'  62  0  O:\code\game.cpp
+|4,39,62,0,1582464921,"O:\\code\\game.cpp"
+-'  1  0  O:\code\game.cpp
+|4,39,1,0,1582464914,"O:\\code\\game.cpp"
+-'  162  4  O:\code\game.cpp
+|4,39,162,4,1582464914,"O:\\code\\game.cpp"
+-'  64  18  O:\code\game.cpp
+|4,39,64,18,1582464557,"O:\\code\\game.cpp"
+-'  63  7  O:\code\game.cpp
+|4,39,63,7,1582464543,"O:\\code\\game.cpp"
+-'  65  55  O:\code\game.cpp
+|4,39,65,55,1582464276,"O:\\code\\game.cpp"
+-'  18  0  O:\code\game.cpp
+|4,39,18,0,1582464267,"O:\\code\\game.cpp"
+-'  160  32  O:\code\game.cpp
+|4,39,160,32,1582463701,"O:\\code\\game.cpp"
+-'  127  5  O:\code\game.cpp
+|4,39,127,5,1582463500,"O:\\code\\game.cpp"
+-'  208  4  O:\code\game.cpp
+|4,39,208,4,1582463499,"O:\\code\\game.cpp"
+-'  166  0  O:\code\game.cpp
+|4,39,166,0,1582463494,"O:\\code\\game.cpp"
+-'  209  0  O:\code\game.cpp
+|4,39,209,0,1582463493,"O:\\code\\game.cpp"
+-'  199  4  O:\code\game.cpp
+|4,39,199,4,1582463485,"O:\\code\\game.cpp"
+-'  72  27  O:\code\game.cpp
+|4,39,72,27,1582463443,"O:\\code\\game.cpp"
+-'  24  58  O:\code\game.cpp
+|4,39,24,58,1582463430,"O:\\code\\game.cpp"
+-'  2  0  O:\code\game.cpp
+|4,39,2,0,1582463422,"O:\\code\\game.cpp"
+-'  151  0  O:\code\game.cpp
+|4,39,151,0,1582463421,"O:\\code\\game.cpp"
+-'  149  8  O:\code\game.cpp
+|4,39,149,8,1582459995,"O:\\code\\game.cpp"
+-'  101  4  O:\code\game.cpp
+|4,39,101,4,1582459880,"O:\\code\\game.cpp"
+-'  75  17  O:\code\game.cpp
+|4,39,75,17,1582459764,"O:\\code\\game.cpp"
+-'  14  27  O:\code\game.cpp
+|4,39,14,27,1582459763,"O:\\code\\game.cpp"
+-'  123  14  O:\code\game.cpp
+|4,39,123,14,1582459761,"O:\\code\\game.cpp"
+-'  97  10  O:\code\game.cpp
+|4,39,97,10,1582459760,"O:\\code\\game.cpp"
+-'  59  0  O:\code\game.cpp
+|4,39,59,0,1582459378,"O:\\code\\game.cpp"
+-'  142  4  O:\code\game.cpp
+|4,39,142,4,1582459311,"O:\\code\\game.cpp"
+-'  194  7  O:\code\game.cpp
+|4,39,194,7,1582456590,"O:\\code\\game.cpp"
+-'  193  10  O:\code\game.cpp
+|4,39,193,10,1582456197,"O:\\code\\game.cpp"
+-'  35  0  O:\code\game.cpp
+|4,39,35,0,1582455630,"O:\\code\\game.cpp"
+-'  22  22  O:\code\game.cpp
+|4,39,22,22,1582455439,"O:\\code\\game.cpp"
+-'  163  0  O:\code\game.cpp
+|4,39,163,0,1582455384,"O:\\code\\game.cpp"
+-'  128  0  O:\code\game.cpp
+|4,39,128,0,1582455382,"O:\\code\\game.cpp"
+-'  36  21  O:\code\game.cpp
+|4,39,36,21,1582453932,"O:\\code\\game.cpp"
+-'  30  87  O:\code\game.cpp
+|4,39,30,87,1582453854,"O:\\code\\game.cpp"
+-'  34  36  O:\code\game.cpp
+|4,39,34,36,1582453791,"O:\\code\\game.cpp"
+-'  47  0  O:\code\game.cpp
+|4,39,47,0,1582453788,"O:\\code\\game.cpp"
+-'  17  0  O:\ressources\shaders\postProcess.frag
+|4,39,17,0,1582417494,"O:\\ressources\\shaders\\postProcess.frag"
+-'  17  0  O:\ressources\shaders\postProcess.frag
+|4,39,17,0,1582417494,"O:\\ressources\\shaders\\postProcess.frag"
+-'  12  52  O:\ressources\shaders\postProcess.frag
+|4,39,12,52,1582416080,"O:\\ressources\\shaders\\postProcess.frag"
+-'  12  52  O:\ressources\shaders\postProcess.frag
+|4,39,12,52,1582416080,"O:\\ressources\\shaders\\postProcess.frag"
+-'  15  15  O:\ressources\shaders\postProcess.frag
+|4,39,15,15,1582415054,"O:\\ressources\\shaders\\postProcess.frag"
+-'  15  15  O:\ressources\shaders\postProcess.frag
+|4,39,15,15,1582415054,"O:\\ressources\\shaders\\postProcess.frag"
+-'  11  0  O:\ressources\shaders\postProcess.frag
+|4,39,11,0,1582413592,"O:\\ressources\\shaders\\postProcess.frag"
+-'  11  0  O:\ressources\shaders\postProcess.frag
+|4,39,11,0,1582413592,"O:\\ressources\\shaders\\postProcess.frag"
+-'  1  0  O:\ressources\shaders\postProcess.frag
+|4,39,1,0,1582411620,"O:\\ressources\\shaders\\postProcess.frag"
+-'  1  0  O:\code\NERD_tree_1
+|4,39,1,0,1582411620,"O:\\code\\NERD_tree_1"
+-'  1  0  O:\ressources\shaders\postProcess.frag
+|4,39,1,0,1582411620,"O:\\ressources\\shaders\\postProcess.frag"
+-'  1  0  O:\code\NERD_tree_1
+|4,39,1,0,1582411620,"O:\\code\\NERD_tree_1"
+-'  11  23  O:\ressources\shaders\image.frag
+|4,39,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
 -'  11  23  O:\ressources\shaders\image.frag
 |4,39,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
 -'  10  41  O:\ressources\shaders\image.frag
 |4,39,10,41,1582309680,"O:\\ressources\\shaders\\image.frag"
+-'  10  41  O:\ressources\shaders\image.frag
+|4,39,10,41,1582309680,"O:\\ressources\\shaders\\image.frag"
+-'  1  0  O:\ressources\shaders\image.frag
+|4,39,1,0,1582309675,"O:\\ressources\\shaders\\image.frag"
 -'  1  0  O:\ressources\shaders\image.frag
 |4,39,1,0,1582309675,"O:\\ressources\\shaders\\image.frag"
 -'  14  0  O:\code\NERD_tree_1
@@ -328,34 +476,64 @@ $gameState->
 |4,39,1,0,1582309670,"O:\\code\\NERD_tree_1"
 -'  41  46  O:\ressources\shaders\sky.frag
 |4,39,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
+-'  41  46  O:\ressources\shaders\sky.frag
+|4,39,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
+-'  50  27  O:\ressources\shaders\sky.frag
+|4,39,50,27,1582304326,"O:\\ressources\\shaders\\sky.frag"
 -'  50  27  O:\ressources\shaders\sky.frag
 |4,39,50,27,1582304326,"O:\\ressources\\shaders\\sky.frag"
 -'  38  31  O:\ressources\shaders\sky.frag
 |4,39,38,31,1582304252,"O:\\ressources\\shaders\\sky.frag"
+-'  38  31  O:\ressources\shaders\sky.frag
+|4,39,38,31,1582304252,"O:\\ressources\\shaders\\sky.frag"
+-'  48  19  O:\ressources\shaders\sky.frag
+|4,39,48,19,1582304199,"O:\\ressources\\shaders\\sky.frag"
 -'  48  19  O:\ressources\shaders\sky.frag
 |4,39,48,19,1582304199,"O:\\ressources\\shaders\\sky.frag"
 -'  25  13  O:\ressources\shaders\sky.frag
 |4,39,25,13,1582304189,"O:\\ressources\\shaders\\sky.frag"
+-'  25  13  O:\ressources\shaders\sky.frag
+|4,39,25,13,1582304189,"O:\\ressources\\shaders\\sky.frag"
+-'  52  41  O:\ressources\shaders\sky.frag
+|4,39,52,41,1582304062,"O:\\ressources\\shaders\\sky.frag"
 -'  52  41  O:\ressources\shaders\sky.frag
 |4,39,52,41,1582304062,"O:\\ressources\\shaders\\sky.frag"
 -'  47  0  O:\ressources\shaders\sky.frag
 |4,39,47,0,1582303345,"O:\\ressources\\shaders\\sky.frag"
 -'  55  0  O:\ressources\shaders\sky.frag
 |4,39,55,0,1582303345,"O:\\ressources\\shaders\\sky.frag"
+-'  47  0  O:\ressources\shaders\sky.frag
+|4,39,47,0,1582303345,"O:\\ressources\\shaders\\sky.frag"
+-'  55  0  O:\ressources\shaders\sky.frag
+|4,39,55,0,1582303345,"O:\\ressources\\shaders\\sky.frag"
+-'  21  17  O:\ressources\shaders\sky.frag
+|4,39,21,17,1582303270,"O:\\ressources\\shaders\\sky.frag"
 -'  21  17  O:\ressources\shaders\sky.frag
 |4,39,21,17,1582303270,"O:\\ressources\\shaders\\sky.frag"
 -'  19  5  O:\ressources\shaders\color.frag
 |4,39,19,5,1582302248,"O:\\ressources\\shaders\\color.frag"
+-'  19  5  O:\ressources\shaders\color.frag
+|4,39,19,5,1582302248,"O:\\ressources\\shaders\\color.frag"
+-'  12  15  O:\ressources\shaders\image.vert
+|4,39,12,15,1582302182,"O:\\ressources\\shaders\\image.vert"
 -'  12  15  O:\ressources\shaders\image.vert
 |4,39,12,15,1582302182,"O:\\ressources\\shaders\\image.vert"
 -'  11  18  O:\ressources\shaders\image.vert
 |4,39,11,18,1582302047,"O:\\ressources\\shaders\\image.vert"
+-'  11  18  O:\ressources\shaders\image.vert
+|4,39,11,18,1582302047,"O:\\ressources\\shaders\\image.vert"
+-'  3  0  O:\ressources\shaders\testShader.frag
+|4,39,3,0,1582302036,"O:\\ressources\\shaders\\testShader.frag"
 -'  3  0  O:\ressources\shaders\testShader.frag
 |4,39,3,0,1582302036,"O:\\ressources\\shaders\\testShader.frag"
 -'  1  0  O:\ressources\shaders\testShader.frag
 |4,39,1,0,1582302024,"O:\\ressources\\shaders\\testShader.frag"
+-'  1  0  O:\ressources\shaders\testShader.frag
+|4,39,1,0,1582302024,"O:\\ressources\\shaders\\testShader.frag"
 -'  1  0  O:\code\NERD_tree_1
 |4,39,1,0,1582302024,"O:\\code\\NERD_tree_1"
+-'  188  4  O:\code\game.cpp
+|4,39,188,4,1582299155,"O:\\code\\game.cpp"
 -'  162  4  O:\code\game.cpp
 |4,39,162,4,1582299155,"O:\\code\\game.cpp"
 -'  140  36  O:\code\game.cpp
@@ -364,815 +542,640 @@ $gameState->
 |4,39,139,36,1582298798,"O:\\code\\game.cpp"
 -'  130  34  O:\code\game.cpp
 |4,39,130,34,1582298798,"O:\\code\\game.cpp"
+-'  148  0  O:\code\game.cpp
+|4,39,148,0,1582298796,"O:\\code\\game.cpp"
 -'  129  0  O:\code\game.cpp
 |4,39,129,0,1582298796,"O:\\code\\game.cpp"
+-'  134  0  O:\code\game.cpp
+|4,39,134,0,1582298711,"O:\\code\\game.cpp"
+-'  139  0  O:\code\game.cpp
+|4,39,139,0,1582298711,"O:\\code\\game.cpp"
 -'  115  0  O:\code\game.cpp
 |4,39,115,0,1582298711,"O:\\code\\game.cpp"
--'  120  0  O:\code\game.cpp
-|4,39,120,0,1582298711,"O:\\code\\game.cpp"
--'  112  0  O:\code\game.cpp
-|4,39,112,0,1582298703,"O:\\code\\game.cpp"
--'  90  0  O:\code\game.cpp
-|4,39,90,0,1582298703,"O:\\code\\game.cpp"
--'  88  9  O:\code\game.cpp
-|4,39,88,9,1582294480,"O:\\code\\game.cpp"
--'  44  13  O:\code\game.cpp
-|4,39,44,13,1582294478,"O:\\code\\game.cpp"
--'  220  24  O:\code\game.cpp
-|4,39,220,24,1582294477,"O:\\code\\game.cpp"
--'  207  31  O:\code\game.cpp
-|4,39,207,31,1582294475,"O:\\code\\game.cpp"
--'  106  4  O:\code\game.cpp
-|4,39,106,4,1582293836,"O:\\code\\game.cpp"
--'  119  5  O:\code\game.cpp
-|4,39,119,5,1582293043,"O:\\code\\game.cpp"
--'  108  35  O:\code\game.cpp
-|4,39,108,35,1582292015,"O:\\code\\game.cpp"
--'  105  0  O:\code\game.cpp
-|4,39,105,0,1582291998,"O:\\code\\game.cpp"
--'  121  0  O:\code\game.cpp
-|4,39,121,0,1582291650,"O:\\code\\game.cpp"
--'  122  0  O:\code\game.cpp
-|4,39,122,0,1582291643,"O:\\code\\game.cpp"
--'  118  35  O:\code\game.cpp
-|4,39,118,35,1582291643,"O:\\code\\game.cpp"
--'  65  7  O:\code\game.cpp
-|4,39,65,7,1582291476,"O:\\code\\game.cpp"
--'  23  0  O:\code\game.cpp
-|4,39,23,0,1582291382,"O:\\code\\game.cpp"
--'  16  20  O:\code\game.hpp
-|4,39,16,20,1582291379,"O:\\code\\game.hpp"
--'  1  0  O:\code\game.hpp
-|4,39,1,0,1582291366,"O:\\code\\game.hpp"
--'  18  4  O:\ressources\shaders\color.vert
-|4,39,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
--'  18  4  O:\ressources\shaders\color.vert
-|4,39,18,4,1582291280,"O:\\ressources\\shaders\\color.vert"
--'  1  0  O:\ressources\shaders\color.vert
-|4,39,1,0,1582289356,"O:\\ressources\\shaders\\color.vert"
--'  13  0  O:\code\NERD_tree_4
-|4,39,13,0,1582289356,"O:\\code\\NERD_tree_4"
--'  1  0  O:\ressources\shaders\color.vert
-|4,39,1,0,1582289356,"O:\\ressources\\shaders\\color.vert"
--'  13  0  O:\code\NERD_tree_4
-|4,39,13,0,1582289356,"O:\\code\\NERD_tree_4"
--'  24  2  O:\code\NERD_tree_4
-|4,39,24,2,1582289355,"O:\\code\\NERD_tree_4"
--'  1  0  O:\code\NERD_tree_4
-|4,39,1,0,1582289355,"O:\\code\\NERD_tree_4"
--'  24  2  O:\code\NERD_tree_4
-|4,39,24,2,1582289355,"O:\\code\\NERD_tree_4"
--'  1  0  O:\code\NERD_tree_4
-|4,39,1,0,1582289355,"O:\\code\\NERD_tree_4"
--'  18  0  O:\code\win32\main.cpp
-|4,39,18,0,1582285712,"O:\\code\\win32\\main.cpp"
--'  18  0  O:\code\win32\main.cpp
-|4,39,18,0,1582285712,"O:\\code\\win32\\main.cpp"
--'  344  0  O:\code\win32\main.cpp
-|4,39,344,0,1582284168,"O:\\code\\win32\\main.cpp"
--'  344  0  O:\code\win32\main.cpp
-|4,39,344,0,1582284168,"O:\\code\\win32\\main.cpp"
--'  1  0  O:\code\win32\main.cpp
-|4,39,1,0,1582283877,"O:\\code\\win32\\main.cpp"
--'  1  0  O:\code\win32\main.cpp
-|4,39,1,0,1582283877,"O:\\code\\win32\\main.cpp"
--'  1  0  O:\code\NERD_tree_4
-|4,39,1,0,1582283877,"O:\\code\\NERD_tree_4"
--'  19  0  O:\ressources\shaders\color.vert
-|4,39,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
--'  19  0  O:\ressources\shaders\color.vert
-|4,39,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
--'  19  0  O:\ressources\shaders\color.vert
-|4,39,19,0,1582252220,"O:\\ressources\\shaders\\color.vert"
--'  17  4  O:\ressources\shaders\color.vert
-|4,39,17,4,1582252212,"O:\\ressources\\shaders\\color.vert"
--'  17  4  O:\ressources\shaders\color.vert
-|4,39,17,4,1582252212,"O:\\ressources\\shaders\\color.vert"
--'  17  4  O:\ressources\shaders\color.vert
-|4,39,17,4,1582252212,"O:\\ressources\\shaders\\color.vert"
--'  166  0  O:\code\rendering\texture.hpp
-|4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
--'  166  0  O:\code\rendering\texture.hpp
-|4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
--'  166  0  O:\code\rendering\texture.hpp
-|4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
--'  166  0  O:\code\rendering\texture.hpp
-|4,39,166,0,1582252209,"O:\\code\\rendering\\texture.hpp"
--'  1  0  O:\code\rendering\texture.hpp
-|4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
--'  1  0  O:\code\rendering\texture.hpp
-|4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
--'  1  0  O:\code\rendering\texture.hpp
-|4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
--'  1  0  O:\code\rendering\texture.hpp
-|4,39,1,0,1582251393,"O:\\code\\rendering\\texture.hpp"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582251392,"O:\\code\\NERD_tree_1"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582251392,"O:\\code\\NERD_tree_1"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582251392,"O:\\code\\NERD_tree_1"
--'  144  0  O:\code\game.cpp
-|4,39,144,0,1582246550,"O:\\code\\game.cpp"
--'  163  0  O:\code\game.cpp
-|4,39,163,0,1582246550,"O:\\code\\game.cpp"
--'  163  0  O:\code\game.cpp
-|4,39,163,0,1582246550,"O:\\code\\game.cpp"
--'  135  0  O:\code\game.cpp
-|4,39,135,0,1582246360,"O:\\code\\game.cpp"
--'  135  0  O:\code\game.cpp
-|4,39,135,0,1582246360,"O:\\code\\game.cpp"
--'  124  0  O:\code\game.cpp
-|4,39,124,0,1582246359,"O:\\code\\game.cpp"
--'  143  0  O:\code\game.cpp
-|4,39,143,0,1582246359,"O:\\code\\game.cpp"
--'  143  0  O:\code\game.cpp
-|4,39,143,0,1582246359,"O:\\code\\game.cpp"
--'  132  0  O:\code\game.cpp
-|4,39,132,0,1582246339,"O:\\code\\game.cpp"
--'  132  0  O:\code\game.cpp
-|4,39,132,0,1582246339,"O:\\code\\game.cpp"
--'  136  12  O:\code\game.cpp
-|4,39,136,12,1582246161,"O:\\code\\game.cpp"
--'  136  12  O:\code\game.cpp
-|4,39,136,12,1582246161,"O:\\code\\game.cpp"
--'  86  0  O:\code\game.cpp
-|4,39,86,0,1582245923,"O:\\code\\game.cpp"
--'  94  0  O:\code\game.cpp
-|4,39,94,0,1582245923,"O:\\code\\game.cpp"
--'  94  0  O:\code\game.cpp
-|4,39,94,0,1582245923,"O:\\code\\game.cpp"
--'  127  0  O:\code\game.cpp
-|4,39,127,0,1582230764,"O:\\code\\game.cpp"
--'  146  0  O:\code\game.cpp
-|4,39,146,0,1582230764,"O:\\code\\game.cpp"
--'  146  0  O:\code\game.cpp
-|4,39,146,0,1582230764,"O:\\code\\game.cpp"
--'  172  43  O:\code\game.cpp
-|4,39,172,43,1582230743,"O:\\code\\game.cpp"
--'  176  4  O:\code\game.cpp
-|4,39,176,4,1582230743,"O:\\code\\game.cpp"
--'  191  43  O:\code\game.cpp
-|4,39,191,43,1582230743,"O:\\code\\game.cpp"
 
 # History of marks within files (newest to oldest):
 
-> O:\ressources\shaders\image.frag
-	*	1582310326	0
-	"	11	23
-	^	11	24
-	.	11	23
-	+	2	0
-	+	3	12
-	+	6	23
-	+	12	0
-	+	11	4
-	+	4	16
-	+	3	8
-	+	11	13
-	+	6	0
-	+	11	30
-	+	10	16
-	+	11	24
-	+	10	7
-	+	11	23
-
 > O:\code\game.cpp
-	*	1582310278	0
-	"	278	3
-	^	211	8
-	.	212	8
-	+	121	30
-	+	132	0
-	+	126	32
-	+	123	57
-	+	126	35
-	+	131	0
-	+	130	19
-	+	89	21
-	+	90	21
-	+	100	45
-	+	106	20
-	+	107	13
-	+	108	8
-	+	112	94
-	+	112	0
-	+	111	0
-	+	118	8
-	+	123	8
-	+	126	23
-	+	132	0
-	+	151	27
-	+	170	0
-	+	174	38
-	+	196	30
-	+	95	17
-	+	95	0
-	+	94	34
-	+	95	29
-	+	99	34
-	+	100	29
-	+	96	36
-	+	101	39
-	+	269	26
-	+	272	14
-	+	279	0
-	+	267	0
-	+	279	75
-	+	278	4
-	+	279	0
-	+	279	46
-	+	279	75
-	+	279	0
-	+	279	14
-	+	279	27
-	+	279	0
-	+	279	39
-	+	279	0
-	+	148	0
-	+	133	0
-	+	148	0
-	+	147	0
-	+	133	66
-	+	145	61
-	+	279	0
-	+	279	15
-	+	276	0
-	+	279	57
-	+	270	67
-	+	277	0
-	+	280	0
-	+	279	50
-	+	279	63
-	+	281	58
-	+	282	0
-	+	279	4
-	+	188	0
-	+	273	0
-	+	279	5
-	+	275	0
-	+	268	27
-	+	274	21
-	+	279	0
-	+	269	5
-	+	276	4
-	+	269	4
-	+	130	0
-	+	165	44
-	+	158	35
-	+	97	68
-	+	100	0
-	+	98	48
-	+	102	0
-	+	209	0
-	+	279	57
-	+	211	0
-	+	279	61
-	+	158	35
-	+	212	0
-	+	211	4
-	+	212	4
-	+	211	7
-	+	212	0
-	+	211	0
-	+	212	8
-
-> O:\code\rendering\texture.hpp
-	*	1582310191	0
-	"	165	0
-	^	173	35
-	.	173	34
-	+	144	0
-	+	146	0
-	+	146	33
-	+	144	26
-	+	144	0
-	+	116	0
-	+	144	0
-	+	144	32
-	+	116	25
-	+	129	0
-	+	116	0
-	+	117	38
-	+	115	39
-	+	115	3
-	+	129	0
-	+	45	22
-	+	46	0
-	+	111	0
-	+	110	4
-	+	109	4
-	+	110	37
-	+	115	17
-	+	41	0
-	+	84	0
-	+	83	0
-	+	98	0
-	+	116	0
-	+	117	78
-	+	118	70
-	+	119	0
-	+	115	0
-	+	119	68
-	+	120	68
-	+	121	81
-	+	124	0
-	+	123	26
-	+	124	0
-	+	124	50
-	+	125	52
-	+	121	27
-	+	125	53
-	+	122	0
-	+	123	0
-	+	124	0
-	+	125	61
-	+	128	0
-	+	126	39
-	+	127	29
-	+	129	0
-	+	146	0
-	+	161	0
-	+	131	0
-	+	140	0
-	+	141	0
-	+	133	0
-	+	131	70
-	+	133	3
-	+	144	0
-	+	133	0
-	+	139	32
-	+	143	30
-	+	142	36
-	+	146	80
-	+	154	36
-	+	159	0
-	+	158	35
-	+	113	56
-	+	115	11
-	+	117	66
-	+	118	66
-	+	119	62
-	+	120	62
-	+	123	0
-	+	117	9
-	+	101	6
-	+	150	21
-	+	34	28
-	+	179	0
-	+	178	0
-	+	167	23
-	+	177	11
-	+	173	40
-	+	173	35
-	+	177	17
-	+	173	7
-	+	174	0
-	+	177	34
-	+	177	42
-	+	179	0
-	+	18	59
-	+	15	20
-	+	20	22
-	+	32	19
-	+	38	13
-	+	146	98
-	+	150	28
-	+	157	61
-	+	158	40
-	+	177	6
-	+	173	34
-
-> O:\code\rendering\openGLState.hpp
-	*	1582310190	0
-	"	46	8
-	.	46	0
-	+	1	27
-	+	2	6
-	+	70	5
-	+	7	0
-	+	70	0
+	*	1582484943	0
+	"	94	37
+	^	94	39
+	.	94	37
+	+	47	0
+	+	47	5
+	+	47	55
+	+	47	25
+	+	47	66
+	+	47	53
+	+	47	38
+	+	47	0
 	+	16	0
-	+	30	0
-	+	70	0
-	+	70	21
-	+	70	0
-	+	70	43
-	+	70	0
-	+	17	0
-	+	5	8
-	+	5	29
-	+	21	18
-	+	21	22
-	+	22	16
-	+	27	0
-	+	27	9
-	+	22	15
+	+	34	35
+	+	27	24
+	+	34	0
+	+	28	45
+	+	29	25
+	+	30	87
+	+	34	0
+	+	29	35
+	+	33	16
+	+	34	22
+	+	35	0
+	+	34	21
+	+	35	6
+	+	45	21
+	+	36	12
+	+	26	45
+	+	24	5
 	+	25	0
-	+	24	49
-	+	25	0
-	+	25	34
-	+	24	0
-	+	24	49
-	+	25	0
-	+	27	0
-	+	25	38
-	+	18	23
-	+	14	0
-	+	12	14
-	+	23	40
+	+	21	0
+	+	26	0
+	+	23	0
+	+	24	57
+	+	21	24
+	+	89	0
+	+	144	0
+	+	151	0
+	+	144	0
+	+	151	0
+	+	21	0
+	+	22	22
+	+	94	37
+	+	36	0
+	+	24	22
+	+	144	41
+	+	88	43
+	+	197	0
+	+	193	49
+	+	197	0
+	+	193	8
+	+	193	0
+	+	196	0
+	+	88	44
+	+	195	101
+	+	194	40
+	+	88	43
+	+	215	0
+	+	83	10
+	+	83	0
+	+	125	32
+	+	142	5
+	+	14	47
+	+	75	33
+	+	83	0
+	+	125	0
+	+	97	58
+	+	123	30
+	+	97	36
+	+	214	50
+	+	146	0
+	+	144	5
+	+	142	4
+	+	149	49
+	+	150	38
+	+	72	27
+	+	112	50
+	+	124	25
+	+	209	0
+	+	208	0
+	+	162	42
+	+	160	32
+	+	19	38
+	+	20	3
+	+	65	49
+	+	63	85
+	+	64	64
+	+	65	59
+	+	57	0
+	+	59	43
+	+	57	7
+	+	63	7
+	+	58	18
+	+	64	18
+	+	65	49
+	+	162	0
+	+	160	4
+	+	162	4
+	+	161	35
+	+	193	5
+	+	94	37
+
+> O:\ressources\shaders\test\test.frag
+	*	1582484902	0
+	"	90	0
+	^	89	6
+	.	89	4
+	+	51	0
+	+	45	0
+	+	47	43
+	+	44	38
+	+	47	22
+	+	52	0
+	+	47	25
+	+	44	28
 	+	44	0
-	+	43	0
-	+	44	11
-	+	45	18
-	+	46	45
-	+	47	18
-	+	44	22
-	+	45	25
-	+	46	44
-	+	47	24
-	+	44	9
-	+	65	34
+	+	36	42
+	+	44	0
+	+	47	41
+	+	76	46
+	+	44	44
+	+	9	19
+	+	66	28
+	+	67	0
+	+	10	18
+	+	66	18
+	+	69	37
+	+	44	0
+	+	38	0
+	+	34	0
+	+	25	29
+	+	26	35
+	+	31	27
+	+	30	0
+	+	26	0
+	+	29	17
+	+	33	16
+	+	24	57
+	+	28	19
+	+	32	40
+	+	79	0
+	+	77	0
+	+	79	14
+	+	18	18
+	+	19	25
+	+	18	27
+	+	19	45
+	+	79	5
+	+	66	10
+	+	69	10
+	+	72	25
+	+	76	40
+	+	79	45
+	+	79	0
+	+	70	13
+	+	72	32
+	+	18	47
+	+	18	35
+	+	19	52
+	+	20	15
+	+	71	15
+	+	72	0
+	+	76	0
+	+	79	5
+	+	72	43
+	+	70	0
+	+	78	16
+	+	79	55
+	+	84	0
+	+	81	25
+	+	73	22
+	+	75	21
+	+	73	0
+	+	87	0
+	+	86	13
+	+	76	0
+	+	82	27
+	+	88	12
+	+	83	14
+	+	88	35
+	+	79	0
+	+	73	22
+	+	88	9
+	+	73	20
+	+	78	4
+	+	81	23
+	+	77	0
+	+	81	0
+	+	80	14
+	+	38	25
+	+	32	8
+	+	38	25
+	+	32	36
+	+	38	56
+	+	48	15
+	+	49	69
+	+	43	25
+	+	42	10
+	+	43	49
+	+	50	22
+	+	43	32
+	+	49	78
+	+	89	4
+
+> O:\code\rendering\autoShaderProgram.hpp
+	*	1582465364	0
+	"	229	17
+	^	229	18
+	.	229	17
+	+	305	4
+	+	306	4
+	+	283	23
+	+	284	20
+	+	285	22
+	+	281	33
+	+	229	17
+	+	263	17
+	+	328	59
+	+	330	54
+	+	331	0
+	+	332	39
+	+	344	73
+	+	321	56
+	+	322	0
+	+	332	40
+	+	376	41
+	+	398	0
+	+	394	76
+	+	396	0
+	+	397	0
+	+	396	0
+	+	397	0
+	+	394	43
+	+	396	40
+	+	397	45
+	+	427	0
+	+	402	0
+	+	401	36
+	+	403	0
+	+	406	0
+	+	409	0
+	+	412	0
+	+	403	66
+	+	406	65
+	+	409	65
+	+	412	65
+	+	415	0
+	+	418	0
+	+	415	65
+	+	418	65
+	+	421	64
+	+	424	73
+	+	427	0
+	+	424	64
+	+	347	41
+	+	18	17
+	+	44	0
 	+	46	0
+	+	44	21
+	+	46	22
+	+	45	28
+	+	47	29
+	+	108	0
+	+	107	3
+	+	108	0
+	+	118	0
+	+	108	82
+	+	109	0
+	+	110	0
+	+	111	0
+	+	109	30
+	+	110	35
+	+	111	37
+	+	112	0
+	+	113	0
+	+	112	33
+	+	113	31
+	+	115	0
+	+	114	0
+	+	115	62
+	+	116	60
+	+	115	35
+	+	116	32
+	+	117	31
+	+	108	0
+	+	349	0
+	+	352	0
+	+	355	53
+	+	354	77
+	+	355	66
+	+	356	21
+	+	360	21
+	+	321	89
+	+	360	0
+	+	359	0
+	+	360	0
+	+	359	61
+	+	354	91
+	+	353	16
+	+	357	16
+	+	394	79
+	+	396	43
+	+	263	16
+	+	229	16
+	+	359	16
+	+	355	0
+	+	359	0
+	+	263	17
+	+	229	17
+
+> O:\ressources\shaders\test\test.vert
+	*	1582465083	0
+	"	8	30
+	^	8	31
+	.	8	30
+	+	6	0
+	+	3	0
+	+	3	13
+	+	5	0
+	+	3	0
+	+	8	35
+	+	2	0
+	+	4	13
+	+	9	16
+	+	8	30
 
 > O:\code\NERD_tree_1
-	*	1582309697	0
-	"	14	0
+	*	1582464908	0
+	"	11	0
 	.	1	0
 	+	1	0
 
-> O:\ressources\shaders\sky.frag
-	*	1582304453	0
-	"	41	46
-	^	51	31
-	.	51	30
-	+	55	11
-	+	21	0
-	+	21	16
-	+	16	17
-	+	21	0
-	+	45	0
-	+	21	16
-	+	22	62
-	+	55	25
-	+	48	27
-	+	52	0
-	+	52	50
-	+	52	0
-	+	52	13
-	+	52	5
-	+	52	31
-	+	52	42
-	+	52	39
-	+	55	0
-	+	53	16
-	+	48	0
-	+	48	22
-	+	53	14
-	+	54	15
-	+	53	5
-	+	54	15
-	+	52	31
-	+	48	0
-	+	52	19
-	+	52	0
-	+	52	13
-	+	52	0
-	+	52	13
-	+	52	31
-	+	52	26
-	+	48	0
-	+	52	31
-	+	52	0
-	+	52	30
-	+	52	8
-	+	52	41
-	+	52	29
-	+	52	40
-	+	52	28
-	+	52	5
-	+	52	0
-	+	52	5
-	+	52	48
-	+	52	40
-	+	52	5
-	+	52	15
-	+	54	5
-	+	52	41
-	+	52	30
-	+	52	0
-	+	52	4
-	+	52	41
-	+	52	4
-	+	52	14
-	+	52	31
-	+	52	15
-	+	52	4
-	+	44	0
-	+	52	0
-	+	33	0
-	+	48	22
-	+	25	28
-	+	48	0
-	+	27	0
-	+	25	18
-	+	48	19
-	+	25	32
-	+	48	21
-	+	27	29
-	+	28	30
-	+	31	31
-	+	37	27
-	+	38	36
-	+	37	37
-	+	38	37
-	+	37	37
-	+	48	29
-	+	50	32
-	+	51	30
-
-> O:\code\NERD_tree_6
-	*	1582304452	0
-	"	10	0
+> O:\code\NERD_tree_8
+	*	1582464637	0
+	"	11	0
 	.	1	0
 	+	1	0
 
-> O:\code\utils\meshGenerators.hpp
-	*	1582302606	0
-	"	20	54
-	^	20	55
-	.	20	54
-	+	2	8
-	+	132	5
-	+	6	0
-	+	4	12
-	+	27	0
-	+	6	49
-	+	28	18
-	+	30	0
-	+	31	0
-	+	29	50
-	+	31	0
-	+	30	32
-	+	73	0
-	+	72	0
-	+	6	23
-	+	42	48
-	+	75	49
-	+	76	19
-	+	63	16
-	+	88	34
-	+	101	0
-	+	100	0
-	+	88	55
-	+	103	18
-	+	104	18
-	+	103	37
-	+	86	0
-	+	79	93
-	+	79	70
-	+	85	11
-	+	81	25
-	+	82	37
-	+	79	89
-	+	82	44
-	+	83	40
-	+	84	0
-	+	85	47
-	+	107	0
-	+	106	0
-	+	107	21
-	+	109	23
-	+	110	34
-	+	111	35
-	+	113	26
-	+	33	0
-	+	32	0
-	+	33	16
-	+	35	13
-	+	110	24
-	+	35	21
-	+	36	33
-	+	37	33
-	+	39	24
-	+	33	65
-	+	79	64
-	+	107	67
-	+	39	4
-	+	85	4
-	+	113	4
-	+	74	9
-	+	42	31
-	+	6	0
-	+	26	0
-	+	6	0
-	+	6	11
-	+	6	0
-	+	33	32
-	+	39	24
-	+	79	33
-	+	85	27
-	+	107	30
-	+	113	24
-	+	107	31
-	+	29	49
-	+	17	52
-	+	18	51
-	+	17	55
-	+	20	54
-
-> O:\code\NERD_tree_7
-	*	1582302603	0
-	"	12	0
-	.	1	0
-	+	1	0
-
-> O:\code\win32\win32_gameHooks.cpp
-	*	1582302596	0
-	"	241	0
-	.	241	0
-	+	1	27
-	+	2	8
-	+	30	15
-	+	93	18
-	+	102	20
-	+	107	18
-	+	114	18
-	+	122	18
-	+	30	0
-	+	92	31
-	+	96	19
-	+	144	84
-	+	147	0
-	+	145	26
-	+	146	35
-	+	30	0
-	+	29	0
-	+	30	0
-	+	74	0
-	+	86	0
-	+	74	0
-	+	86	0
-	+	76	23
-	+	77	23
-	+	79	0
+> O:\code\materialRenderer\materialRenderer.hpp
+	*	1582464633	0
+	"	68	51
+	^	68	19
+	.	68	18
+	+	89	5
+	+	9	1
+	+	21	1
+	+	7	0
+	+	14	1
+	+	13	12
+	+	18	21
+	+	7	15
+	+	8	19
+	+	9	0
+	+	6	30
+	+	9	0
+	+	39	1
+	+	34	36
+	+	54	0
+	+	43	17
+	+	41	28
+	+	43	77
+	+	41	46
+	+	43	82
+	+	59	0
+	+	57	32
+	+	61	20
+	+	35	18
+	+	41	46
+	+	45	22
+	+	63	0
+	+	61	40
+	+	63	0
+	+	61	30
+	+	63	15
+	+	35	11
+	+	41	38
+	+	63	28
+	+	61	62
+	+	63	12
+	+	43	31
+	+	36	19
+	+	30	1
+	+	23	17
+	+	29	23
+	+	36	36
+	+	61	44
+	+	44	36
+	+	58	30
+	+	62	29
+	+	27	31
+	+	25	14
+	+	62	61
+	+	63	0
+	+	64	0
 	+	78	0
-	+	79	96
-	+	81	0
-	+	83	46
-	+	85	0
-	+	83	45
-	+	82	0
-	+	80	10
-	+	84	30
-	+	84	0
-	+	79	97
-	+	158	8
-	+	159	8
-	+	98	22
-	+	108	23
-	+	115	23
-	+	141	22
-	+	111	0
-	+	108	0
-	+	109	0
-	+	108	0
+	+	76	0
+	+	65	52
+	+	78	0
+	+	75	24
+	+	77	27
+	+	44	25
+	+	58	0
+	+	75	64
+	+	39	0
+	+	19	20
+	+	20	25
+	+	37	21
+	+	48	66
+	+	49	38
+	+	50	39
+	+	70	28
+	+	71	68
+	+	73	43
+	+	38	28
+	+	52	45
+	+	53	38
+	+	73	71
+	+	71	46
+	+	74	0
+	+	72	85
+	+	50	37
+	+	67	0
+	+	65	55
+	+	69	0
+	+	75	66
+	+	67	7
+	+	68	18
+
+> O:\code\rendering\autoMesh.hpp
+	*	1582464632	0
+	"	13	0
+	^	120	45
+	.	120	0
+	+	41	0
+	+	44	0
+	+	27	0
+	+	41	28
+	+	55	81
+	+	56	55
+	+	35	20
+	+	36	17
+	+	38	23
+	+	39	23
+	+	41	23
+	+	37	32
+	+	56	23
+	+	42	31
+	+	51	28
+	+	55	5
+	+	56	5
+	+	42	0
+	+	30	0
+	+	51	0
+	+	27	0
+	+	14	30
+	+	15	52
+	+	27	0
+	+	12	24
+	+	17	0
+	+	27	0
+	+	17	33
+	+	22	0
+	+	18	57
+	+	17	16
+	+	18	16
+	+	19	51
+	+	23	0
+	+	20	59
+	+	21	56
+	+	16	21
+	+	17	32
+	+	18	44
+	+	19	41
+	+	27	0
+	+	24	0
 	+	110	0
-	+	115	0
-	+	117	0
-	+	24	23
-	+	99	60
-	+	114	68
+	+	113	33
 	+	114	0
-	+	114	45
-	+	99	0
-	+	114	0
-	+	122	0
-	+	142	0
-	+	114	0
-	+	115	0
-	+	118	0
-	+	142	0
-	+	142	52
-	+	118	0
+	+	111	0
+	+	112	0
+	+	110	0
+	+	113	0
+	+	113	68
+	+	113	0
+	+	113	81
+	+	113	61
+	+	116	15
+	+	113	0
 	+	116	0
-	+	117	0
-	+	139	0
-	+	142	0
-	+	125	0
-	+	127	30
-	+	139	0
-	+	138	0
-	+	125	67
-	+	124	44
-	+	120	64
+	+	116	16
+	+	116	0
+	+	105	0
+	+	102	39
+	+	105	0
+	+	105	12
+	+	105	0
+	+	105	13
+	+	105	75
+	+	105	23
+	+	105	12
+	+	105	13
+	+	105	0
+	+	104	0
+	+	105	12
+	+	105	18
+	+	105	51
+	+	105	26
+	+	105	62
+	+	105	60
+	+	105	12
+	+	105	48
+	+	105	83
+	+	105	14
+	+	105	37
+	+	105	0
+	+	105	115
+	+	105	48
+	+	105	29
+	+	105	59
+	+	105	0
+	+	104	12
+	+	118	86
+	+	122	0
+	+	118	22
+	+	120	47
+	+	121	14
 	+	123	0
-	+	140	0
-	+	133	29
-	+	129	26
-	+	130	30
-	+	133	0
-	+	128	51
-	+	131	0
-	+	132	41
-	+	135	22
-	+	134	26
-	+	135	0
-	+	136	29
-	+	137	18
-	+	134	54
-	+	241	0
-	+	241	1
-	+	241	0
+	+	123	90
+	+	123	0
+	+	118	80
+	+	120	44
+	+	120	0
+
+> O:\code\NERD_tree_12
+	*	1582464462	0
+	"	8	0
+	.	1	0
+	+	1	0
 
 > O:\code\platform.hpp
-	*	1582302439	0
-	"	157	0
-	^	12	36
-	.	12	35
-	+	50	0
-	+	50	23
-	+	45	0
-	+	50	0
-	+	45	0
-	+	50	0
-	+	50	30
-	+	50	0
-	+	50	23
-	+	47	15
-	+	50	23
-	+	50	0
-	+	51	0
+	*	1582464305	0
+	"	1	0
+	^	37	16
+	.	44	0
+	+	53	23
+	+	50	15
+	+	53	23
 	+	53	0
-	+	51	69
-	+	37	0
-	+	50	25
-	+	51	22
-	+	52	93
-	+	50	65
-	+	53	33
-	+	53	20
+	+	54	0
+	+	56	0
+	+	54	69
+	+	40	0
+	+	53	25
+	+	54	22
+	+	55	93
+	+	53	65
+	+	56	33
+	+	56	20
+	+	56	0
+	+	56	71
 	+	53	0
-	+	53	71
-	+	50	0
 	+	32	0
-	+	35	0
-	+	50	0
+	+	38	0
 	+	53	0
-	+	53	50
-	+	53	0
-	+	74	22
+	+	56	0
+	+	56	50
+	+	56	0
+	+	77	22
 	+	17	0
-	+	71	14
-	+	59	23
+	+	74	14
+	+	62	23
 	+	32	28
 	+	32	29
 	+	33	63
-	+	37	20
-	+	38	0
+	+	40	20
+	+	41	0
 	+	34	0
 	+	30	51
-	+	36	32
+	+	39	32
 	+	34	18
 	+	33	9
 	+	33	0
-	+	50	0
-	+	50	15
-	+	52	103
+	+	53	0
+	+	53	15
+	+	55	103
 	+	33	12
 	+	33	0
 	+	32	0
 	+	33	0
-	+	42	0
+	+	45	0
 	+	32	0
-	+	42	0
+	+	45	0
 	+	34	20
 	+	33	18
 	+	32	20
 	+	31	41
-	+	42	0
+	+	45	0
+	+	47	0
+	+	46	0
 	+	44	0
-	+	43	0
-	+	41	0
-	+	40	18
-	+	41	0
-	+	69	0
-	+	77	0
+	+	43	18
+	+	44	0
+	+	72	0
+	+	80	0
 	+	5	0
 	+	6	0
 	+	5	0
 	+	6	6
 	+	5	0
 	+	6	43
-	+	47	19
-	+	59	0
+	+	50	19
+	+	62	0
+	+	56	0
 	+	53	0
-	+	50	0
-	+	53	0
-	+	49	0
-	+	53	0
-	+	74	30
-	+	78	0
+	+	56	0
+	+	52	0
+	+	56	0
+	+	77	30
+	+	81	0
 	+	6	0
 	+	1	23
 	+	2	23
@@ -1190,69 +1193,611 @@ $gameState->
 	+	16	0
 	+	11	0
 	+	12	35
+	+	44	26
+	+	37	16
+	+	35	24
+	+	37	0
+	+	36	20
+	+	35	0
+	+	37	15
+	+	44	0
 
-> O:\code\game.hpp
-	*	1582302436	0
-	"	29	0
-	^	16	21
-	.	16	20
-	+	2	19
-	+	37	5
-	+	13	0
-	+	24	0
-	+	13	15
-	+	13	0
-	+	8	1
-	+	6	52
+> O:\code\rendering\renderState.hpp
+	*	1582464194	0
+	"	18	0
+	.	65	0
+	+	1	15
+	+	2	15
+	+	62	31
+	+	17	19
+	+	65	0
+
+> O:\ressources\shaders\material\phong.vert
+	*	1582463365	0
+	"	15	37
+	.	15	0
 	+	8	0
-	+	7	38
+	+	3	0
+	+	8	0
+	+	17	0
+	+	14	0
+	+	9	18
+	+	14	26
+	+	6	17
+	+	15	97
+	+	5	0
+	+	7	14
+	+	15	48
+	+	10	19
+	+	9	16
+	+	10	19
+	+	15	37
+	+	14	36
+	+	9	17
+	+	14	0
+	+	15	37
+	+	15	0
+
+> O:\code\NERD_tree_11
+	*	1582463364	0
+	"	9	0
+	.	1	0
+	+	1	0
+
+> O:\ressources\shaders\material\phong.frag
+	*	1582463363	0
+	"	16	17
+	^	25	103
+	.	25	92
+	+	35	0
+	+	6	16
+	+	7	0
+	+	34	30
+	+	7	0
+	+	3	16
+	+	20	37
 	+	13	0
-	+	13	10
-	+	13	18
-	+	24	0
-	+	13	0
-	+	24	0
-	+	13	0
-	+	24	0
-	+	13	0
-	+	13	39
-	+	13	21
-	+	13	22
-	+	13	15
-	+	13	0
-	+	13	17
-	+	13	0
-	+	13	52
-	+	13	54
-	+	13	36
-	+	13	49
-	+	13	52
-	+	13	0
-	+	24	0
-	+	13	0
-	+	20	18
-	+	13	22
-	+	24	0
-	+	23	9
-	+	24	0
-	+	13	16
-	+	25	0
-	+	13	0
-	+	9	0
-	+	21	19
-	+	13	0
-	+	9	0
-	+	13	0
+	+	9	20
+	+	10	17
+	+	10	23
+	+	7	0
+	+	28	13
 	+	10	0
-	+	12	0
-	+	13	0
+	+	8	18
+	+	11	14
+	+	10	22
+	+	10	0
+	+	28	29
+	+	34	5
+	+	28	4
 	+	28	0
-	+	15	19
-	+	16	20
+	+	29	13
+	+	27	10
+	+	26	3
+	+	29	31
+	+	33	0
+	+	23	25
+	+	30	26
+	+	12	22
+	+	24	4
+	+	21	12
+	+	23	5
+	+	21	21
+	+	23	62
+	+	24	47
+	+	26	0
+	+	15	18
+	+	17	0
+	+	25	35
+	+	15	18
+	+	14	9
+	+	4	13
+	+	5	0
+	+	33	0
+	+	31	5
+	+	22	45
+	+	32	5
+	+	25	66
+	+	15	18
+	+	25	66
+	+	15	18
+	+	15	17
+	+	16	18
+	+	25	91
+	+	15	23
+	+	16	16
+	+	15	23
+	+	16	18
+	+	15	23
+	+	16	16
+	+	15	23
+	+	25	92
+
+> O:\code\NERD_tree_10
+	*	1582461781	0
+	"	8	0
+	.	1	0
+	+	1	0
+
+> O:\uppLib\datastructures\datastructures.hpp
+	*	1582460300	0
+	"	45	4
+	^	102	9
+	.	103	0
+	+	102	0
+	+	102	8
+	+	103	0
+
+> O:\code\utils\camera.hpp
+	*	1582459505	0
+	"	2	0
+	.	17	0
+	+	1	21
+	+	2	21
+	+	25	5
+	+	4	0
+	+	17	0
+	+	12	33
+	+	14	31
+	+	17	50
+	+	17	0
+	+	17	37
+	+	17	0
+	+	12	52
+	+	13	66
+	+	17	37
+	+	17	31
+	+	12	44
+	+	13	62
+	+	14	61
+	+	17	10
+	+	17	66
+	+	17	62
+	+	10	6
+	+	17	35
+	+	12	45
+	+	14	29
+	+	17	36
+	+	17	32
+	+	13	90
+	+	12	45
+	+	13	76
+	+	14	52
+	+	4	35
+	+	4	0
+	+	4	33
+	+	17	25
+	+	17	0
+	+	10	0
+	+	4	0
+	+	14	0
+	+	10	0
+	+	17	0
+
+> O:\code\NERD_tree_9
+	*	1582459090	0
+	"	4	0
+	.	1	0
+	+	1	0
+
+> O:\code\utils\meshGenerators.hpp
+	*	1582458818	0
+	"	98	8
+	^	90	10
+	.	54	8
+	+	64	15
+	+	65	20
+	+	68	20
+	+	67	20
+	+	66	20
+	+	65	26
+	+	66	26
+	+	65	26
+	+	66	26
+	+	65	33
+	+	66	33
+	+	67	33
+	+	68	33
+	+	65	33
+	+	66	33
+	+	65	33
+	+	67	33
+	+	68	33
+	+	65	58
+	+	69	19
+	+	70	20
+	+	71	0
+	+	59	19
+	+	60	34
+	+	61	0
+	+	74	18
+	+	75	0
+	+	79	21
+	+	75	27
+	+	76	27
+	+	77	27
+	+	78	27
+	+	76	20
+	+	77	20
+	+	76	32
+	+	78	34
+	+	77	0
+	+	76	33
+	+	75	52
+	+	80	27
+	+	81	0
+	+	84	0
+	+	99	0
+	+	87	15
+	+	99	0
+	+	89	12
+	+	98	29
+	+	99	0
+	+	103	50
+	+	104	46
+	+	76	0
+	+	96	8
+	+	98	9
+	+	75	8
+	+	81	0
+	+	98	8
+	+	80	8
+	+	103	78
+	+	49	19
+	+	47	71
+	+	84	0
+	+	55	0
+	+	84	58
+	+	84	60
+	+	84	46
+	+	84	48
+	+	84	52
+	+	84	54
+	+	84	72
+	+	84	75
+	+	84	73
+	+	84	70
+	+	84	72
+	+	84	75
+	+	84	73
+	+	84	70
+	+	84	72
+	+	84	75
+	+	84	73
+	+	84	70
+	+	84	0
+	+	55	8
+	+	54	9
+	+	55	0
+	+	84	8
+	+	98	9
+	+	96	9
+	+	94	9
+	+	92	9
+	+	90	23
+	+	92	8
+	+	94	29
+	+	96	8
+	+	98	29
+	+	84	0
+	+	54	8
+
+> O:\code\NERD_tree_4
+	*	1582457233	0
+	"	14	0
+	.	1	0
+	+	1	0
+
+> O:\ressources\shaders\image.vert
+	*	1582457232	0
+	"	10	12
+	^	12	17
+	.	11	35
+	+	1	5
+	+	3	13
+	+	6	13
+	+	9	0
+	+	4	12
+	+	5	0
+	+	13	0
+	+	8	18
+	+	11	39
+	+	12	15
+	+	6	7
+	+	11	0
+	+	8	15
+	+	11	48
+	+	12	15
+	+	11	35
+
+> O:\code\NERD_tree_7
+	*	1582457231	0
+	"	13	0
+	.	1	0
+	+	1	0
+
+> O:\ressources\shaders\color.vert
+	*	1582457230	0
+	"	19	26
+	^	19	27
+	.	19	26
+	+	26	4
+	+	24	20
+	+	24	35
+	+	26	0
+	+	24	0
+	+	24	35
+	+	14	0
+	+	14	56
+	+	24	67
+	+	24	0
+	+	14	0
+	+	24	42
+	+	14	13
+	+	16	33
+	+	14	0
+	+	11	0
+	+	20	0
+	+	24	0
+	+	26	0
+	+	17	0
+	+	26	0
+	+	12	1
+	+	16	5
+	+	12	0
+	+	16	4
+	+	24	0
+	+	22	0
+	+	24	35
+	+	6	0
+	+	5	12
+	+	16	15
+	+	22	4
+	+	17	4
+	+	8	17
+	+	25	5
+	+	24	36
+	+	23	0
+	+	23	20
+	+	23	0
+	+	23	4
+	+	23	7
+	+	22	5
+	+	21	5
+	+	23	8
+	+	23	15
+	+	24	33
+	+	23	0
+	+	24	35
+	+	17	4
+	+	17	0
+	+	18	4
+	+	21	4
+	+	22	5
+	+	18	5
+	+	22	4
+	+	24	35
+	+	18	5
+	+	24	33
+	+	7	1
+	+	24	5
+	+	25	21
+	+	18	5
+	+	25	5
+	+	24	4
+	+	7	0
+	+	24	35
+	+	17	0
+	+	18	4
+	+	19	5
+	+	18	5
+	+	19	4
+	+	18	4
+	+	19	5
+	+	18	5
+	+	19	26
+
+> O:\code\NERD_tree_3
+	*	1582457211	0
+	"	10	0
+	.	1	0
+	+	1	0
+
+> O:\code\rendering\framebuffer.hpp
+	*	1582457207	0
+	"	124	0
+	^	126	0
+	.	125	26
+	+	1	26
+	+	2	26
+	+	135	5
+	+	4	0
+	+	90	15
+	+	130	30
+	+	30	38
+	+	49	28
+	+	58	60
+	+	76	0
+	+	61	38
+	+	64	0
+	+	67	0
+	+	70	0
+	+	73	0
+	+	61	48
+	+	64	56
+	+	67	49
+	+	70	38
+	+	73	51
+	+	62	77
+	+	63	17
+	+	66	17
+	+	69	17
+	+	72	17
+	+	75	17
+	+	77	16
+	+	130	0
+	+	131	0
+	+	129	0
+	+	127	30
+	+	128	14
+	+	125	26
+
+> O:\code\win32\main.cpp
+	*	1582457203	0
+	"	1004	4
+	^	1002	30
+	.	1002	29
+	+	970	31
+	+	554	4
+	+	1235	12
+	+	1239	0
+	+	1233	60
+	+	554	0
+	+	970	31
+	+	1233	12
+	+	1239	0
+	+	1232	38
+	+	1234	12
+	+	1233	27
+	+	1236	0
+	+	1239	0
+	+	1237	0
+	+	716	46
+	+	715	97
+	+	38	26
+	+	850	42
+	+	38	16
+	+	850	25
+	+	872	39
+	+	873	59
+	+	1060	60
+	+	1060	0
+	+	1060	56
+	+	1060	59
+	+	1060	0
+	+	1060	48
+	+	1060	0
+	+	1060	37
+	+	1060	41
+	+	1060	0
+	+	38	0
+	+	850	0
+	+	873	0
+	+	233	17
+	+	233	0
+	+	294	0
+	+	296	37
+	+	296	72
+	+	296	38
+	+	296	26
+	+	296	0
+	+	295	59
+	+	296	68
+	+	296	0
+	+	296	69
+	+	296	0
+	+	295	0
+	+	296	0
+	+	295	0
+	+	942	0
+	+	941	0
+	+	1060	0
+	+	1060	26
+	+	1060	0
+	+	1060	39
+	+	1060	0
+	+	1060	16
+	+	1060	31
+	+	1060	10
+	+	1060	0
+	+	1060	22
+	+	1060	38
+	+	1060	39
+	+	1060	0
+	+	1006	0
+	+	977	3
+	+	1060	0
+	+	978	0
+	+	1060	0
+	+	984	50
+	+	1010	0
+	+	1048	8
+	+	1003	0
+	+	999	12
+	+	1000	0
+	+	999	19
+	+	1000	24
+	+	999	24
+	+	1001	28
+	+	1002	29
+	t	1088	5
+
+> O:\ressources\shaders\postProcess.frag
+	*	1582456618	0
+	"	15	17
+	^	15	18
+	.	15	17
+	+	17	0
+	+	3	16
+	+	9	0
+	+	15	25
+	+	4	8
+	+	15	18
+	+	15	5
+	+	17	6
+	+	15	21
+	+	17	0
+	+	6	23
+	+	15	33
+	+	15	17
+	+	15	33
+	+	8	20
+	+	15	49
+	+	15	0
+	+	10	19
+	+	10	0
+	+	10	41
+	+	15	42
+	+	8	1
+	+	15	0
+	+	12	51
+	+	15	17
+	+	10	0
+	+	15	23
+	+	12	52
+	+	7	24
+	+	15	16
+	+	8	0
+	+	15	5
+	+	16	17
+	+	13	61
+	+	14	3
+	+	16	0
+	+	7	17
+	+	12	0
+	+	13	34
+	+	7	25
+	+	13	41
+	+	14	0
+	+	13	5
+	+	16	6
+	+	15	17
+
+> O:\code\NERD_tree_5
+	*	1582456532	0
+	"	14	0
+	.	1	0
+	+	1	0
+
+> O:\code\NERD_tree_6
+	*	1582456474	0
+	"	10	0
+	.	1	0
+	+	1	0
 
 > O:\ressources\shaders\color.frag
-	*	1582302243	0
-	"	19	5
+	*	1582455754	0
+	"	6	0
 	^	20	6
 	.	20	5
 	+	12	0
@@ -1291,47 +1836,332 @@ $gameState->
 	+	19	5
 	+	20	5
 
-> O:\ressources\shaders\image.vert
-	*	1582302180	0
-	"	12	15
-	^	12	17
-	.	12	15
-	+	1	5
-	+	3	13
-	+	6	13
-	+	9	0
-	+	4	12
-	+	5	0
-	+	13	0
-	+	8	18
-	+	11	39
-	+	12	15
-	+	6	7
-	+	11	0
-	+	8	15
-	+	11	48
-	+	12	15
-
-> O:\ressources\shaders\testShader.frag
-	*	1582302025	0
-	"	3	0
-	^	7	24
-	.	7	19
-	+	1	0
-	+	3	0
-	+	5	0
-	+	8	0
-	+	7	19
-
-> O:\code\NERD_tree_4
-	*	1582301362	0
-	"	6	0
+> O:\code\NERD_tree_2
+	*	1582454435	0
+	"	11	0
 	.	1	0
 	+	1	0
 
+> O:\code\rendering\texture.hpp
+	*	1582417202	0
+	"	242	0
+	^	246	29
+	.	222	0
+	+	283	21
+	+	283	11
+	+	283	27
+	+	283	0
+	+	283	34
+	+	283	18
+	+	283	32
+	+	283	0
+	+	283	35
+	+	283	0
+	+	283	6
+	+	283	41
+	+	283	0
+	+	283	44
+	+	283	49
+	+	283	0
+	+	283	61
+	+	283	26
+	+	283	38
+	+	283	51
+	+	283	36
+	+	283	46
+	+	283	28
+	+	283	30
+	+	283	27
+	+	283	29
+	+	283	0
+	+	283	14
+	+	283	15
+	+	283	48
+	+	283	0
+	+	282	0
+	+	78	0
+	+	48	0
+	+	78	0
+	+	180	0
+	+	181	84
+	+	180	23
+	+	181	84
+	+	181	7
+	+	181	84
+	+	163	23
+	+	163	0
+	+	164	0
+	+	164	3
+	+	163	22
+	+	164	0
+	+	163	0
+	+	165	0
+	+	180	0
+	+	178	64
+	+	180	0
+	+	184	0
+	+	186	21
+	+	189	20
+	+	190	23
+	+	189	14
+	+	190	15
+	+	191	0
+	+	189	22
+	+	233	26
+	+	251	34
+	+	65	0
+	+	64	28
+	+	85	44
+	+	86	0
+	+	85	37
+	+	116	25
+	+	117	0
+	+	195	17
+	+	211	28
+	+	218	39
+	+	214	0
+	+	215	17
+	+	216	0
+	+	217	0
+	+	218	0
+	+	217	37
+	+	235	17
+	+	195	26
+	+	279	69
+	+	281	0
+	+	280	36
+	+	74	0
+	+	73	44
+	+	141	24
+	+	224	0
+	+	223	24
+	+	253	26
+	+	246	28
+	+	270	0
+	+	211	0
+	+	222	0
+	+	215	0
+	+	218	0
+	+	222	0
+
+> O:\code\rendering\shaderprogram.hpp
+	*	1582417202	0
+	"	416	8
+	.	416	0
+	+	201	0
+	+	181	36
+	+	191	0
+	+	185	45
+	+	191	0
+	+	188	48
+	+	187	38
+	+	189	40
+	+	191	0
+	+	191	20
+	+	191	0
+	+	189	39
+	+	191	0
+	+	201	0
+	+	192	50
+	+	194	41
+	+	192	51
+	+	147	0
+	+	174	28
+	+	360	24
+	+	186	13
+	+	184	13
+	+	186	27
+	+	193	9
+	+	195	0
+	+	196	24
+	+	198	0
+	+	187	24
+	+	198	38
+	+	199	38
+	+	189	0
+	+	276	60
+	+	278	47
+	+	304	0
+	+	299	0
+	+	279	38
+	+	37	47
+	+	63	0
+	+	73	63
+	+	325	33
+	+	325	50
+	+	326	30
+	+	41	24
+	+	44	29
+	+	47	29
+	+	50	29
+	+	53	29
+	+	57	74
+	+	67	67
+	+	63	45
+	+	84	52
+	+	86	85
+	+	325	35
+	+	288	0
+	+	285	13
+	+	284	5
+	+	285	5
+	+	284	4
+	+	285	4
+	+	287	4
+	+	288	4
+	+	289	4
+	+	290	4
+	+	291	4
+	+	292	4
+	+	285	0
+	+	292	5
+	+	292	0
+	+	291	44
+	+	284	4
+	+	285	4
+	+	292	4
+	+	298	4
+	+	299	4
+	+	280	27
+	+	281	17
+	+	291	0
+	+	303	5
+	+	304	0
+	+	302	67
+	+	303	4
+	+	304	4
+	+	305	4
+	+	304	0
+	+	303	4
+	+	330	0
+	+	81	23
+	+	87	27
+	+	77	0
+	+	103	0
+	+	101	0
+	+	99	0
+	+	95	11
+	+	98	0
+	+	97	44
+	+	100	16
+	+	93	18
+	+	80	56
+	+	417	0
+	+	416	0
+
+> O:\code\NERD_tree_14
+	*	1582415769	0
+	"	14	0
+	.	1	0
+	+	1	0
+
+> O:\ressources\shaders\postProcess.vert
+	*	1582415765	0
+	"	8	0
+	^	9	32
+	.	9	32
+	+	10	0
+	+	3	13
+	+	6	0
+	+	9	34
+	+	6	19
+	+	6	0
+	+	5	0
+	+	6	8
+	+	6	12
+	+	6	0
+	+	4	13
+	+	8	25
+	+	4	9
+	+	8	25
+	+	8	4
+	+	9	32
+
+> O:\code\rendering\renderer.hpp
+	*	1582413285	0
+	"	14	0
+	^	9	21
+	.	9	20
+	+	37	0
+	+	37	21
+	+	37	23
+	+	37	22
+	+	37	0
+	+	37	22
+	+	37	51
+	+	37	33
+	+	37	37
+	+	37	25
+	+	37	38
+	+	37	37
+	+	37	48
+	+	37	0
+	+	37	72
+	+	37	52
+	+	37	51
+	+	37	72
+	+	37	57
+	+	37	76
+	+	37	77
+	+	37	78
+	+	37	29
+	+	37	0
+	+	37	89
+	+	37	95
+	+	37	92
+	+	37	0
+	+	37	23
+	+	37	0
+	+	37	14
+	+	19	0
+	+	37	0
+	+	16	25
+	+	37	0
+	+	37	47
+	+	37	0
+	+	37	33
+	+	37	22
+	+	37	37
+	+	37	72
+	+	37	54
+	+	37	47
+	+	37	62
+	+	37	0
+	+	16	0
+	+	9	8
+	+	8	17
+	+	9	25
+	+	10	18
+	+	7	0
+	+	11	0
+	+	7	0
+	+	12	31
+	+	13	21
+	+	13	18
+	+	14	21
+	+	6	17
+	+	7	0
+	+	15	25
+	+	9	20
+
+> O:\code\NERD_tree_13
+	*	1582412984	0
+	"	4	0
+	.	1	0
+	+	1	0
+
+> O:\code\utils\string_utils.hpp
+	*	1582412607	0
+	"	65	27
+	^	61	24
+	.	61	56
+	+	1	21
+	+	2	21
+	+	61	56
+
 > O:\code\rendering\mesh.hpp
-	*	1582301360	0
-	"	366	5
+	*	1582411743	0
+	"	399	5
 	.	343	0
 	+	384	0
 	+	383	38
@@ -1430,377 +2260,421 @@ $gameState->
 	+	339	0
 	+	343	0
 
-> O:\code\rendering\shaderprogram.hpp
-	*	1582301305	0
-	"	366	4
-	^	289	6
-	.	316	0
-	+	399	14
-	+	420	0
-	+	412	0
-	+	397	65
-	+	187	0
-	+	158	10
-	+	160	39
-	+	161	9
-	+	160	9
-	+	161	32
-	+	164	0
-	+	163	26
-	+	165	56
-	+	168	0
-	+	187	0
-	+	167	36
-	+	177	0
-	+	171	45
-	+	177	0
-	+	174	48
-	+	173	38
-	+	175	40
-	+	177	0
-	+	177	20
-	+	177	0
-	+	175	39
-	+	177	0
-	+	187	0
-	+	178	50
-	+	180	41
-	+	178	51
-	+	133	0
-	+	160	28
-	+	346	24
-	+	172	13
-	+	170	13
-	+	172	27
-	+	179	9
-	+	181	0
-	+	182	24
-	+	184	0
-	+	173	24
-	+	184	38
-	+	185	38
-	+	175	0
-	+	262	60
-	+	264	47
-	+	290	0
-	+	285	0
-	+	265	38
-	+	37	47
-	+	63	0
-	+	73	63
-	+	311	33
-	+	311	50
-	+	312	30
-	+	41	24
-	+	44	29
-	+	47	29
-	+	50	29
-	+	53	29
-	+	57	74
-	+	67	67
-	+	63	45
-	+	86	52
-	+	88	85
-	+	311	35
-	+	274	0
-	+	271	13
-	+	270	5
-	+	271	5
-	+	270	4
-	+	271	4
-	+	273	4
-	+	274	4
-	+	275	4
-	+	276	4
-	+	277	4
-	+	278	4
-	+	271	0
-	+	278	5
-	+	278	0
-	+	277	44
-	+	270	4
-	+	271	4
-	+	278	4
-	+	284	4
-	+	285	4
-	+	266	27
-	+	267	17
-	+	277	0
-	+	289	5
-	+	290	0
-	+	288	67
-	+	289	4
-	+	290	4
-	+	291	4
-	+	290	0
-	+	289	4
-	+	316	0
-
-> O:\code\rendering\autoShaderProgram.hpp
-	*	1582301297	0
-	"	300	5
-	^	246	18
-	.	246	17
-	+	285	62
-	+	317	13
-	+	319	24
-	+	324	74
-	+	327	74
-	+	330	74
-	+	333	58
-	+	336	54
-	+	345	67
-	+	353	17
-	+	346	0
-	+	5	32
-	+	345	44
-	+	373	55
-	+	373	27
-	+	373	54
-	+	373	21
-	+	373	37
-	+	373	17
-	+	373	23
-	+	373	22
-	+	373	5
-	+	373	16
-	+	373	4
-	+	213	0
-	+	212	58
-	+	339	37
-	+	340	21
-	+	365	0
-	+	364	0
-	+	215	41
-	+	218	42
-	+	279	24
-	+	285	27
-	+	305	32
-	+	312	40
-	+	314	36
-	+	317	20
-	+	305	43
-	+	336	43
-	+	373	0
-	+	184	0
-	+	162	34
-	+	163	60
-	+	169	0
-	+	167	15
-	+	164	13
-	+	166	27
-	+	167	16
-	+	44	0
-	+	42	0
-	+	28	0
-	+	28	25
-	+	30	24
-	+	32	30
-	+	34	23
-	+	36	22
-	+	38	23
-	+	40	17
-	+	29	33
+> O:\code\utils\arcBallController.hpp
+	*	1582403621	0
+	"	18	0
+	^	54	51
+	.	54	50
+	+	1	32
+	+	2	6
+	+	72	5
+	+	6	0
+	+	3	0
+	+	4	35
+	+	26	45
 	+	30	0
+	+	29	0
+	+	54	36
+	+	54	0
+	+	50	0
+	+	54	20
+	+	54	27
+	+	50	18
+	+	54	0
+	+	53	0
+	+	52	20
+	+	51	26
+	+	30	20
+	+	58	20
+	+	60	0
+	+	60	33
+	+	62	25
+	+	58	20
+	+	62	25
+	+	39	36
+	+	42	24
+	+	39	36
+	+	45	36
+	+	48	24
+	+	60	0
+	+	26	49
+	+	28	19
+	+	54	50
+
+> O:\code\win32\win32_gameHooks.cpp
+	*	1582402760	0
+	"	106	19
+	^	106	20
+	.	106	19
+	+	95	18
+	+	105	20
+	+	111	18
+	+	118	18
+	+	126	18
 	+	32	0
-	+	34	0
-	+	36	0
-	+	38	0
-	+	40	0
-	+	42	0
-	+	42	30
-	+	43	18
-	+	167	70
-	+	163	19
-	+	170	46
-	+	172	36
-	+	177	65
-	+	183	0
-	+	179	45
-	+	183	0
-	+	180	0
-	+	171	4
-	+	177	0
-	+	178	9
-	+	168	11
-	+	175	11
-	+	182	11
-	+	181	67
-	+	25	35
-	+	42	0
-	+	43	31
-	+	215	53
-	+	286	0
-	+	284	0
-	+	289	0
-	+	288	4
-	+	289	4
-	+	266	23
-	+	267	20
-	+	268	22
-	+	264	33
-	+	212	17
-	+	246	17
+	+	94	31
+	+	98	19
+	+	149	84
+	+	152	0
+	+	150	26
+	+	151	35
+	+	32	0
+	+	31	0
+	+	32	0
+	+	76	0
+	+	88	0
+	+	76	0
+	+	88	0
+	+	78	23
+	+	79	23
+	+	81	0
+	+	80	0
+	+	81	96
+	+	83	0
+	+	85	46
+	+	87	0
+	+	85	45
+	+	84	0
+	+	82	10
+	+	86	30
+	+	86	0
+	+	81	97
+	+	163	8
+	+	164	8
+	+	101	22
+	+	112	23
+	+	119	23
+	+	146	22
+	+	115	0
+	+	112	0
+	+	113	0
+	+	112	0
+	+	114	0
+	+	119	0
+	+	121	0
+	+	26	23
+	+	102	60
+	+	118	68
+	+	118	0
+	+	118	45
+	+	102	0
+	+	118	0
+	+	126	0
+	+	147	0
+	+	118	0
+	+	119	0
+	+	122	0
+	+	147	0
+	+	147	52
+	+	122	0
+	+	120	0
+	+	121	0
+	+	144	0
+	+	147	0
+	+	130	0
+	+	132	30
+	+	144	0
+	+	143	0
+	+	130	67
+	+	129	44
+	+	124	64
+	+	128	0
+	+	145	0
+	+	138	29
+	+	134	26
+	+	135	30
+	+	138	0
+	+	133	51
+	+	136	0
+	+	137	41
+	+	140	22
+	+	139	26
+	+	140	0
+	+	141	29
+	+	142	18
+	+	139	54
+	+	246	0
+	+	246	1
+	+	246	0
+	+	96	0
+	+	99	22
+	+	114	0
+	+	128	0
+	+	127	0
+	+	106	33
+	+	4	35
+	+	106	32
+	+	4	33
+	+	106	19
 
-> O:\code\NERD_tree_5
-	*	1582301291	0
-	"	4	0
-	.	1	0
+> O:\code\win32\platformBuild.cpp
+	*	1582402644	0
+	"	27	0
+	.	26	0
+	+	27	18
+	+	28	22
+	+	7	0
+	+	12	0
+	+	12	29
+	+	27	0
+	+	27	12
+	+	12	0
+	+	12	62
+	+	12	16
+	+	28	24
+	+	12	0
+	+	23	0
+	+	24	0
+	+	27	0
+	+	12	0
 	+	1	0
-
-> O:\code\NERD_tree_3
-	*	1582301222	0
-	"	13	0
-	.	1	0
+	+	7	0
 	+	1	0
-
-> O:\code\utils\camera.hpp
-	*	1582301202	0
-	"	15	90
-	^	15	91
-	.	15	90
-	+	1	21
-	+	2	21
-	+	36	5
-	+	4	0
-	+	21	0
-	+	20	0
-	+	14	33
-	+	16	31
-	+	21	50
+	+	2	0
+	+	4	50
+	+	6	0
+	+	25	25
+	+	27	0
 	+	25	0
-	+	21	37
+	+	27	0
+	+	6	0
+	+	12	0
+	+	24	0
+	+	27	0
+	+	25	0
+	+	26	0
+
+> O:\ressources\shaders\image.frag
+	*	1582310326	0
+	"	11	23
+	^	11	24
+	.	11	23
+	+	2	0
+	+	3	12
+	+	6	23
+	+	12	0
+	+	11	4
+	+	4	16
+	+	3	8
+	+	11	13
+	+	6	0
+	+	11	30
+	+	10	16
+	+	11	24
+	+	10	7
+	+	11	23
+
+> O:\code\rendering\openGLState.hpp
+	*	1582310190	0
+	"	46	8
+	.	46	0
+	+	1	27
+	+	2	6
+	+	70	5
+	+	7	0
+	+	70	0
+	+	16	0
+	+	30	0
+	+	70	0
+	+	70	21
+	+	70	0
+	+	70	43
+	+	70	0
+	+	17	0
+	+	5	8
+	+	5	29
+	+	21	18
+	+	21	22
+	+	22	16
+	+	27	0
+	+	27	9
+	+	22	15
+	+	25	0
+	+	24	49
+	+	25	0
+	+	25	34
+	+	24	0
+	+	24	49
+	+	25	0
+	+	27	0
+	+	25	38
+	+	18	23
+	+	14	0
+	+	12	14
+	+	23	40
+	+	44	0
+	+	43	0
+	+	44	11
+	+	45	18
+	+	46	45
+	+	47	18
+	+	44	22
+	+	45	25
+	+	46	44
+	+	47	24
+	+	44	9
+	+	65	34
+	+	46	0
+
+> O:\ressources\shaders\sky.frag
+	*	1582304453	0
+	"	41	46
+	^	51	31
+	.	51	30
+	+	55	11
+	+	21	0
+	+	21	16
+	+	16	17
+	+	21	0
+	+	45	0
+	+	21	16
+	+	22	62
+	+	55	25
+	+	48	27
+	+	52	0
+	+	52	50
+	+	52	0
+	+	52	13
+	+	52	5
+	+	52	31
+	+	52	42
+	+	52	39
+	+	55	0
+	+	53	16
+	+	48	0
+	+	48	22
+	+	53	14
+	+	54	15
+	+	53	5
+	+	54	15
+	+	52	31
+	+	48	0
+	+	52	19
+	+	52	0
+	+	52	13
+	+	52	0
+	+	52	13
+	+	52	31
+	+	52	26
+	+	48	0
+	+	52	31
+	+	52	0
+	+	52	30
+	+	52	8
+	+	52	41
+	+	52	29
+	+	52	40
+	+	52	28
+	+	52	5
+	+	52	0
+	+	52	5
+	+	52	48
+	+	52	40
+	+	52	5
+	+	52	15
+	+	54	5
+	+	52	41
+	+	52	30
+	+	52	0
+	+	52	4
+	+	52	41
+	+	52	4
+	+	52	14
+	+	52	31
+	+	52	15
+	+	52	4
+	+	44	0
+	+	52	0
+	+	33	0
+	+	48	22
+	+	25	28
+	+	48	0
+	+	27	0
+	+	25	18
+	+	48	19
+	+	25	32
+	+	48	21
+	+	27	29
+	+	28	30
+	+	31	31
+	+	37	27
+	+	38	36
+	+	37	37
+	+	38	37
+	+	37	37
+	+	48	29
+	+	50	32
+	+	51	30
+
+> O:\code\game.hpp
+	*	1582302436	0
+	"	29	0
+	^	16	21
+	.	16	20
+	+	2	19
+	+	37	5
+	+	13	0
+	+	24	0
+	+	13	15
+	+	13	0
+	+	8	1
+	+	6	52
+	+	8	0
+	+	7	38
+	+	13	0
+	+	13	10
+	+	13	18
+	+	24	0
+	+	13	0
+	+	24	0
+	+	13	0
+	+	24	0
+	+	13	0
+	+	13	39
+	+	13	21
+	+	13	22
+	+	13	15
+	+	13	0
+	+	13	17
+	+	13	0
+	+	13	52
+	+	13	54
+	+	13	36
+	+	13	49
+	+	13	52
+	+	13	0
+	+	24	0
+	+	13	0
+	+	20	18
+	+	13	22
+	+	24	0
+	+	23	9
+	+	24	0
+	+	13	16
+	+	25	0
+	+	13	0
+	+	9	0
+	+	21	19
+	+	13	0
+	+	9	0
+	+	13	0
+	+	10	0
+	+	12	0
+	+	13	0
 	+	28	0
-	+	14	52
-	+	15	66
-	+	23	37
-	+	26	31
-	+	14	44
-	+	15	62
-	+	16	61
-	+	21	10
-	+	23	66
-	+	26	62
-	+	11	6
-	+	21	35
-	+	14	45
-	+	16	29
-	+	23	36
-	+	26	32
-	+	15	90
+	+	15	19
+	+	16	20
 
-> O:\code\win32\main.cpp
-	*	1582301192	0
-	"	711	97
-	^	711	98
-	.	711	97
-	+	926	13
-	+	931	20
-	+	936	45
-	+	978	30
-	+	990	0
-	+	977	0
-	+	990	0
-	+	990	30
-	+	990	0
-	+	990	12
-	+	990	32
-	+	990	0
-	+	1115	8
-	+	1116	9
-	+	325	0
-	+	326	0
-	+	324	0
-	+	323	16
-	+	324	0
-	+	974	44
-	+	990	0
-	+	979	0
-	+	974	53
-	+	975	52
-	+	977	0
-	+	985	28
-	+	986	0
-	+	987	0
-	+	988	0
-	+	986	20
-	+	987	24
-	+	988	25
-	+	987	35
-	+	988	37
-	+	986	27
-	+	1178	0
-	+	1177	25
-	+	1197	9
-	+	1198	8
-	+	1206	22
-	+	307	66
-	+	308	68
-	+	304	40
-	+	305	41
-	+	1055	0
-	+	1055	8
-	+	1055	9
-	+	1055	0
-	+	1055	8
-	+	1055	31
-	+	1055	0
-	+	1193	0
-	+	1193	26
-	+	1059	35
-	+	1076	0
-	+	1190	36
-	+	1193	0
-	+	1061	0
-	+	1059	34
-	+	1061	0
-	+	1076	0
-	+	1059	40
-	+	1069	0
-	+	1074	0
-	+	1051	0
-	+	1064	0
-	+	1066	69
-	+	1067	67
-	+	1066	0
-	+	1190	38
-	+	1065	15
-	+	337	0
-	+	344	0
+> O:\ressources\shaders\testShader.frag
+	*	1582302025	0
+	"	3	0
+	^	7	24
+	.	7	19
 	+	1	0
-	+	337	25
-	+	337	0
-	+	28	71
-	+	963	31
-	+	962	38
-	+	966	34
-	+	1176	0
-	+	1215	0
-	+	550	5
-	+	963	31
-	+	550	4
-	+	1206	12
-	+	1210	0
-	+	1204	60
-	+	550	0
-	+	963	31
-	+	1204	12
-	+	1210	0
-	+	1203	38
-	+	1205	12
-	+	1204	27
-	+	1207	0
-	+	1210	0
-	+	1208	0
-	+	712	46
-	+	711	97
-	t	1059	5
-
-> O:\code\NERD_tree_2
-	*	1582300596	0
-	"	9	0
-	.	1	0
-	+	1	0
+	+	3	0
+	+	5	0
+	+	8	0
+	+	7	19
 
 > O:\code\win32\win32_fileListener.cpp
 	*	1582299432	0
@@ -1896,185 +2770,6 @@ $gameState->
 	+	13	0
 	+	272	13
 
-> O:\code\rendering\autoMesh.hpp
-	*	1582298679	0
-	"	94	26
-	.	104	12
-	+	41	0
-	+	44	0
-	+	27	0
-	+	41	28
-	+	55	81
-	+	56	55
-	+	35	20
-	+	36	17
-	+	38	23
-	+	39	23
-	+	41	23
-	+	37	32
-	+	56	23
-	+	42	31
-	+	51	28
-	+	55	5
-	+	56	5
-	+	42	0
-	+	30	0
-	+	51	0
-	+	27	0
-	+	14	30
-	+	15	52
-	+	27	0
-	+	12	24
-	+	17	0
-	+	27	0
-	+	17	33
-	+	22	0
-	+	18	57
-	+	17	16
-	+	18	16
-	+	19	51
-	+	23	0
-	+	20	59
-	+	21	56
-	+	16	21
-	+	17	32
-	+	18	44
-	+	19	41
-	+	27	0
-	+	24	0
-	+	110	0
-	+	113	33
-	+	114	0
-	+	111	0
-	+	112	0
-	+	110	0
-	+	113	0
-	+	113	68
-	+	113	0
-	+	113	81
-	+	113	61
-	+	116	15
-	+	113	0
-	+	116	0
-	+	116	16
-	+	116	0
-	+	105	0
-	+	102	39
-	+	105	0
-	+	105	12
-	+	105	0
-	+	105	13
-	+	105	75
-	+	105	23
-	+	105	12
-	+	105	13
-	+	105	0
-	+	104	0
-	+	105	12
-	+	105	18
-	+	105	51
-	+	105	26
-	+	105	62
-	+	105	60
-	+	105	12
-	+	105	48
-	+	105	83
-	+	105	14
-	+	105	37
-	+	105	0
-	+	105	115
-	+	105	48
-	+	105	29
-	+	105	59
-	+	105	0
-	+	104	12
-
-> O:\ressources\shaders\color.vert
-	*	1582298677	0
-	"	18	5
-	^	18	6
-	.	18	5
-	+	26	4
-	+	24	20
-	+	24	35
-	+	26	0
-	+	24	0
-	+	24	35
-	+	14	0
-	+	14	56
-	+	24	67
-	+	24	0
-	+	14	0
-	+	24	42
-	+	14	13
-	+	16	33
-	+	14	0
-	+	11	0
-	+	20	0
-	+	24	0
-	+	26	0
-	+	17	0
-	+	26	0
-	+	12	1
-	+	16	5
-	+	12	0
-	+	16	4
-	+	24	0
-	+	22	0
-	+	24	35
-	+	6	0
-	+	5	12
-	+	16	15
-	+	22	4
-	+	17	4
-	+	8	17
-	+	25	5
-	+	24	36
-	+	23	0
-	+	23	20
-	+	23	0
-	+	23	4
-	+	23	7
-	+	22	5
-	+	21	5
-	+	23	8
-	+	23	15
-	+	24	33
-	+	23	0
-	+	24	35
-	+	17	4
-	+	17	0
-	+	18	4
-	+	21	4
-	+	22	5
-	+	18	5
-	+	22	4
-	+	24	35
-	+	18	5
-	+	24	33
-	+	7	1
-	+	24	5
-	+	25	21
-	+	18	5
-	+	25	5
-	+	24	4
-	+	7	0
-	+	24	35
-	+	17	0
-	+	18	4
-	+	19	5
-	+	18	5
-	+	19	4
-	+	18	4
-	+	19	5
-	+	18	5
-
-> O:\code\NERD_tree_9
-	*	1582291252	0
-	"	11	0
-	.	1	0
-	+	1	0
-
 > O:\code\win32\win32_glFunctions.hpp
 	*	1582289431	0
 	"	221	0
@@ -2123,114 +2818,6 @@ $gameState->
 	+	215	0
 	+	214	21
 	+	39	8
-
-> O:\code\NERD_tree_8
-	*	1582289024	0
-	"	13	0
-	.	1	0
-	+	1	0
-
-> O:\code\rendering\renderer.hpp
-	*	1582289022	0
-	"	10	0
-	^	6	18
-	.	7	0
-	+	36	0
-	+	36	21
-	+	36	23
-	+	36	22
-	+	36	0
-	+	36	22
-	+	36	51
-	+	36	33
-	+	36	37
-	+	36	25
-	+	36	38
-	+	36	37
-	+	36	48
-	+	36	0
-	+	36	72
-	+	36	52
-	+	36	51
-	+	36	72
-	+	36	57
-	+	36	76
-	+	36	77
-	+	36	78
-	+	36	29
-	+	36	0
-	+	36	89
-	+	36	95
-	+	36	92
-	+	36	0
-	+	36	23
-	+	36	0
-	+	36	14
-	+	18	0
-	+	36	0
-	+	15	25
-	+	36	0
-	+	36	47
-	+	36	0
-	+	36	33
-	+	36	22
-	+	36	37
-	+	36	72
-	+	36	54
-	+	36	47
-	+	36	62
-	+	36	0
-	+	15	0
-	+	9	8
-	+	8	17
-	+	9	25
-	+	10	18
-	+	7	0
-	+	11	0
-	+	7	0
-	+	12	31
-	+	13	21
-	+	13	18
-	+	14	21
-	+	6	17
-	+	7	0
-
-> O:\code\win32\platformBuild.cpp
-	*	1582288672	0
-	"	12	0
-	.	26	0
-	+	27	18
-	+	28	22
-	+	7	0
-	+	12	0
-	+	12	29
-	+	27	0
-	+	27	12
-	+	12	0
-	+	12	62
-	+	12	16
-	+	28	24
-	+	12	0
-	+	23	0
-	+	24	0
-	+	27	0
-	+	12	0
-	+	1	0
-	+	7	0
-	+	1	0
-	+	2	0
-	+	4	50
-	+	6	0
-	+	25	25
-	+	27	0
-	+	25	0
-	+	27	0
-	+	6	0
-	+	12	0
-	+	24	0
-	+	27	0
-	+	25	0
-	+	26	0
 
 > O:\code\utils\fileIO.hpp
 	*	1582288289	0
@@ -2450,47 +3037,6 @@ $gameState->
 	+	82	33
 	+	79	43
 
-> O:\code\utils\arcBallController.hpp
-	*	1582191214	0
-	"	21	22
-	^	54	51
-	.	54	50
-	+	1	32
-	+	2	6
-	+	72	5
-	+	6	0
-	+	3	0
-	+	4	35
-	+	26	45
-	+	30	0
-	+	29	0
-	+	54	36
-	+	54	0
-	+	50	0
-	+	54	20
-	+	54	27
-	+	50	18
-	+	54	0
-	+	53	0
-	+	52	20
-	+	51	26
-	+	30	20
-	+	58	20
-	+	60	0
-	+	60	33
-	+	62	25
-	+	58	20
-	+	62	25
-	+	39	36
-	+	42	24
-	+	39	36
-	+	45	36
-	+	48	24
-	+	60	0
-	+	26	49
-	+	28	19
-	+	54	50
-
 > O:\code\utils\transform.hpp
 	*	1582155591	0
 	"	7	0
@@ -2513,35 +3059,6 @@ $gameState->
 	+	9	0
 	+	10	0
 	+	3	21
-
-> O:\code\NERD_tree_10
-	*	1582155352	0
-	"	8	0
-	.	1	0
-	+	1	0
-
-> O:\uppLib\datastructures\datastructures.hpp
-	*	1582150938	0
-	"	125	0
-	^	102	9
-	.	103	0
-	+	102	0
-	+	102	8
-	+	103	0
-
-> O:\code\NERD_tree_11
-	*	1582144122	0
-	"	6	0
-	.	1	0
-	+	1	0
-
-> O:\code\utils\string_utils.hpp
-	*	1582136661	0
-	"	2	21
-	^	2	22
-	.	2	21
-	+	1	21
-	+	2	21
 
 > O:\code\win32\platformSpecific.cpp
 	*	1582136313	0

@@ -33,6 +33,9 @@ struct WindowState
     bool wasMoved; 
     bool wasMinimized;
 
+    // Can not be set
+    bool inFocus;
+
     // These variables can be set
     bool fullscreen;
     bool quit;

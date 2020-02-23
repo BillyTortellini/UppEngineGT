@@ -1,6 +1,8 @@
 #ifndef __WIN32_GAME_HOOKS__
 #define __WIN32_GAME_HOOKS__
 
+#include "..\rendering\renderState.hpp"
+
 // GameAllocator
 struct GameDataAndAlloc
 {
@@ -94,12 +96,14 @@ extern "C"
         createGameAlloc();
         initTmpAlloc(gameDataAndAlloc->_tmpAllocBlk);
         // Init game
+        initRenderer();
         gameInit();
         gameAfterReload();
     }
 
     __declspec(dllexport) void gameTick(GameState* state) {
         //initGlobals(state);
+        renderState.frameCounter++;
         gameTick();
     }
 
@@ -120,6 +124,7 @@ extern "C"
     __declspec(dllexport) void gameAfterReset(GameState* state) 
     {
         initGlobals(state);
+        initRenderer();
 
         // Check if gameData size has changed
         if (gameDataAndAlloc->oldGameDataSize != sizeof(GameData)) 

@@ -6,12 +6,13 @@
 #include "../utils/fileIO.hpp"
 
 // Render includes
-#include "openGLState.hpp"
+#include "renderState.hpp"
 #include "mesh.hpp"
 #include "shaderProgram.hpp"
 #include "autoShaderProgram.hpp"
 #include "autoMesh.hpp"
 #include "texture.hpp"
+#include "framebuffer.hpp"
 
 // Next steps:
 //  - Mesh creation in new file

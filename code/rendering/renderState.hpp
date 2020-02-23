@@ -1,23 +1,26 @@
-#ifndef __OPENGL_STATE_HPP__
-#define __OPENGL_STATE_HPP__
+#ifndef __RENDER_STATE_HPP__
+#define __RENDER_STATE_HPP__
 
 // Includes
 #include "openGLFunctions.hpp"
 
 #define TEXTURE_UNIT_COUNT 16
-struct OpenGLState
+struct RenderState
 {
     GLuint vao;
     GLuint program;
     GLuint fbo;
     GLuint textureUnit[TEXTURE_UNIT_COUNT];
     int nextTextureUnit;
+    int viewportWidth;
+    int viewportHeight;
+    int frameCounter;
 };
 
-OpenGLState glState;
-void initOpenGLState() 
+RenderState renderState;
+void initRenderer() 
 {
-    memset(&glState, 0, sizeof(OpenGLState));
+    memset(&renderState, 0, sizeof(RenderState));
     glBindVertexArray(0);
     glUseProgram(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -27,24 +30,36 @@ void initOpenGLState()
     }
 }
 
+void setViewport(int width, int height) 
+{
+    if (renderState.viewportWidth != width || 
+        renderState.viewportHeight != height) 
+    {
+        renderState.viewportWidth = width;
+        renderState.viewportHeight = height;
+        glViewport(0, 0, width, height);
+    }
+}
+
 void bindVao(GLuint vao) {
-    if (glState.vao != vao) {
+    if (renderState.vao != vao) {
         glBindVertexArray(vao);
-        glState.vao = vao;
+        renderState.vao = vao;
     }
 }
 
 void bindProgram(GLuint id) {
-    if (glState.program != id) {
+    if (renderState.program != id) {
         glUseProgram(id);
-        glState.program = id;
+        renderState.program = id;
     }
 }
 
 void bindFbo(GLuint fbo) {
-    if (glState.fbo != fbo) {
+    if (renderState.fbo != fbo) {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glState.fbo = fbo;
+        renderState.fbo = fbo;
+        renderState.frameCounter++;
     }
 }
 
@@ -53,14 +68,14 @@ GLint bindTexture2D(GLuint id)
 {
     // Check if it is already bound
     for (int i = 0; i < TEXTURE_UNIT_COUNT; i++) {
-        if (glState.textureUnit[i] == id) {
+        if (renderState.textureUnit[i] == id) {
             return i;
         }
     }
 
     // Bind to unit
-    GLint unit = glState.nextTextureUnit;
-    glState.nextTextureUnit = (glState.nextTextureUnit + 1) % TEXTURE_UNIT_COUNT;
+    GLint unit = renderState.nextTextureUnit;
+    renderState.nextTextureUnit = (renderState.nextTextureUnit + 1) % TEXTURE_UNIT_COUNT;
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, id);
 

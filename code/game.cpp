@@ -11,27 +11,38 @@
 #include "utils/meshGenerators.hpp"
 #include "utils/camera.hpp"
 #include "utils/arcBallController.hpp"
-#include <functional>
+#include "materialRenderer/materialRenderer.hpp"
 
 // TODO:
 // -----
+//  More Autouniforms, u_resolution, u_res, u_viewport, u_screenSize, u_screen, u_size,
+//         u_mousePos, u_mPos, u_mouse
+//  
 //  - 3D Transform with Quaternions (Or just from rotation vector) 
-//  - Phong shading
-//  - Textures + Framebuffer rendering
-//  - Textures from Shaderfiles
-//  - What would be nice:
-//    - An easy way to set up a rendering pipeline
-//    - Rendering to framebuffers
-//    - HDR framebuffers
-//    - Blur (Maybe compute buffers)
-//    - Tone mapping
-//    - Deferred shading
-//    - Ambient occlusion
-//    - Baked light maps
-//    - Add Gamma correction
-//    - Shadow mapping
-//    - Normal mapping
-//    - Multisampling 
+//  - rayTracing Shader
+//  - Shaderprogram autoadd #define primitives
+//  - MaterialRenderer(phong shading, directional lighting)
+//  - Textures from Shaderfiles (Maybe animated)
+//  - Improved MeshGenerator
+//    * More primitives (Spheres, Torus, Cylinder, Pill)
+//    * generateNormals(float angleThreshhold)
+//    * boolean operations(Union...)
+//    * UV projections (sphere-projection, orthogonal, perspective, cylinder-projection)
+//    * Marching cubes
+//    * Procedural terrain
+//    * Metaballs
+//  - Rendering Stuff:
+//    * HDR framebuffers
+//    * Blur 
+//    * Tone mapping
+//    * Deferred shading
+//    * Ambient occlusion
+//    * Baked light maps
+//    * Add Gamma correction
+//    * Shadow mapping
+//    * Normal mapping
+//    * Multisampling 
+//    * Computeshaders
 
 struct GameData
 {
@@ -40,116 +51,28 @@ struct GameData
     AutoMesh cubeMesh;
     AutoMesh planeMesh;
     AutoMesh quadMesh;
-    int frameCount;
 };
 
-void draw(AutoShaderProgram* p, AutoMesh* m, const vec3& pos)
-{
-    updatePerFrameUniforms(p, &gameData->camera, gameData->frameCount, (float)gameState->time.now);
-    updatePerModelUniforms(p, &gameData->camera, Transform(pos));
-    draw(m, p);
+void draw(AutoMesh* m, AutoShaderProgram* p, const vec3& pos) {
+    vec2 mousePos = vec2((float)gameState->input.mouseX/gameState->windowState.width, 
+            (float)gameState->input.mouseY/gameState->windowState.height);
+    draw(m, p, &gameData->camera, mousePos, (float)gameState->time.now, Transform(pos));
 }
 
-void draw(AutoShaderProgram* p, Mesh* m, const vec3& pos)
-{
-    updatePerFrameUniforms(p, &gameData->camera, gameData->frameCount, (float)gameState->time.now);
-    updatePerModelUniforms(p, &gameData->camera, Transform(pos));
-    bind(p);
-    draw(m);
-}
-
-// What does a framebuffer need?
-//  - width height
-//  - resizable
-//  - Color attachment (Either RGBA or just RGB or stuff
-//  - Depth attachment
-//  - Depth-Stencil attachment
-//  - 
-//
-// // How i would like it to work
-// -- render into (e.g. deferred shading)
-// Framebuffer f;
-// init(&f, 512, 512, {GL_RGBA, GL_DEPTH_COMPONENT, GL_STENCIL_INDEX, GL_DEPTH_STENCIL}
-//
-// Either rendering into
-//  - width, h
-struct Framebuffer
-{
-    GLuint fbo;
-    GLuint colorTexture;
-    GLuint depthTexture;
-    int width, height;
-};
-
-void init(Framebuffer* f, int width, int height) 
-{
-    f->width = width;
-    f->height = height;
-
-    glGenTextures(1, &f->colorTexture);
-    glGenTextures(1, &f->depthTexture);
-    assert(f->colorTexture != 0 && f->depthTexture != 0, "glGenTextures failed\n");
-
-    // Generate gpu storage
-    bindTexture2D(f->colorTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, 
-            GL_RGBA, GL_UNSIGNED_BYTE, nullptr); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    bindTexture2D(f->depthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, 
-            GL_DEPTH_COMPONENT, GL_FLOAT, nullptr); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Generate framebuffer
-    glGenFramebuffers(1, &f->fbo);
-    assert(f->fbo != 0, "glGenFramebuffer failed!\n");
-    bindFbo(f->fbo);
-
-    // Attach depth and color texture
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, f->colorTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, f->depthTexture, 0);
-
-    // Check if finished
-    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer not complete\n");
-
-    // Unbind framebuffer so nothing can mess with the data
-    bindFbo(0);
-}
-
-void shutdown(Framebuffer* f) 
-{
-    bindFbo(0); // Make sure this framebuffer is not bound
-    glDeleteTextures(1, &f->colorTexture);
-    glDeleteTextures(1, &f->depthTexture);
-    glDeleteFramebuffers(1, &f->fbo);
-}
-
-void bind(Framebuffer* f) {
-    bindFbo(f->fbo);
-}
-
-void setUniform(ShaderProgram* p, const char* name, Framebuffer* t)
-{
-    bindProgram(p->id); 
-    UniformInfo* info = getUniformInfo(p, name); 
-    if (info == nullptr) { 
-        loggf("Uniform \"%s\" not in shaderprogram\n", name); 
-        return; 
-    } 
-    if (info->type != GL_SAMPLER_2D) { 
-        loggf("Uniform \"%s\" type did not match\n", name); 
-        return; 
-    } 
-    glUniform1i(info->location, bindTexture2D(t->colorTexture)); 
+void updateAutoUniforms(AutoShaderProgram* p) {
+    vec2 mousePos = vec2((float)gameState->input.mouseX/gameState->windowState.width, 
+            (float)gameState->input.mouseY/gameState->windowState.height);
+    updatePerFrameUniforms(p, &gameData->camera, mousePos, (float)gameState->time.now);
 }
 
 AutoShaderProgram colorShader;
 AutoShaderProgram imageShader;
 AutoShaderProgram skyShader;
-Framebuffer testFramebuffer;
+AutoShaderProgram postProcessShader;
+AutoShaderProgram testShader;
+Framebuffer postProcessFramebuffer;
 Texture testTexture;
+MaterialRenderer materialRenderer;
 void gameAfterReload() 
 {
     // Set game options
@@ -162,16 +85,16 @@ void gameAfterReload()
     gameState->windowState.y = 50;
     gameState->windowState.width = 800;
     gameState->windowState.height = 600;
-    gameState->windowState.fullscreen = false;
-
-    // Init framecount
-    gameData->frameCount = 0;
-
-    // Init renderer
-    initOpenGLState();
+    gameState->windowState.fullscreen = true;
 
     // Init framebuffers
-    init(&testFramebuffer, 1024, 1024);
+    init(&postProcessFramebuffer, 
+            gameState->windowState.width, 
+            gameState->windowState.height,
+            true, true, true, GL_RGBA);
+
+    // Init renderers
+    init(&materialRenderer, &gameData->camera, gameAlloc);
     
     // Set default options
     glClearColor(0, 0, 0, 0);
@@ -185,6 +108,8 @@ void gameAfterReload()
     init(&imageShader, {"image.vert", "image.frag"}, gameAlloc);
     init(&colorShader, {"color.vert", "color.frag"}, gameAlloc);
     init(&skyShader, {"sky.vert", "sky.frag"}, gameAlloc);
+    init(&postProcessShader, {"postProcess.vert", "postProcess.frag"}, gameAlloc);
+    init(&testShader, {"test/test.vert", "test/test.frag"}, gameAlloc);
 }
 
 void gameBeforeReload() 
@@ -193,38 +118,48 @@ void gameBeforeReload()
     shutdown(&imageShader);
     shutdown(&colorShader);
     shutdown(&skyShader);
-    shutdown(&testFramebuffer);
+    shutdown(&postProcessShader);
+    shutdown(&postProcessFramebuffer);
+    shutdown(&materialRenderer);
+    shutdown(&testShader);
 }
 
 void renderScene() 
 {
+#define Resolution gameState->windowState.width, gameState->windowState.height
+    bind(&postProcessFramebuffer, Resolution);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    gameData->frameCount++;
-
     // Draw sky
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-
-    draw(&skyShader, &gameData->cubeMesh, vec3(0.0f));
+    draw(&gameData->cubeMesh, &skyShader, vec3(0.0f));
 
     // Draw meshes
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    draw(&colorShader, &gameData->cubeMesh, vec3(3.0f));
     setUniform(&imageShader.program, "image", &testTexture);
-    draw(&imageShader, &gameData->planeMesh, vec3(0.0f));
-    
+    draw(&gameData->planeMesh, &imageShader, vec3(0.0f));
 
-    //prepare(&imageShader, &gameData->planeMesh, Transform(vec3(0)));
-    //GLint loc = bind(&testTexture);
-    ////setUniform(&imageShader, "image", loc);
-    //draw(&gameData->planeMesh);
+    //draw(&gameData->cubeMesh, &imageShader, vec3(3.0f));
+    //draw(&gameData->cubeMesh, &colorShader, vec3(-3.0f));
+    //draw(&gameData->cubeMesh, &colorShader, vec3(-3.0f, -3.0f, 3.0f));
+    //draw(&gameData->cubeMesh, &colorShader, vec3(3.0f, -3.0f, -3.0f));
+    //draw(&gameData->cubeMesh, &colorShader, vec3(3.0f, -3.0f, -3.0f));
+    draw(&materialRenderer, &gameData->cubeMesh, vec3(0));
+    render(&materialRenderer, gameState);
 
-    draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f));
-    draw(&colorShader, &gameData->cubeMesh, vec3(-3.0f, -3.0f, 3.0f));
-    draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
-    draw(&colorShader, &gameData->cubeMesh, vec3(3.0f, -3.0f, -3.0f));
+    bindDefaultFramebuffer(Resolution);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    setUniform(&postProcessShader, "frame", getColorTexture(&postProcessFramebuffer));
+    setUniform(&postProcessShader, "depthMap", getDepthTexture(&postProcessFramebuffer));
+    updateAutoUniforms(&postProcessShader);
+    draw(&gameData->quadMesh, &postProcessShader);
+
+    // Test shader
+    glClear(GL_DEPTH_BUFFER_BIT);
+    updateAutoUniforms(&testShader);
+    draw(&gameData->quadMesh, &testShader);
 }
 
 void gameTick() 
@@ -255,47 +190,34 @@ void gameTick()
     if (input->keyPressed[KEY_F11]) {
         gameState->windowState.fullscreen = !gameState->windowState.fullscreen;
     }
+    //gameState->windowState.hideCursor = gameState->windowState.inFocus;
+    if (gameState->windowState.wasResized) {
+        loggf("Width: %d, height: %d\n", gameState->windowState.width, gameState->windowState.height);
+    }
 
     // Handle resize
     if (gameState->windowState.wasResized) {
-        glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
+        setViewport(gameState->windowState.width, gameState->windowState.height);
         gameData->camera.projection = projection(0.01f, 100.0f, d2r(90), 
                 (float)gameState->windowState.width/gameState->windowState.height);
     }
 
+    // Update camera
     update(&gameData->controller, gameState);
 
-    // Render to framebuffer
-    bind(&testFramebuffer);
-    glViewport(0, 0, testFramebuffer.width, testFramebuffer.height);
     renderScene();
-    bindFbo(0);
-
-    // Render normally
-    gameData->frameCount++;
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, gameState->windowState.width, gameState->windowState.height);
-    
-    setUniform(&imageShader.program, "image", &testFramebuffer);
-    draw(&imageShader, &gameData->planeMesh, vec3(0.0f));
-    draw(&colorShader, &gameData->cubeMesh, vec3(0, 2, 0));
-
-    //float t = (float)gameState->time.now;
-    //vec3 pos = vec3(sinf(t), 0, cosf(t)) * 5;
-    //draw(&colorShader, &gameData->cubeMesh, Transform(pos));
 }
 
 void gameInit() 
 {
-    // Create mesh
+    // Create basic meshes 
     createCubeMesh(&gameData->cubeMesh, gameAlloc);
     createPlaneMesh(&gameData->planeMesh, gameAlloc);
     createQuadMesh(&gameData->quadMesh, gameAlloc);
 
     // Create/set camera and controller
-    init(&gameData->camera, gameState);
+    init(&gameData->camera, gameState->windowState.width, gameState->windowState.height);
     init(&gameData->controller, &gameData->camera, 0.005f, 0.2f);
-    gameData->controller.pos = vec3(0, 0, 0);
     gameData->controller.distToCenter = 5;
 }
 

@@ -16,7 +16,7 @@ void main()
     f_uv = a_uv;
     f_Color = vec3(sin(u_time)/2+.5, cos(u_time*3.0)/2+.5, sin(u_time*2.5)/2+.5);
     //f_Color = vec3(0, 0, 1);
-    //f_Color = a_Color;
+    f_Color = vec3(0.5, 0.2, 0);
 
     vec3 pos = a_Pos;
     pos += vec3(sin(u_time + pos.y*2)*3, 0, 0);
