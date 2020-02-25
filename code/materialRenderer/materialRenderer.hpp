@@ -5,7 +5,21 @@ struct Material
 {
     // Phong shading parameters
     vec3 albedo;
-    float specular;
+    /*
+    bool hasAlbedoMap;
+    Texture albedoMap;
+    bool hasNormalMap;
+    Texture normalMap;
+    bool hasMetallMap;
+    Texture metallMap;
+    bool isGlowing;
+    vec3 glowColor;
+    bool hasGlowTexture;
+    Texture glowTexture;
+    bool isShadowCaster;
+    */
+    float specularStrength;
+    float specularExp;
 };
 
 struct DirLight
@@ -50,7 +64,8 @@ void init(MaterialRenderer* r, Camera3D* camera, Allocator* alloc)
     r->lighting.ambientStrength = 0.15f;
     // Init default material
     r->defaultMaterial.albedo = vec3(1, 0, 0);
-    r->defaultMaterial.specular = 0.0f;
+    r->defaultMaterial.specularStrength = 0.0f;
+    r->defaultMaterial.specularExp = 1.0f;
 }
 
 void shutdown(MaterialRenderer* r) {

@@ -506,12 +506,20 @@ void loadGameFunctions()
     }
 }
 
+bool changedPrevFrame = false;
+bool changedThisFrame = false;
 void onGameDllChanged(const char* filename, void* userData) 
 {
-    gameBeforeReset(&gameState);
-    loadGameFunctions();
-    setGameFunctionPtrs();
-    gameAfterReset(&gameState);
+    if (!changedPrevFrame && !changedThisFrame) 
+    {
+        gameBeforeReset(&gameState);
+        printFileListeners();
+        loadGameFunctions();
+        setGameFunctionPtrs();
+        gameAfterReset(&gameState);
+        changedThisFrame = true;
+    }
+    changedPrevFrame = changedThisFrame;
 }
 
 void initDynamicReloading()
@@ -829,18 +837,34 @@ void initWindowAndOpenGL(HINSTANCE instance, HWND& hwnd, HDC& deviceContext, HGL
 // -----------------------
 // --- STATE FUNCTIONS ---
 // -----------------------
-void initWindowState(HWND hwnd)
+void retrieveWindowSize(HWND hwnd) 
 {
-    // Get window size infos
     RECT clientRect;
     GetWindowRect(hwnd, &actualWinState.savedWindowRect);
-    GetClientRect(hwnd, &clientRect),
+    GetClientRect(hwnd, &clientRect);
 
-        // Init actual window state
-        actualWinState.x = actualWinState.savedWindowRect.left;
+    actualWinState.x = actualWinState.savedWindowRect.left;
     actualWinState.y = actualWinState.savedWindowRect.top;
     actualWinState.width = clientRect.right - clientRect.left;
     actualWinState.height = clientRect.bottom - clientRect.top;
+    WindowState* w = &gameState.windowState;
+    ActualWinState* a = &actualWinState;
+    if (w->width != a->width || w->height != a->height) {
+        a->width = w->width;
+        a->height = w->height;
+        w->wasResized = true;
+    }
+    if (w->x != a->x || w->y != a->y) {
+        a->x = w->x;
+        a->y = w->y;
+        w->wasMoved = true;
+    }
+}
+
+void initWindowState(HWND hwnd)
+{
+    // Init actual window state
+    retrieveWindowSize(hwnd);
     actualWinState.fullscreen = false;
     actualWinState.minimized = false;
     actualWinState.continuousDraw = true;
@@ -933,12 +957,20 @@ bool handleGameRequests(HWND hwnd)
     WindowState* w = &gameState.windowState;
     RenderOptions* o = &gameState.renderOptions;
     ActualWinState* actual = &actualWinState;
-    
+
     // Simple updates
     actual->redraw = o->redraw;
     actual->continuousDraw = o->continuousDraw;
     actual->fps = o->fps;
     w->inFocus = actual->inFocus;
+
+    // Update confinement if window was moved or resized
+    if (actual->hideCursor && (w->wasResized || w->wasMoved)) {
+        RECT clip;
+        GetWindowRect(hwnd, &clip);
+        loggf("Updating cursor clip\n");
+        ClipCursor(&clip);
+    }
 
     // Reset members that get reset each frame
     w->wasResized = false;
@@ -974,14 +1006,14 @@ bool handleGameRequests(HWND hwnd)
             wglSwapIntervalEXT(0);
         }
     }
-    
+
     // Handle request window move/resize
     if (actual->x != w->x || actual->y != w->y ||
-        actual->width != w->width || actual->height != w->height) {
+            actual->width != w->width || actual->height != w->height) {
+        loggf("Sizes did not match\n");
         // Ignore if fullscreen is set or if minimized
-        if (!actual->fullscreen && !actual->minimized) 
+        if (!actual->fullscreen) 
         {
-            loggf("Window move/resize request!\n");
             SetWindowPos(hwnd, HWND_TOP, w->x, w->y, w->width, w->height, NULL);
             w->wasMoved = true;
             if (actual->x != w->x || actual->y != w->y) {
@@ -990,22 +1022,20 @@ bool handleGameRequests(HWND hwnd)
             else {
                 w->wasResized = true;
             }
-            actual->x = w->x;
-            actual->y = w->y;
-            actual->width = w->width;
-            actual->height = w->height;
+            retrieveWindowSize(hwnd);
         }
         else {
             w->x = actual->x;
             w->y = actual->y;
             w->width = actual->width;
             w->height = actual->height;
+            w->wasResized = true;
+            w->wasMoved = true;
         }
     }
 
     // Handle fullscreen requests
-    if (actual->fullscreen != w->fullscreen)
-    {
+    if (actual->fullscreen != w->fullscreen) {
         actual->fullscreen = w->fullscreen;
         loggf("Window fullscreen request\n");
         if (w->fullscreen) 
@@ -1030,7 +1060,8 @@ bool handleGameRequests(HWND hwnd)
                 SetWindowLong(hwnd, GWL_EXSTYLE, NULL);
                 RECT& r = info.rcMonitor;
                 SetWindowPos(hwnd, HWND_TOP, 
-                        r.left, r.top, r.right - r.left, r.bottom - r.top, NULL);
+                        r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_DRAWFRAME | SWP_SHOWWINDOW);
+                w->wasResized = true;
             }
         }
         else 
@@ -1042,19 +1073,7 @@ bool handleGameRequests(HWND hwnd)
                     r.right - r.left, r.bottom - r.top, NULL);
         }
 
-        RECT dim;
-        GetWindowRect(hwnd, &dim);
-        // Update windowPos/width height
-        w->wasResized = true;
-        w->wasMoved = true;
-        w->x = dim.left;
-        w->y = dim.top;
-        w->width = dim.right - dim.left;
-        w->height = dim.bottom - dim.top;
-        actual->x = w->x;
-        actual->y = w->y;
-        actual->width = w->width;
-        actual->height = w->height;
+        retrieveWindowSize(hwnd);
     }
 
     if (actual->hideCursor != w->hideCursor) 
@@ -1073,13 +1092,6 @@ bool handleGameRequests(HWND hwnd)
             ShowCursor(TRUE);
             ClipCursor(NULL);
         }
-    }
-
-    // Update confinement if window was moved or resized
-    if (actual->hideCursor && (w->wasResized || w->wasMoved)) {
-        RECT clip;
-        GetWindowRect(hwnd, &clip);
-        ClipCursor(&clip);
     }
 
     return false;
@@ -1220,6 +1232,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
         if (quit) break;
 
         // Check if any files have changed
+        changedThisFrame = false;
         checkFilesChanged();
 
         // Update game
@@ -1257,8 +1270,8 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE unused, PSTR cmdLine, int cmdSh
     DestroyWindow(hwnd);
     gameShutdown(&gameState);
     loggf("Program exit\n");
-    //sleepFor(10);
-    debugWaitForConsoleInput();
+    //sleepFor(2);
+    //debugWaitForConsoleInput();
 
     return EXIT_SUCCESS;
 }

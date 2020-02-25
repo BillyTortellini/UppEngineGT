@@ -11,18 +11,21 @@
 #include "utils/meshGenerators.hpp"
 #include "utils/camera.hpp"
 #include "utils/arcBallController.hpp"
+#include "utils/flyCameraController.hpp"
 #include "materialRenderer/materialRenderer.hpp"
 
 // TODO:
 // -----
-//  More Autouniforms, u_resolution, u_res, u_viewport, u_screenSize, u_screen, u_size,
-//         u_mousePos, u_mPos, u_mouse
-//  
-//  - 3D Transform with Quaternions (Or just from rotation vector) 
-//  - rayTracing Shader
+//  - 3D Transform implementation
+//  - Defines in shaderprogram before compiling
+//      Shaderprogram p;
+//      init(&p, {"xyz.frag", "xyz.vert"}, alloc, const char* defines);
+//  - Debug rendering (Lines, spheres..., just color)
+//  - Collision detection system (Raycasts into world)
+//  - Textures from Shaderfiles (Maybe animated)
+//  - Sound
 //  - Shaderprogram autoadd #define primitives
 //  - MaterialRenderer(phong shading, directional lighting)
-//  - Textures from Shaderfiles (Maybe animated)
 //  - Improved MeshGenerator
 //    * More primitives (Spheres, Torus, Cylinder, Pill)
 //    * generateNormals(float angleThreshhold)
@@ -31,8 +34,11 @@
 //    * Marching cubes
 //    * Procedural terrain
 //    * Metaballs
+//    * Bevel 
+//    * Subsurface modifier
 //  - Rendering Stuff:
 //    * HDR framebuffers
+//    * Instancing
 //    * Blur 
 //    * Tone mapping
 //    * Deferred shading
@@ -43,11 +49,14 @@
 //    * Normal mapping
 //    * Multisampling 
 //    * Computeshaders
+//    * Particle system
 
 struct GameData
 {
     Camera3D camera;
-    ArcBallController controller;
+    ArcBallController arcController;
+    FlyCameraController flyController;
+    bool arcEnabled;
     AutoMesh cubeMesh;
     AutoMesh planeMesh;
     AutoMesh quadMesh;
@@ -86,6 +95,7 @@ void gameAfterReload()
     gameState->windowState.width = 800;
     gameState->windowState.height = 600;
     gameState->windowState.fullscreen = true;
+    //gameState->windowState.hideCursor = true;
 
     // Init framebuffers
     init(&postProcessFramebuffer, 
@@ -110,10 +120,15 @@ void gameAfterReload()
     init(&skyShader, {"sky.vert", "sky.frag"}, gameAlloc);
     init(&postProcessShader, {"postProcess.vert", "postProcess.frag"}, gameAlloc);
     init(&testShader, {"test/test.vert", "test/test.frag"}, gameAlloc);
+
+    bindDefaultFramebuffer(gameState->windowState.width, gameState->windowState.height);
 }
 
 void gameBeforeReload() 
 {
+    //loggf("Before reload\n");
+    //loggf("width %d, height %d\n", gameState->windowState.width, gameState->windowState.height);
+    //loggf("viewportWidth %d, viewportHeight %d\n", renderState.viewportWidth, renderState.viewportHeight);
     shutdown(&testTexture);
     shutdown(&imageShader);
     shutdown(&colorShader);
@@ -127,37 +142,37 @@ void gameBeforeReload()
 void renderScene() 
 {
 #define Resolution gameState->windowState.width, gameState->windowState.height
-    bind(&postProcessFramebuffer, Resolution);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    // Draw sky
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    draw(&gameData->cubeMesh, &skyShader, vec3(0.0f));
+    //bind(&postProcessFramebuffer, Resolution);
+    //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    //// Draw sky
+    //glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_CULL_FACE);
+    //draw(&gameData->cubeMesh, &skyShader, vec3(0.0f));
 
-    // Draw meshes
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //// Draw meshes
 
-    setUniform(&imageShader.program, "image", &testTexture);
-    draw(&gameData->planeMesh, &imageShader, vec3(0.0f));
+    //setUniform(&imageShader.program, "image", &testTexture);
+    //draw(&gameData->planeMesh, &imageShader, vec3(0.0f));
 
-    //draw(&gameData->cubeMesh, &imageShader, vec3(3.0f));
-    //draw(&gameData->cubeMesh, &colorShader, vec3(-3.0f));
-    //draw(&gameData->cubeMesh, &colorShader, vec3(-3.0f, -3.0f, 3.0f));
-    //draw(&gameData->cubeMesh, &colorShader, vec3(3.0f, -3.0f, -3.0f));
-    //draw(&gameData->cubeMesh, &colorShader, vec3(3.0f, -3.0f, -3.0f));
-    draw(&materialRenderer, &gameData->cubeMesh, vec3(0));
-    render(&materialRenderer, gameState);
+    ////draw(&gameData->cubeMesh, &imageShader, vec3(3.0f));
+    ////draw(&gameData->cubeMesh, &colorShader, vec3(-3.0f));
+    ////draw(&gameData->cubeMesh, &colorShader, vec3(-3.0f, -3.0f, 3.0f));
+    ////draw(&gameData->cubeMesh, &colorShader, vec3(3.0f, -3.0f, -3.0f));
+    ////draw(&gameData->cubeMesh, &colorShader, vec3(3.0f, -3.0f, -3.0f));
+    //draw(&materialRenderer, &gameData->cubeMesh, vec3(0));
+    //render(&materialRenderer, gameState);
 
-    bindDefaultFramebuffer(Resolution);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    setUniform(&postProcessShader, "frame", getColorTexture(&postProcessFramebuffer));
-    setUniform(&postProcessShader, "depthMap", getDepthTexture(&postProcessFramebuffer));
-    updateAutoUniforms(&postProcessShader);
-    draw(&gameData->quadMesh, &postProcessShader);
+    //bindDefaultFramebuffer(Resolution);
+    //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    //setUniform(&postProcessShader, "frame", getColorTexture(&postProcessFramebuffer));
+    //setUniform(&postProcessShader, "depthMap", getDepthTexture(&postProcessFramebuffer));
+    //updateAutoUniforms(&postProcessShader);
+    //draw(&gameData->quadMesh, &postProcessShader);
 
     // Test shader
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     updateAutoUniforms(&testShader);
     draw(&gameData->quadMesh, &testShader);
 }
@@ -171,6 +186,20 @@ void gameTick()
     if (input->keyPressed[KEY_F5]) {
         gameState->windowState.hideCursor = !gameState->windowState.hideCursor;
         loggf("Hide cursor set to: %s\n", gameState->windowState.hideCursor ? "TRUE" : "FALSE");
+    }
+    if (input->keyPressed[KEY_F1]) {
+        gameData->arcEnabled = !gameData->arcEnabled;
+    }
+    if (!gameData->arcEnabled) {
+        if (gameState->windowState.inFocus) {
+            gameState->windowState.hideCursor = true;
+        }
+        else {
+            gameState->windowState.hideCursor = true;
+        }
+    }
+    else {
+            gameState->windowState.hideCursor = false;
     }
     if (input->keyPressed[KEY_Y]) {
         loggf("FPS: 60,  VSYNC = FALSE\n");
@@ -190,11 +219,6 @@ void gameTick()
     if (input->keyPressed[KEY_F11]) {
         gameState->windowState.fullscreen = !gameState->windowState.fullscreen;
     }
-    //gameState->windowState.hideCursor = gameState->windowState.inFocus;
-    if (gameState->windowState.wasResized) {
-        loggf("Width: %d, height: %d\n", gameState->windowState.width, gameState->windowState.height);
-    }
-
     // Handle resize
     if (gameState->windowState.wasResized) {
         setViewport(gameState->windowState.width, gameState->windowState.height);
@@ -203,7 +227,14 @@ void gameTick()
     }
 
     // Update camera
-    update(&gameData->controller, gameState);
+    if (gameData->arcEnabled) {
+        update(&gameData->arcController, gameState);
+    }
+    else {
+        update(&gameData->flyController, gameState);
+    }
+    //loggf("width %d, height %d\n", gameState->windowState.width, gameState->windowState.height);
+    //loggf("viewportWidth %d, viewportHeight %d\n", renderState.viewportWidth, renderState.viewportHeight);
 
     renderScene();
 }
@@ -217,8 +248,11 @@ void gameInit()
 
     // Create/set camera and controller
     init(&gameData->camera, gameState->windowState.width, gameState->windowState.height);
-    init(&gameData->controller, &gameData->camera, 0.005f, 0.2f);
-    gameData->controller.distToCenter = 5;
+    init(&gameData->flyController, &gameData->camera, 0.005f, 2.0f, 10.0f);
+    init(&gameData->arcController, &gameData->camera, 0.005f, 0.2f);
+    gameData->arcController.distToCenter = 5;
+
+    gameData->arcEnabled = true;
 }
 
 void gameShutdown() 

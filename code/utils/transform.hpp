@@ -9,6 +9,10 @@ struct Transform
         return translate(pos);
     }
 
+    mat3 toNormalMat() const {
+        return mat3(1);
+    }
+
     vec3 pos;
 };
 

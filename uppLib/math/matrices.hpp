@@ -64,6 +64,11 @@ struct mat3
         columns[1] = vec3(m.columns[1], 0.0f);
         columns[2] = vec3(0.0f, 0.0f, 1.0f);
     }
+    mat3(float* data) {
+        columns[0] = vec3(data[0], data[1], data[2]);
+        columns[1] = vec3(data[3], data[4], data[5]);
+        columns[2] = vec3(data[6], data[7], data[8]);
+    }
 
     vec3 columns[3];
 };
@@ -125,6 +130,10 @@ struct mat4
         columns[2] = vec4(m.columns[2], 0.0f);
         columns[3] = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
+    float* getDataPtr() {
+        return (float*)columns;
+    }
+
     vec4 columns[4];
 };
 
@@ -159,7 +168,14 @@ mat4 projection(float near, float far, float fovX, float aspectRatio)
 {
     mat4 projection;
 
-    float fovY = fovX / aspectRatio;
+    float fovY;
+    if (aspectRatio > 1.0f) {
+        fovY = fovX / aspectRatio;
+    }
+    else {
+        fovY = fovX;
+        fovX = fovX * aspectRatio;
+    }
     float sx = 1.0f / tanf(fovX/2.0f);
     float sy = 1.0f / tanf(fovY/2.0f);
     projection.columns[0] = vec4(sx, 0.0f, 0.0f, 0.0f);

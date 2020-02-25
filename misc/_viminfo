@@ -11,7 +11,7 @@
 # hlsearch on (H) or off (h):
 ~h
 # Last Search Pattern:
-~MSle0~/gameTick
+~MSle0~/30
 
 # Last Substitute Search Pattern:
 ~MSle0&glState
@@ -20,14 +20,22 @@
 $renderState
 
 # Command Line History (newest to oldest):
-:wqa
-|2,0,1582485009,,"wqa"
+:q
+|2,0,1582668707,,"q"
+:wq
+|2,0,1582668706,,"wq"
+:.,.+4w
+|2,0,1582668643,,".,.+4w"
 :w
-|2,0,1582484938,,"w"
+|2,0,1582668603,,"w"
+:.,.+3w
+|2,0,1582639478,,".,.+3w"
+:wqa
+|2,0,1582579739,,"wqa"
+:r
+|2,0,1582573530,,"r"
 :.,.+1w
 |2,0,1582482337,,".,.+1w"
-:q
-|2,0,1582464637,,"q"
 :registers
 |2,0,1582401866,,"registers"
 :%s/glState/renderState/gc
@@ -38,8 +46,6 @@ $renderState
 |2,0,1582396258,,"%s/img/textureData/gc"
 :wa)
 |2,0,1582395892,,"wa)"
-:wq
-|2,0,1582304454,,"wq"
 :'<,'>s/gameState./gameState->/g
 |2,0,1582291029,,"'<,'>s/gameState./gameState->/g"
 :wjj
@@ -96,8 +102,70 @@ $renderState
 |2,0,1581967249,,"qa"
 
 # Search String History (newest to oldest):
+?/30
+|2,1,1582668641,47,"30"
+?/sceneSdf
+|2,1,1582641105,47,"sceneSdf"
+?/shade
+|2,1,1582641036,47,"shade"
+?/sceneS
+|2,1,1582640879,47,"sceneS"
+?/pointLightPos
+|2,1,1582634922,47,"pointLightPos"
+?//
+|2,1,1582634228,47,"/"
+? \<arcEnabled\>
+|2,1,1582545468,,"\\<arcEnabled\\>"
 ?/gameTick
-|2,1,1582465103,47,"gameTick"
+|2,1,1582545443,47,"gameTick"
+?/gameInit
+|2,1,1582545271,47,"gameInit"
+?/c
+|2,1,1582544985,47,"c"
+?/loggf
+|2,1,1582544801,47,"loggf"
+?/handleGame
+|2,1,1582544123,47,"handleGame"
+?/loadGame
+|2,1,1582543911,47,"loadGame"
+? \<retrieveWindowSize\>
+|2,1,1582543828,,"\\<retrieveWindowSize\\>"
+?/Sizes did
+|2,1,1582543826,47,"Sizes did"
+?/size
+|2,1,1582543821,47,"size"
+?/onGame
+|2,1,1582543532,47,"onGame"
+?/reloadgame
+|2,1,1582543174,47,"reloadgame"
+?/bindD
+|2,1,1582543087,47,"bindD"
+?/handl
+|2,1,1582541738,47,"handl"
+?/getData
+|2,1,1582494282,47,"getData"
+?/request
+|2,1,1582493592,47,"request"
+?/proje
+|2,1,1582493565,47,"proje"
+?/init(
+|2,1,1582493127,47,"init("
+?/projection
+|2,1,1582493108,47,"projection"
+?/GetClientRect
+|2,1,1582492120,47,"GetClientRect"
+?/renderScen
+|2,1,1582491737,47,"renderScen"
+?/GetWindowRe
+|2,1,1582491612,47,"GetWindowRe"
+? \<GetClientRect\>
+|2,1,1582491492,,"\\<GetClientRect\\>"
+?/GetClient
+|2,1,1582491419,47,"GetClient"
+?/get
+|2,1,1582491319,47,"get"
+?/actualWinState.wi
+|2,1,1582491262,47,"actualWinState.wi"
 ?/Dete
 |2,1,1582464992,47,"Dete"
 ?/found
@@ -116,8 +184,6 @@ $renderState
 |2,1,1582458660,47,"renderSce"
 ?/handleGa
 |2,1,1582455851,47,"handleGa"
-?/handleGame
-|2,1,1582455302,47,"handleGame"
 ?/windowStyle
 |2,1,1582454654,47,"windowStyle"
 ? \<inFocus\>
@@ -136,70 +202,12 @@ $renderState
 |2,1,1582414330,47,"struct Texture "
 ?/Texture
 |2,1,1582414323,47,"Texture"
-?/setU
-|2,1,1582413538,47,"setU"
-? \<postProcessShader\>
-|2,1,1582413214,,"\\<postProcessShader\\>"
-?/draw
-|2,1,1582411842,47,"draw"
-?/for
-|2,1,1582404786,47,"for"
-?/f
-|2,1,1582404770,47,"f"
-? \<format\>
-|2,1,1582404757,,"\\<format\\>"
-? \<Transform\>
-|2,1,1582403429,,"\\<Transform\\>"
-?/update
-|2,1,1582402827,47,"update"
-?/init(
-|2,1,1582402314,47,"init("
-?/ii
-|2,1,1582402302,47,"ii"
-? \<Texture\>
-|2,1,1582401935,,"\\<Texture\\>"
-?/defaultTe
-|2,1,1582401861,47,"defaultTe"
-?/defa
-|2,1,1582401828,47,"defa"
-?/GameSt
-|2,1,1582401533,47,"GameSt"
-? glState
-|2,1,1582401427,,"glState"
-?/glView
-|2,1,1582401189,47,"glView"
-? 16
-|2,1,1582398964,,"16"
-?/GL_R 
-|2,1,1582398661,47,"GL_R "
-? \<setFilterMode\>
-|2,1,1582398323,,"\\<setFilterMode\\>"
-?/mipmapp
-|2,1,1582397456,47,"mipmapp"
-?/bestFi
-|2,1,1582396600,47,"bestFi"
-?/img
-|2,1,1582396380,47,"img"
-? img
-|2,1,1582396258,,"img"
-?/init
-|2,1,1582309936,47,"init"
-? \<bind\>
-|2,1,1582309799,,"\\<bind\\>"
-?/renderSc
-|2,1,1582309602,47,"renderSc"
-? \<setUniform\>
-|2,1,1582309558,,"\\<setUniform\\>"
-?/print
-|2,1,1582309485,47,"print"
-?/bindTe
-|2,1,1582308919,47,"bindTe"
-?/id
-|2,1,1582307628,47,"id"
 
 # Expression History (newest to oldest):
 
 # Input Line History (newest to oldest):
+@O:\code\utils\flyCameraController.hpp
+|2,3,1582544864,,"O:\\code\\utils\\flyCameraController.hpp"
 @O:\ressources\shaders\test\test.vert
 |2,3,1582463407,,"O:\\ressources\\shaders\\test\\test.vert"
 @O:\ressources\shaders\test\test.frag
@@ -279,43 +287,60 @@ $renderState
 
 # Registers:
 "0	LINE	0
-	float sphere(vec3 ro, vec3 rd, vec3 c, float r, out vec3 n) {
-|3,0,0,1,1,0,1582481491,"float sphere(vec3 ro, vec3 rd, vec3 c, float r, out vec3 n) {"
-"1	LINE	0
-	    if (ts > 0) {
-|3,0,1,1,1,0,1582482303,"    if (ts > 0) {"
+	    d = min(d, sdfSphere(p, vec3(0., 1., -2.), 1.+sin(u_time)*.2));
+|3,0,0,1,1,0,1582636792,"    d = min(d, sdfSphere(p, vec3(0., 1., -2.), 1.+sin(u_time)*.2));"
+"1	BLOCK	1
+	//
+	//
+	//
+	//
+	//
+	//
+|3,0,1,2,6,1,1582647731,"//","//","//","//","//","//"
 "2	LINE	0
-	    else {
-	        t = 
-	    }
-|3,0,2,1,3,0,1582482295,"    else {","        t = ","    }"
-"3	BLOCK	1
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-|3,0,3,2,7,1,1582482198,"//","//","//","//","//","//","//"
+	    col += renderScene(f_uv);
+|3,0,2,1,1,0,1582641610,"    col += renderScene(f_uv);"
+"3	LINE	0
+	    vec2 off = vec2(.25)/u_resolution*2.-1.;
+|3,0,3,1,1,0,1582641589,"    vec2 off = vec2(.25)/u_resolution*2.-1.;"
 "4	LINE	0
-	        normal
-|3,0,4,1,1,0,1582482072,"        normal"
+	    for (int i
+|3,0,4,1,1,0,1582640169,"    for (int i"
 "5	LINE	0
-	        col += shade(ro+rd*t, normal, ro, vec3(1));
-|3,0,5,1,1,0,1582482066,"        col += shade(ro+rd*t, normal, ro, vec3(1));"
+	    col = vec3(rd);
+	    col = vec3(t/10.);
+	    col = n;
+|3,0,5,1,3,0,1582640131,"    col = vec3(rd);","    col = vec3(t/10.);","    col = n;"
 "6	LINE	0
-	    vec3 col = vec3(0);
-|3,0,6,1,1,0,1582482059,"    vec3 col = vec3(0);"
+	    d = min(d, sdfSphere
+|3,0,6,1,1,0,1582638937,"    d = min(d, sdfSphere"
 "7	LINE	0
-	    vec4 plane = vec4(0, 1, 0, 0);
-|3,0,7,1,1,0,1582481963,"    vec4 plane = vec4(0, 1, 0, 0);"
+	    float a = u_resolution.x/u_resolution.y;
+	    vec2 uv = f_uv * vec2(max(1., a), min(1., 1./a));
+	
+	    vec3 ro = u_eye;
+	    vec3 rd = u_invview * normalize(vec3(uv, -1.));
+	
+	    float t = rayMarch(ro, rd);
+	    vec3 p = ro + t*rd;
+	    vec3 n = sceneNormal(p);
+	
+	    vec3 col = vec3(.5);
+	    col = vec3(rd);
+	    col = vec3(t/10.);
+	    col = n;
+	    col = shade(p, n);
+	
+	    // Gamma correction
+	    col = pow(col, vec3(1./2.2));
+|3,0,7,1,18,0,1582638668,"    float a = u_resolution.x/u_resolution.y;","    vec2 uv = f_uv * vec2(max(1., a), min(1., 1./a));","","    vec3 ro = u_eye;","    vec3 rd = u_invview * normalize(vec3(uv, -1.));","","    float t = rayMarch(ro, rd);","    vec3 p = ro + t*rd;","    vec3 n = sceneNormal(p);","","    vec3 col = vec3(.5);","    col = vec3(rd);","    col = vec3(t/10.);","    col = n;","    col = shade(p, n);","","    // Gamma correction",>35
+|<"    col = pow(col, vec3(1./2.2));"
 "8	LINE	0
-	    
-|3,0,8,1,1,0,1582481705,"    "
+	    d = min(d, halfSphere);
+|3,0,8,1,1,0,1582638592,"    d = min(d, halfSphere);"
 "9	LINE	0
-	    vec3 lightDir = normalize(p - lightPos);
-|3,0,9,1,1,0,1582480401,"    vec3 lightDir = normalize(p - lightPos);"
+	    //d = min(d, sdfPlane(p, vec4(normalize(vec3(0., 1., 0.)), 1.)));
+|3,0,9,1,1,0,1582638453,"    //d = min(d, sdfPlane(p, vec4(normalize(vec3(0., 1., 0.)), 1.)));"
 "a@	CHAR	0
 	$a:invalid_path"€kb("Status was kyiwj$pa\n");obreak;
 |3,2,10,0,1,0,1582404328,"$a:invalid_path\"€kb(\"Status was kyiwj$pa\\n\");obreak;"
@@ -326,779 +351,998 @@ $renderState
 |<"k:w€k527GzzlllllllllllllllllllllllllllllllllciwerrorMsg:w27Gklllllllllllllllllllljlllllllllfo;ar:w109G$hhhhhhhhhhhhhhhhhi(GLchar*) :w109G143GzzOstruct ShaderProgram;l.w€kb€kb€kba /€ü €kb/€ü Forward declaration:w€k527Gjk$hhhhhhhhhhhhhhhhlllllllvlllllllxhhhhhhhhi(char+€kb*€kb*) .wu:wh%%uuuhhhhhhhhhhhhhhhhhhhhhhhvhhhhhhhhhhhhhhhhhlximaxLength:wlllllllllllllllichar€kb€kb€kb€kb(char*):w€k5165GzzllllllllllllllllllllllllciwattribCount:w181Gllllllllllllllllllllllllxxi.:
 |<w€ý,€ý.€k5181Gzzlllllllllllllllllllllllllllllj0wlllllllllllxxi.:whhhhh%%%%%€k5193Gjkka;:w€k5204GzzllllllllllllcihhhhhhhhcWuniformCount:w€k5217Gllllllllllllllllllllllllllllh0wllllxxi.:wjllllllllxhxi.:w/infonnllllclhxxi.:wj0wlllllllllllxxi.:w"
 ""-	CHAR	0
-	F
-|3,1,36,0,1,0,1582484937,"F"
+	/
+|3,1,36,0,1,0,1582668602,"/"
 
 # File marks:
-'0  94  37  O:\code\game.cpp
-|4,48,94,37,1582485009,"O:\\code\\game.cpp"
-'1  17  0  O:\ressources\shaders\postProcess.frag
-|4,49,17,0,1582417494,"O:\\ressources\\shaders\\postProcess.frag"
-'2  17  0  O:\ressources\shaders\postProcess.frag
-|4,50,17,0,1582417494,"O:\\ressources\\shaders\\postProcess.frag"
-'3  11  23  O:\ressources\shaders\image.frag
-|4,51,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
-'4  11  23  O:\ressources\shaders\image.frag
-|4,52,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
-'5  11  23  O:\ressources\shaders\image.frag
-|4,53,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
-'6  11  23  O:\ressources\shaders\image.frag
-|4,54,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
-'7  41  46  O:\ressources\shaders\sky.frag
-|4,55,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
-'8  41  46  O:\ressources\shaders\sky.frag
-|4,56,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
-'9  41  46  O:\ressources\shaders\sky.frag
-|4,57,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
+'0  145  4  O:\ressources\shaders\test\test.frag
+|4,48,145,4,1582668707,"O:\\ressources\\shaders\\test\\test.frag"
+'1  90  35  O:\code\game.cpp
+|4,49,90,35,1582647755,"O:\\code\\game.cpp"
+'2  90  35  O:\code\game.cpp
+|4,50,90,35,1582647755,"O:\\code\\game.cpp"
+'3  4  4  O:\ressources\shaders\test\test.frag
+|4,51,4,4,1582579739,"O:\\ressources\\shaders\\test\\test.frag"
+'4  72  4  O:\ressources\shaders\test\test.frag
+|4,52,72,4,1582579739,"O:\\ressources\\shaders\\test\\test.frag"
+'5  4  4  O:\ressources\shaders\test\test.frag
+|4,53,4,4,1582579739,"O:\\ressources\\shaders\\test\\test.frag"
+'6  72  4  O:\ressources\shaders\test\test.frag
+|4,54,72,4,1582579739,"O:\\ressources\\shaders\\test\\test.frag"
+'7  23  0  O:\code\game.cpp
+|4,55,23,0,1582498647,"O:\\code\\game.cpp"
+'8  22  0  O:\code\game.cpp
+|4,56,22,0,1582498647,"O:\\code\\game.cpp"
+'9  23  0  O:\code\game.cpp
+|4,57,23,0,1582498647,"O:\\code\\game.cpp"
 
 # Jumplist (newest first):
+-'  145  4  O:\ressources\shaders\test\test.frag
+|4,39,145,4,1582668707,"O:\\ressources\\shaders\\test\\test.frag"
+-'  40  0  O:\ressources\shaders\test\test.frag
+|4,39,40,0,1582668496,"O:\\ressources\\shaders\\test\\test.frag"
+-'  11  33  O:\ressources\shaders\test\test.frag
+|4,39,11,33,1582668494,"O:\\ressources\\shaders\\test\\test.frag"
+-'  13  0  O:\ressources\shaders\test\test.frag
+|4,39,13,0,1582668494,"O:\\ressources\\shaders\\test\\test.frag"
+-'  1  0  O:\ressources\shaders\test\test.frag
+|4,39,1,0,1582668492,"O:\\ressources\\shaders\\test\\test.frag"
+-'  14  0  O:\code\NERD_tree_1
+|4,39,14,0,1582668492,"O:\\code\\NERD_tree_1"
+-'  28  2  O:\code\NERD_tree_1
+|4,39,28,2,1582668488,"O:\\code\\NERD_tree_1"
+-'  1  0  O:\code\NERD_tree_1
+|4,39,1,0,1582668488,"O:\\code\\NERD_tree_1"
+-'  90  35  O:\code\game.cpp
+|4,39,90,35,1582647755,"O:\\code\\game.cpp"
+-'  12  0  O:\code\NERD_tree_1
+|4,39,12,0,1582631573,"O:\\code\\NERD_tree_1"
+-'  34  2  O:\code\NERD_tree_1
+|4,39,34,2,1582631571,"O:\\code\\NERD_tree_1"
+-'  1  0  O:\code\NERD_tree_1
+|4,39,1,0,1582631571,"O:\\code\\NERD_tree_1"
+-'  72  4  O:\ressources\shaders\test\test.frag
+|4,39,72,4,1582579739,"O:\\ressources\\shaders\\test\\test.frag"
+-'  74  14  O:\ressources\shaders\test\test.frag
+|4,39,74,14,1582576190,"O:\\ressources\\shaders\\test\\test.frag"
+-'  53  19  O:\ressources\shaders\test\test.frag
+|4,39,53,19,1582575645,"O:\\ressources\\shaders\\test\\test.frag"
+-'  38  0  O:\ressources\shaders\test\test.frag
+|4,39,38,0,1582575574,"O:\\ressources\\shaders\\test\\test.frag"
+-'  57  0  O:\ressources\shaders\test\test.frag
+|4,39,57,0,1582575574,"O:\\ressources\\shaders\\test\\test.frag"
+-'  67  31  O:\ressources\shaders\test\test.frag
+|4,39,67,31,1582575440,"O:\\ressources\\shaders\\test\\test.frag"
+-'  33  46  O:\ressources\shaders\test\test.frag
+|4,39,33,46,1582575349,"O:\\ressources\\shaders\\test\\test.frag"
+-'  44  40  O:\ressources\shaders\test\test.frag
+|4,39,44,40,1582575133,"O:\\ressources\\shaders\\test\\test.frag"
+-'  54  4  O:\ressources\shaders\test\test.frag
+|4,39,54,4,1582575133,"O:\\ressources\\shaders\\test\\test.frag"
+-'  55  34  O:\ressources\shaders\test\test.frag
+|4,39,55,34,1582575008,"O:\\ressources\\shaders\\test\\test.frag"
+-'  45  42  O:\ressources\shaders\test\test.frag
+|4,39,45,42,1582574931,"O:\\ressources\\shaders\\test\\test.frag"
+-'  46  28  O:\ressources\shaders\test\test.frag
+|4,39,46,28,1582574862,"O:\\ressources\\shaders\\test\\test.frag"
+-'  32  50  O:\ressources\shaders\test\test.frag
+|4,39,32,50,1582573888,"O:\\ressources\\shaders\\test\\test.frag"
+-'  41  20  O:\ressources\shaders\test\test.frag
+|4,39,41,20,1582573397,"O:\\ressources\\shaders\\test\\test.frag"
+-'  56  21  O:\ressources\shaders\test\test.frag
+|4,39,56,21,1582573229,"O:\\ressources\\shaders\\test\\test.frag"
+-'  24  15  O:\ressources\shaders\test\test.frag
+|4,39,24,15,1582573156,"O:\\ressources\\shaders\\test\\test.frag"
+-'  25  49  O:\ressources\shaders\test\test.frag
+|4,39,25,49,1582573156,"O:\\ressources\\shaders\\test\\test.frag"
+-'  20  16  O:\ressources\shaders\test\test.frag
+|4,39,20,16,1582572802,"O:\\ressources\\shaders\\test\\test.frag"
+-'  77  13  O:\ressources\shaders\test\test.frag
+|4,39,77,13,1582572488,"O:\\ressources\\shaders\\test\\test.frag"
+-'  39  43  O:\ressources\shaders\test\test.frag
+|4,39,39,43,1582572321,"O:\\ressources\\shaders\\test\\test.frag"
+-'  22  0  O:\code\game.cpp
+|4,39,22,0,1582498647,"O:\\code\\game.cpp"
+-'  1  0  O:\code\game.cpp
+|4,39,1,0,1582495247,"O:\\code\\game.cpp"
+-'  25  10  O:\code\game.cpp
+|4,39,25,10,1582495214,"O:\\code\\game.cpp"
+-'  22  10  O:\code\game.cpp
+|4,39,22,10,1582495214,"O:\\code\\game.cpp"
+-'  19  22  O:\code\game.cpp
+|4,39,19,22,1582495059,"O:\\code\\game.cpp"
+-'  175  0  O:\code\game.cpp
+|4,39,175,0,1582494748,"O:\\code\\game.cpp"
+-'  168  0  O:\code\game.cpp
+|4,39,168,0,1582494748,"O:\\code\\game.cpp"
+-'  204  25  O:\code\game.cpp
+|4,39,204,25,1582493537,"O:\\code\\game.cpp"
+-'  197  25  O:\code\game.cpp
+|4,39,197,25,1582493537,"O:\\code\\game.cpp"
+-'  32  77  O:\code\game.cpp
+|4,39,32,77,1582493121,"O:\\code\\game.cpp"
+-'  29  77  O:\code\game.cpp
+|4,39,29,77,1582493121,"O:\\code\\game.cpp"
+-'  205  28  O:\code\game.cpp
+|4,39,205,28,1582493119,"O:\\code\\game.cpp"
+-'  198  28  O:\code\game.cpp
+|4,39,198,28,1582493119,"O:\\code\\game.cpp"
+-'  173  4  O:\code\game.cpp
+|4,39,173,4,1582493108,"O:\\code\\game.cpp"
+-'  166  4  O:\code\game.cpp
+|4,39,166,4,1582493108,"O:\\code\\game.cpp"
+-'  211  4  O:\code\game.cpp
+|4,39,211,4,1582491737,"O:\\code\\game.cpp"
+-'  201  0  O:\code\game.cpp
+|4,39,201,0,1582491737,"O:\\code\\game.cpp"
+-'  204  4  O:\code\game.cpp
+|4,39,204,4,1582491737,"O:\\code\\game.cpp"
+-'  194  0  O:\code\game.cpp
+|4,39,194,0,1582491737,"O:\\code\\game.cpp"
+-'  1  0  O:\code\game.cpp
+|4,39,1,0,1582491055,"O:\\code\\game.cpp"
+-'  18  13  O:\code\game.cpp
+|4,39,18,13,1582485160,"O:\\code\\game.cpp"
+-'  18  13  O:\code\game.cpp
+|4,39,18,13,1582485160,"O:\\code\\game.cpp"
+-'  18  13  O:\code\game.cpp
+|4,39,18,13,1582485160,"O:\\code\\game.cpp"
+-'  1  0  O:\code\game.cpp
+|4,39,1,0,1582485125,"O:\\code\\game.cpp"
+-'  100  37  O:\code\game.cpp
+|4,39,100,37,1582485009,"O:\\code\\game.cpp"
+-'  103  37  O:\code\game.cpp
+|4,39,103,37,1582485009,"O:\\code\\game.cpp"
+-'  98  37  O:\code\game.cpp
+|4,39,98,37,1582485009,"O:\\code\\game.cpp"
+-'  101  37  O:\code\game.cpp
+|4,39,101,37,1582485009,"O:\\code\\game.cpp"
+-'  93  37  O:\code\game.cpp
+|4,39,93,37,1582485009,"O:\\code\\game.cpp"
+-'  96  37  O:\code\game.cpp
+|4,39,96,37,1582485009,"O:\\code\\game.cpp"
+-'  91  37  O:\code\game.cpp
+|4,39,91,37,1582485009,"O:\\code\\game.cpp"
 -'  94  37  O:\code\game.cpp
 |4,39,94,37,1582485009,"O:\\code\\game.cpp"
+-'  171  5  O:\code\game.cpp
+|4,39,171,5,1582465103,"O:\\code\\game.cpp"
+-'  152  4  O:\code\game.cpp
+|4,39,152,4,1582465103,"O:\\code\\game.cpp"
+-'  174  5  O:\code\game.cpp
+|4,39,174,5,1582465103,"O:\\code\\game.cpp"
+-'  155  4  O:\code\game.cpp
+|4,39,155,4,1582465103,"O:\\code\\game.cpp"
+-'  169  5  O:\code\game.cpp
+|4,39,169,5,1582465103,"O:\\code\\game.cpp"
+-'  150  4  O:\code\game.cpp
+|4,39,150,4,1582465103,"O:\\code\\game.cpp"
+-'  172  5  O:\code\game.cpp
+|4,39,172,5,1582465103,"O:\\code\\game.cpp"
+-'  153  4  O:\code\game.cpp
+|4,39,153,4,1582465103,"O:\\code\\game.cpp"
+-'  164  5  O:\code\game.cpp
+|4,39,164,5,1582465103,"O:\\code\\game.cpp"
+-'  145  4  O:\code\game.cpp
+|4,39,145,4,1582465103,"O:\\code\\game.cpp"
+-'  167  5  O:\code\game.cpp
+|4,39,167,5,1582465103,"O:\\code\\game.cpp"
+-'  148  4  O:\code\game.cpp
+|4,39,148,4,1582465103,"O:\\code\\game.cpp"
+-'  162  5  O:\code\game.cpp
+|4,39,162,5,1582465103,"O:\\code\\game.cpp"
+-'  143  4  O:\code\game.cpp
+|4,39,143,4,1582465103,"O:\\code\\game.cpp"
 -'  165  5  O:\code\game.cpp
 |4,39,165,5,1582465103,"O:\\code\\game.cpp"
 -'  146  4  O:\code\game.cpp
 |4,39,146,4,1582465103,"O:\\code\\game.cpp"
+-'  66  0  O:\code\game.cpp
+|4,39,66,0,1582464942,"O:\\code\\game.cpp"
+-'  69  0  O:\code\game.cpp
+|4,39,69,0,1582464942,"O:\\code\\game.cpp"
+-'  64  0  O:\code\game.cpp
+|4,39,64,0,1582464942,"O:\\code\\game.cpp"
+-'  67  0  O:\code\game.cpp
+|4,39,67,0,1582464942,"O:\\code\\game.cpp"
+-'  59  0  O:\code\game.cpp
+|4,39,59,0,1582464942,"O:\\code\\game.cpp"
+-'  62  0  O:\code\game.cpp
+|4,39,62,0,1582464942,"O:\\code\\game.cpp"
+-'  57  0  O:\code\game.cpp
+|4,39,57,0,1582464942,"O:\\code\\game.cpp"
 -'  60  0  O:\code\game.cpp
 |4,39,60,0,1582464942,"O:\\code\\game.cpp"
+-'  167  4  O:\code\game.cpp
+|4,39,167,4,1582464939,"O:\\code\\game.cpp"
+-'  170  4  O:\code\game.cpp
+|4,39,170,4,1582464939,"O:\\code\\game.cpp"
+-'  165  4  O:\code\game.cpp
+|4,39,165,4,1582464939,"O:\\code\\game.cpp"
+-'  168  4  O:\code\game.cpp
+|4,39,168,4,1582464939,"O:\\code\\game.cpp"
+-'  160  4  O:\code\game.cpp
+|4,39,160,4,1582464939,"O:\\code\\game.cpp"
+-'  163  4  O:\code\game.cpp
+|4,39,163,4,1582464939,"O:\\code\\game.cpp"
+-'  158  4  O:\code\game.cpp
+|4,39,158,4,1582464939,"O:\\code\\game.cpp"
 -'  161  4  O:\code\game.cpp
 |4,39,161,4,1582464939,"O:\\code\\game.cpp"
--'  62  0  O:\code\game.cpp
-|4,39,62,0,1582464921,"O:\\code\\game.cpp"
--'  1  0  O:\code\game.cpp
-|4,39,1,0,1582464914,"O:\\code\\game.cpp"
--'  162  4  O:\code\game.cpp
-|4,39,162,4,1582464914,"O:\\code\\game.cpp"
--'  64  18  O:\code\game.cpp
-|4,39,64,18,1582464557,"O:\\code\\game.cpp"
--'  63  7  O:\code\game.cpp
-|4,39,63,7,1582464543,"O:\\code\\game.cpp"
--'  65  55  O:\code\game.cpp
-|4,39,65,55,1582464276,"O:\\code\\game.cpp"
--'  18  0  O:\code\game.cpp
-|4,39,18,0,1582464267,"O:\\code\\game.cpp"
--'  160  32  O:\code\game.cpp
-|4,39,160,32,1582463701,"O:\\code\\game.cpp"
--'  127  5  O:\code\game.cpp
-|4,39,127,5,1582463500,"O:\\code\\game.cpp"
--'  208  4  O:\code\game.cpp
-|4,39,208,4,1582463499,"O:\\code\\game.cpp"
--'  166  0  O:\code\game.cpp
-|4,39,166,0,1582463494,"O:\\code\\game.cpp"
--'  209  0  O:\code\game.cpp
-|4,39,209,0,1582463493,"O:\\code\\game.cpp"
--'  199  4  O:\code\game.cpp
-|4,39,199,4,1582463485,"O:\\code\\game.cpp"
--'  72  27  O:\code\game.cpp
-|4,39,72,27,1582463443,"O:\\code\\game.cpp"
--'  24  58  O:\code\game.cpp
-|4,39,24,58,1582463430,"O:\\code\\game.cpp"
--'  2  0  O:\code\game.cpp
-|4,39,2,0,1582463422,"O:\\code\\game.cpp"
--'  151  0  O:\code\game.cpp
-|4,39,151,0,1582463421,"O:\\code\\game.cpp"
--'  149  8  O:\code\game.cpp
-|4,39,149,8,1582459995,"O:\\code\\game.cpp"
--'  101  4  O:\code\game.cpp
-|4,39,101,4,1582459880,"O:\\code\\game.cpp"
--'  75  17  O:\code\game.cpp
-|4,39,75,17,1582459764,"O:\\code\\game.cpp"
--'  14  27  O:\code\game.cpp
-|4,39,14,27,1582459763,"O:\\code\\game.cpp"
--'  123  14  O:\code\game.cpp
-|4,39,123,14,1582459761,"O:\\code\\game.cpp"
--'  97  10  O:\code\game.cpp
-|4,39,97,10,1582459760,"O:\\code\\game.cpp"
--'  59  0  O:\code\game.cpp
-|4,39,59,0,1582459378,"O:\\code\\game.cpp"
--'  142  4  O:\code\game.cpp
-|4,39,142,4,1582459311,"O:\\code\\game.cpp"
--'  194  7  O:\code\game.cpp
-|4,39,194,7,1582456590,"O:\\code\\game.cpp"
--'  193  10  O:\code\game.cpp
-|4,39,193,10,1582456197,"O:\\code\\game.cpp"
--'  35  0  O:\code\game.cpp
-|4,39,35,0,1582455630,"O:\\code\\game.cpp"
--'  22  22  O:\code\game.cpp
-|4,39,22,22,1582455439,"O:\\code\\game.cpp"
--'  163  0  O:\code\game.cpp
-|4,39,163,0,1582455384,"O:\\code\\game.cpp"
--'  128  0  O:\code\game.cpp
-|4,39,128,0,1582455382,"O:\\code\\game.cpp"
--'  36  21  O:\code\game.cpp
-|4,39,36,21,1582453932,"O:\\code\\game.cpp"
--'  30  87  O:\code\game.cpp
-|4,39,30,87,1582453854,"O:\\code\\game.cpp"
--'  34  36  O:\code\game.cpp
-|4,39,34,36,1582453791,"O:\\code\\game.cpp"
--'  47  0  O:\code\game.cpp
-|4,39,47,0,1582453788,"O:\\code\\game.cpp"
--'  17  0  O:\ressources\shaders\postProcess.frag
-|4,39,17,0,1582417494,"O:\\ressources\\shaders\\postProcess.frag"
--'  17  0  O:\ressources\shaders\postProcess.frag
-|4,39,17,0,1582417494,"O:\\ressources\\shaders\\postProcess.frag"
--'  12  52  O:\ressources\shaders\postProcess.frag
-|4,39,12,52,1582416080,"O:\\ressources\\shaders\\postProcess.frag"
--'  12  52  O:\ressources\shaders\postProcess.frag
-|4,39,12,52,1582416080,"O:\\ressources\\shaders\\postProcess.frag"
--'  15  15  O:\ressources\shaders\postProcess.frag
-|4,39,15,15,1582415054,"O:\\ressources\\shaders\\postProcess.frag"
--'  15  15  O:\ressources\shaders\postProcess.frag
-|4,39,15,15,1582415054,"O:\\ressources\\shaders\\postProcess.frag"
--'  11  0  O:\ressources\shaders\postProcess.frag
-|4,39,11,0,1582413592,"O:\\ressources\\shaders\\postProcess.frag"
--'  11  0  O:\ressources\shaders\postProcess.frag
-|4,39,11,0,1582413592,"O:\\ressources\\shaders\\postProcess.frag"
--'  1  0  O:\ressources\shaders\postProcess.frag
-|4,39,1,0,1582411620,"O:\\ressources\\shaders\\postProcess.frag"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582411620,"O:\\code\\NERD_tree_1"
--'  1  0  O:\ressources\shaders\postProcess.frag
-|4,39,1,0,1582411620,"O:\\ressources\\shaders\\postProcess.frag"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582411620,"O:\\code\\NERD_tree_1"
--'  11  23  O:\ressources\shaders\image.frag
-|4,39,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
--'  11  23  O:\ressources\shaders\image.frag
-|4,39,11,23,1582310327,"O:\\ressources\\shaders\\image.frag"
--'  10  41  O:\ressources\shaders\image.frag
-|4,39,10,41,1582309680,"O:\\ressources\\shaders\\image.frag"
--'  10  41  O:\ressources\shaders\image.frag
-|4,39,10,41,1582309680,"O:\\ressources\\shaders\\image.frag"
--'  1  0  O:\ressources\shaders\image.frag
-|4,39,1,0,1582309675,"O:\\ressources\\shaders\\image.frag"
--'  1  0  O:\ressources\shaders\image.frag
-|4,39,1,0,1582309675,"O:\\ressources\\shaders\\image.frag"
--'  14  0  O:\code\NERD_tree_1
-|4,39,14,0,1582309675,"O:\\code\\NERD_tree_1"
--'  24  2  O:\code\NERD_tree_1
-|4,39,24,2,1582309670,"O:\\code\\NERD_tree_1"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582309670,"O:\\code\\NERD_tree_1"
--'  41  46  O:\ressources\shaders\sky.frag
-|4,39,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
--'  41  46  O:\ressources\shaders\sky.frag
-|4,39,41,46,1582304454,"O:\\ressources\\shaders\\sky.frag"
--'  50  27  O:\ressources\shaders\sky.frag
-|4,39,50,27,1582304326,"O:\\ressources\\shaders\\sky.frag"
--'  50  27  O:\ressources\shaders\sky.frag
-|4,39,50,27,1582304326,"O:\\ressources\\shaders\\sky.frag"
--'  38  31  O:\ressources\shaders\sky.frag
-|4,39,38,31,1582304252,"O:\\ressources\\shaders\\sky.frag"
--'  38  31  O:\ressources\shaders\sky.frag
-|4,39,38,31,1582304252,"O:\\ressources\\shaders\\sky.frag"
--'  48  19  O:\ressources\shaders\sky.frag
-|4,39,48,19,1582304199,"O:\\ressources\\shaders\\sky.frag"
--'  48  19  O:\ressources\shaders\sky.frag
-|4,39,48,19,1582304199,"O:\\ressources\\shaders\\sky.frag"
--'  25  13  O:\ressources\shaders\sky.frag
-|4,39,25,13,1582304189,"O:\\ressources\\shaders\\sky.frag"
--'  25  13  O:\ressources\shaders\sky.frag
-|4,39,25,13,1582304189,"O:\\ressources\\shaders\\sky.frag"
--'  52  41  O:\ressources\shaders\sky.frag
-|4,39,52,41,1582304062,"O:\\ressources\\shaders\\sky.frag"
--'  52  41  O:\ressources\shaders\sky.frag
-|4,39,52,41,1582304062,"O:\\ressources\\shaders\\sky.frag"
--'  47  0  O:\ressources\shaders\sky.frag
-|4,39,47,0,1582303345,"O:\\ressources\\shaders\\sky.frag"
--'  55  0  O:\ressources\shaders\sky.frag
-|4,39,55,0,1582303345,"O:\\ressources\\shaders\\sky.frag"
--'  47  0  O:\ressources\shaders\sky.frag
-|4,39,47,0,1582303345,"O:\\ressources\\shaders\\sky.frag"
--'  55  0  O:\ressources\shaders\sky.frag
-|4,39,55,0,1582303345,"O:\\ressources\\shaders\\sky.frag"
--'  21  17  O:\ressources\shaders\sky.frag
-|4,39,21,17,1582303270,"O:\\ressources\\shaders\\sky.frag"
--'  21  17  O:\ressources\shaders\sky.frag
-|4,39,21,17,1582303270,"O:\\ressources\\shaders\\sky.frag"
--'  19  5  O:\ressources\shaders\color.frag
-|4,39,19,5,1582302248,"O:\\ressources\\shaders\\color.frag"
--'  19  5  O:\ressources\shaders\color.frag
-|4,39,19,5,1582302248,"O:\\ressources\\shaders\\color.frag"
--'  12  15  O:\ressources\shaders\image.vert
-|4,39,12,15,1582302182,"O:\\ressources\\shaders\\image.vert"
--'  12  15  O:\ressources\shaders\image.vert
-|4,39,12,15,1582302182,"O:\\ressources\\shaders\\image.vert"
--'  11  18  O:\ressources\shaders\image.vert
-|4,39,11,18,1582302047,"O:\\ressources\\shaders\\image.vert"
--'  11  18  O:\ressources\shaders\image.vert
-|4,39,11,18,1582302047,"O:\\ressources\\shaders\\image.vert"
--'  3  0  O:\ressources\shaders\testShader.frag
-|4,39,3,0,1582302036,"O:\\ressources\\shaders\\testShader.frag"
--'  3  0  O:\ressources\shaders\testShader.frag
-|4,39,3,0,1582302036,"O:\\ressources\\shaders\\testShader.frag"
--'  1  0  O:\ressources\shaders\testShader.frag
-|4,39,1,0,1582302024,"O:\\ressources\\shaders\\testShader.frag"
--'  1  0  O:\ressources\shaders\testShader.frag
-|4,39,1,0,1582302024,"O:\\ressources\\shaders\\testShader.frag"
--'  1  0  O:\code\NERD_tree_1
-|4,39,1,0,1582302024,"O:\\code\\NERD_tree_1"
--'  188  4  O:\code\game.cpp
-|4,39,188,4,1582299155,"O:\\code\\game.cpp"
--'  162  4  O:\code\game.cpp
-|4,39,162,4,1582299155,"O:\\code\\game.cpp"
--'  140  36  O:\code\game.cpp
-|4,39,140,36,1582298802,"O:\\code\\game.cpp"
--'  139  36  O:\code\game.cpp
-|4,39,139,36,1582298798,"O:\\code\\game.cpp"
--'  130  34  O:\code\game.cpp
-|4,39,130,34,1582298798,"O:\\code\\game.cpp"
--'  148  0  O:\code\game.cpp
-|4,39,148,0,1582298796,"O:\\code\\game.cpp"
--'  129  0  O:\code\game.cpp
-|4,39,129,0,1582298796,"O:\\code\\game.cpp"
--'  134  0  O:\code\game.cpp
-|4,39,134,0,1582298711,"O:\\code\\game.cpp"
--'  139  0  O:\code\game.cpp
-|4,39,139,0,1582298711,"O:\\code\\game.cpp"
--'  115  0  O:\code\game.cpp
-|4,39,115,0,1582298711,"O:\\code\\game.cpp"
+-'  68  0  O:\code\game.cpp
+|4,39,68,0,1582464921,"O:\\code\\game.cpp"
+-'  71  0  O:\code\game.cpp
+|4,39,71,0,1582464921,"O:\\code\\game.cpp"
+-'  61  0  O:\code\game.cpp
+|4,39,61,0,1582464921,"O:\\code\\game.cpp"
+-'  64  0  O:\code\game.cpp
+|4,39,64,0,1582464921,"O:\\code\\game.cpp"
 
 # History of marks within files (newest to oldest):
 
-> O:\code\game.cpp
-	*	1582484943	0
-	"	94	37
-	^	94	39
-	.	94	37
-	+	47	0
-	+	47	5
-	+	47	55
-	+	47	25
-	+	47	66
-	+	47	53
-	+	47	38
-	+	47	0
-	+	16	0
-	+	34	35
-	+	27	24
-	+	34	0
-	+	28	45
-	+	29	25
-	+	30	87
-	+	34	0
-	+	29	35
-	+	33	16
-	+	34	22
-	+	35	0
-	+	34	21
-	+	35	6
-	+	45	21
-	+	36	12
-	+	26	45
-	+	24	5
-	+	25	0
-	+	21	0
-	+	26	0
-	+	23	0
-	+	24	57
-	+	21	24
-	+	89	0
-	+	144	0
-	+	151	0
-	+	144	0
-	+	151	0
-	+	21	0
-	+	22	22
-	+	94	37
-	+	36	0
-	+	24	22
-	+	144	41
-	+	88	43
-	+	197	0
-	+	193	49
-	+	197	0
-	+	193	8
-	+	193	0
-	+	196	0
-	+	88	44
-	+	195	101
-	+	194	40
-	+	88	43
-	+	215	0
-	+	83	10
-	+	83	0
-	+	125	32
-	+	142	5
-	+	14	47
-	+	75	33
-	+	83	0
-	+	125	0
-	+	97	58
-	+	123	30
-	+	97	36
-	+	214	50
-	+	146	0
-	+	144	5
-	+	142	4
-	+	149	49
-	+	150	38
-	+	72	27
-	+	112	50
-	+	124	25
-	+	209	0
-	+	208	0
-	+	162	42
-	+	160	32
-	+	19	38
-	+	20	3
-	+	65	49
-	+	63	85
-	+	64	64
-	+	65	59
-	+	57	0
-	+	59	43
-	+	57	7
-	+	63	7
-	+	58	18
-	+	64	18
-	+	65	49
-	+	162	0
-	+	160	4
-	+	162	4
-	+	161	35
-	+	193	5
-	+	94	37
-
 > O:\ressources\shaders\test\test.frag
-	*	1582484902	0
-	"	90	0
-	^	89	6
-	.	89	4
-	+	51	0
-	+	45	0
-	+	47	43
-	+	44	38
-	+	47	22
-	+	52	0
-	+	47	25
-	+	44	28
-	+	44	0
-	+	36	42
-	+	44	0
-	+	47	41
-	+	76	46
-	+	44	44
-	+	9	19
-	+	66	28
-	+	67	0
-	+	10	18
-	+	66	18
-	+	69	37
-	+	44	0
+	*	1582668706	0
+	"	145	4
+	^	145	6
+	.	145	4
+	+	38	36
+	+	32	5
+	+	32	49
+	+	38	18
+	+	38	19
 	+	38	0
-	+	34	0
-	+	25	29
-	+	26	35
-	+	31	27
-	+	30	0
-	+	26	0
-	+	29	17
-	+	33	16
-	+	24	57
-	+	28	19
-	+	32	40
-	+	79	0
-	+	77	0
-	+	79	14
-	+	18	18
-	+	19	25
-	+	18	27
-	+	19	45
-	+	79	5
-	+	66	10
-	+	69	10
-	+	72	25
-	+	76	40
-	+	79	45
-	+	79	0
-	+	70	13
-	+	72	32
-	+	18	47
-	+	18	35
-	+	19	52
-	+	20	15
-	+	71	15
-	+	72	0
-	+	76	0
-	+	79	5
-	+	72	43
-	+	70	0
-	+	78	16
-	+	79	55
-	+	84	0
-	+	81	25
-	+	73	22
-	+	75	21
-	+	73	0
-	+	87	0
-	+	86	13
-	+	76	0
-	+	82	27
-	+	88	12
-	+	83	14
+	+	32	51
+	+	38	70
+	+	30	88
+	+	38	4
+	+	38	5
+	+	38	26
+	+	32	5
+	+	38	0
+	+	32	0
+	+	59	17
 	+	88	35
-	+	79	0
-	+	73	22
-	+	88	9
-	+	73	20
-	+	78	4
-	+	81	23
-	+	77	0
-	+	81	0
-	+	80	14
-	+	38	25
-	+	32	8
-	+	38	25
-	+	32	36
-	+	38	56
-	+	48	15
-	+	49	69
-	+	43	25
-	+	42	10
-	+	43	49
-	+	50	22
-	+	43	32
-	+	49	78
-	+	89	4
+	+	59	18
+	+	57	18
+	+	58	20
+	+	57	18
+	+	58	20
+	+	38	0
+	+	31	0
+	+	30	86
+	+	147	0
+	+	146	0
+	+	159	0
+	+	131	0
+	+	129	28
+	+	146	14
+	+	159	29
+	+	129	22
+	+	132	14
+	+	159	35
+	+	151	23
+	+	159	28
+	+	159	21
+	+	159	28
+	+	38	0
+	+	32	63
+	+	39	39
+	+	41	0
+	+	40	26
+	+	37	36
+	+	33	34
+	+	37	15
+	+	33	60
+	+	34	55
+	+	36	17
+	+	34	37
+	+	35	18
+	+	36	5
+	+	34	55
+	+	32	49
+	+	36	0
+	+	32	0
+	+	36	4
+	+	34	40
+	+	36	5
+	+	34	48
+	+	58	21
+	+	57	18
+	+	88	53
+	+	34	49
+	+	32	64
+	+	142	0
+	+	151	0
+	+	30	86
+	+	32	98
+	+	120	60
+	+	32	51
+	+	30	52
+	+	33	39
+	+	159	42
+	+	157	0
+	+	156	0
+	+	152	19
+	+	153	23
+	+	152	25
+	+	153	29
+	+	152	17
+	+	153	21
+	+	154	17
+	+	159	0
+	+	154	15
+	+	159	0
+	+	155	38
+	+	152	24
+	+	154	69
+	+	153	28
+	+	155	42
+	+	152	24
+	+	155	41
+	+	158	27
+	+	153	0
+	+	152	4
+	+	158	5
+	+	135	45
+	+	145	4
+	k	111	38
 
-> O:\code\rendering\autoShaderProgram.hpp
-	*	1582465364	0
-	"	229	17
-	^	229	18
-	.	229	17
-	+	305	4
-	+	306	4
-	+	283	23
-	+	284	20
-	+	285	22
-	+	281	33
-	+	229	17
-	+	263	17
-	+	328	59
-	+	330	54
-	+	331	0
-	+	332	39
-	+	344	73
-	+	321	56
-	+	322	0
-	+	332	40
-	+	376	41
-	+	398	0
-	+	394	76
-	+	396	0
-	+	397	0
-	+	396	0
-	+	397	0
-	+	394	43
-	+	396	40
-	+	397	45
-	+	427	0
-	+	402	0
-	+	401	36
-	+	403	0
-	+	406	0
-	+	409	0
-	+	412	0
-	+	403	66
-	+	406	65
-	+	409	65
-	+	412	65
-	+	415	0
-	+	418	0
-	+	415	65
-	+	418	65
-	+	421	64
-	+	424	73
-	+	427	0
-	+	424	64
-	+	347	41
-	+	18	17
-	+	44	0
-	+	46	0
-	+	44	21
-	+	46	22
-	+	45	28
-	+	47	29
-	+	108	0
-	+	107	3
-	+	108	0
-	+	118	0
-	+	108	82
-	+	109	0
-	+	110	0
-	+	111	0
-	+	109	30
-	+	110	35
-	+	111	37
-	+	112	0
-	+	113	0
-	+	112	33
-	+	113	31
-	+	115	0
-	+	114	0
-	+	115	62
-	+	116	60
-	+	115	35
-	+	116	32
-	+	117	31
-	+	108	0
-	+	349	0
-	+	352	0
-	+	355	53
-	+	354	77
-	+	355	66
-	+	356	21
-	+	360	21
-	+	321	89
-	+	360	0
-	+	359	0
-	+	360	0
-	+	359	61
-	+	354	91
-	+	353	16
-	+	357	16
-	+	394	79
-	+	396	43
-	+	263	16
-	+	229	16
-	+	359	16
-	+	355	0
-	+	359	0
-	+	263	17
-	+	229	17
-
-> O:\ressources\shaders\test\test.vert
-	*	1582465083	0
-	"	8	30
-	^	8	31
-	.	8	30
-	+	6	0
-	+	3	0
-	+	3	13
-	+	5	0
-	+	3	0
-	+	8	35
-	+	2	0
-	+	4	13
-	+	9	16
-	+	8	30
+> O:\code\game.cpp
+	*	1582668705	0
+	"	90	35
+	^	202	53
+	.	90	35
+	+	52	22
+	+	19	32
+	+	20	46
+	+	22	70
+	+	23	101
+	+	23	0
+	+	176	4
+	+	177	4
+	+	146	0
+	+	175	52
+	+	236	95
+	+	237	0
+	+	236	5
+	+	237	103
+	+	222	5
+	+	237	5
+	+	129	28
+	+	130	32
+	+	124	0
+	+	123	0
+	+	124	15
+	+	97	44
+	+	153	4
+	+	153	0
+	+	173	5
+	+	174	0
+	+	173	4
+	+	174	4
+	+	173	4
+	+	236	5
+	+	237	0
+	+	130	0
+	+	124	0
+	+	124	87
+	+	97	43
+	+	98	5
+	+	124	5
+	+	125	5
+	+	131	5
+	+	130	5
+	+	129	4
+	+	124	4
+	+	130	4
+	+	151	0
+	+	151	45
+	+	151	4
+	+	151	0
+	+	151	7
+	+	224	0
+	+	222	0
+	+	222	49
+	+	124	0
+	+	125	0
+	+	129	5
+	+	130	5
+	+	151	0
+	+	14	34
+	+	58	22
+	+	57	38
+	+	58	36
+	+	59	19
+	+	255	0
+	+	254	0
+	+	255	0
+	+	255	31
+	+	254	20
+	+	252	36
+	+	254	32
+	+	57	34
+	+	252	23
+	+	254	62
+	+	254	0
+	+	253	0
+	+	254	0
+	+	251	0
+	+	255	0
+	+	232	0
+	+	236	0
+	+	231	38
+	+	235	0
+	+	234	38
+	+	130	0
+	+	253	26
+	+	190	31
+	+	192	0
+	+	191	39
+	+	200	0
+	+	222	0
+	+	194	0
+	+	200	0
+	+	194	12
+	+	195	51
+	+	199	0
+	+	198	53
+	+	203	0
+	+	202	52
+	+	90	35
 
 > O:\code\NERD_tree_1
-	*	1582464908	0
-	"	11	0
+	*	1582668638	0
+	"	15	0
 	.	1	0
 	+	1	0
 
-> O:\code\NERD_tree_8
-	*	1582464637	0
-	"	11	0
-	.	1	0
-	+	1	0
-
-> O:\code\materialRenderer\materialRenderer.hpp
-	*	1582464633	0
-	"	68	51
-	^	68	19
-	.	68	18
-	+	89	5
-	+	9	1
-	+	21	1
-	+	7	0
-	+	14	1
-	+	13	12
-	+	18	21
-	+	7	15
-	+	8	19
-	+	9	0
-	+	6	30
-	+	9	0
-	+	39	1
-	+	34	36
-	+	54	0
-	+	43	17
-	+	41	28
-	+	43	77
-	+	41	46
-	+	43	82
-	+	59	0
-	+	57	32
-	+	61	20
-	+	35	18
-	+	41	46
-	+	45	22
-	+	63	0
-	+	61	40
-	+	63	0
-	+	61	30
-	+	63	15
-	+	35	11
-	+	41	38
-	+	63	28
-	+	61	62
-	+	63	12
-	+	43	31
-	+	36	19
-	+	30	1
-	+	23	17
-	+	29	23
-	+	36	36
-	+	61	44
-	+	44	36
-	+	58	30
-	+	62	29
-	+	27	31
-	+	25	14
-	+	62	61
-	+	63	0
-	+	64	0
-	+	78	0
-	+	76	0
-	+	65	52
-	+	78	0
-	+	75	24
-	+	77	27
+> O:\code\rendering\autoShaderProgram.hpp
+	*	1582546213	0
+	"	351	97
+	^	351	98
+	.	351	97
+	+	132	60
+	+	131	35
+	+	132	32
+	+	133	31
+	+	124	0
+	+	372	0
+	+	375	0
+	+	378	53
+	+	377	77
+	+	378	66
+	+	379	21
+	+	383	21
+	+	337	89
+	+	383	0
+	+	382	0
+	+	383	0
+	+	382	61
+	+	377	91
+	+	376	16
+	+	380	16
+	+	423	79
+	+	425	43
+	+	279	16
+	+	245	16
+	+	382	16
+	+	378	0
+	+	382	0
+	+	279	17
+	+	245	17
+	+	14	21
 	+	44	25
-	+	58	0
-	+	75	64
-	+	39	0
-	+	19	20
-	+	20	25
-	+	37	21
-	+	48	66
-	+	49	38
-	+	50	39
-	+	70	28
-	+	71	68
-	+	73	43
-	+	38	28
-	+	52	45
-	+	53	38
-	+	73	71
-	+	71	46
-	+	74	0
-	+	72	85
-	+	50	37
-	+	67	0
-	+	65	55
-	+	69	0
-	+	75	66
-	+	67	7
-	+	68	18
-
-> O:\code\rendering\autoMesh.hpp
-	*	1582464632	0
-	"	13	0
-	^	120	45
-	.	120	0
-	+	41	0
-	+	44	0
-	+	27	0
-	+	41	28
-	+	55	81
-	+	56	55
-	+	35	20
-	+	36	17
-	+	38	23
-	+	39	23
-	+	41	23
-	+	37	32
-	+	56	23
-	+	42	31
-	+	51	28
-	+	55	5
-	+	56	5
-	+	42	0
-	+	30	0
-	+	51	0
-	+	27	0
-	+	14	30
-	+	15	52
-	+	27	0
-	+	12	24
-	+	17	0
-	+	27	0
-	+	17	33
-	+	22	0
-	+	18	57
-	+	17	16
-	+	18	16
-	+	19	51
-	+	23	0
-	+	20	59
-	+	21	56
-	+	16	21
-	+	17	32
-	+	18	44
-	+	19	41
-	+	27	0
-	+	24	0
-	+	110	0
-	+	113	33
-	+	114	0
+	+	45	32
+	+	107	0
+	+	106	0
+	+	107	33
+	+	108	34
+	+	110	31
 	+	111	0
-	+	112	0
-	+	110	0
-	+	113	0
-	+	113	68
-	+	113	0
-	+	113	81
-	+	113	61
-	+	116	15
-	+	113	0
-	+	116	0
-	+	116	16
-	+	116	0
-	+	105	0
-	+	102	39
-	+	105	0
-	+	105	12
-	+	105	0
-	+	105	13
-	+	105	75
-	+	105	23
-	+	105	12
-	+	105	13
-	+	105	0
-	+	104	0
-	+	105	12
-	+	105	18
-	+	105	51
-	+	105	26
-	+	105	62
-	+	105	60
-	+	105	12
-	+	105	48
-	+	105	83
-	+	105	14
-	+	105	37
-	+	105	0
-	+	105	115
-	+	105	48
-	+	105	29
-	+	105	59
-	+	105	0
-	+	104	12
-	+	118	86
-	+	122	0
-	+	118	22
-	+	120	47
-	+	121	14
-	+	123	0
-	+	123	90
-	+	123	0
-	+	118	80
-	+	120	44
-	+	120	0
+	+	109	39
+	+	107	66
+	+	108	69
+	+	109	72
+	+	110	87
+	+	109	95
+	+	108	92
+	+	107	89
+	+	402	27
+	+	401	6
+	+	107	81
+	+	108	84
+	+	109	87
+	+	110	79
+	+	401	41
+	+	402	0
+	+	400	36
+	+	401	30
+	+	412	46
+	+	414	77
+	+	400	48
+	+	13	15
+	+	36	31
+	+	37	38
+	+	106	0
+	+	89	0
+	+	88	0
+	+	89	92
+	+	90	0
+	+	91	0
+	+	90	34
+	+	91	37
+	+	92	0
+	+	91	0
+	+	92	40
+	+	89	92
+	+	90	88
+	+	91	91
+	+	92	94
+	+	89	0
+	+	360	52
+	+	361	31
+	+	349	42
+	+	413	63
+	+	400	88
+	+	349	80
+	+	350	79
+	+	351	59
+	+	350	75
+	+	351	78
+	+	349	80
+	+	350	32
+	+	351	27
+	+	350	79
+	+	351	80
+	+	352	40
+	+	361	82
+	+	349	97
+	+	350	97
+	+	351	97
 
-> O:\code\NERD_tree_12
-	*	1582464462	0
-	"	8	0
+> O:\code\utils\arcBallController.hpp
+	*	1582546212	0
+	"	41	4
+	^	29	23
+	.	41	0
+	+	63	36
+	+	63	24
+	+	63	36
+	+	63	24
+	+	64	0
+	+	34	49
+	+	36	19
+	+	63	50
+	+	13	0
+	+	38	39
+	+	40	0
+	+	38	4
+	+	40	4
+	+	40	0
+	+	38	4
+	+	40	4
+	+	43	0
+	+	40	0
+	+	43	0
+	+	40	0
+	+	43	0
+	+	40	0
+	+	43	0
+	+	43	8
+	+	43	0
+	+	43	33
+	+	40	0
+	+	43	0
+	+	40	0
+	+	22	0
+	+	17	32
+	+	18	0
+	+	20	0
+	+	21	0
+	+	18	80
+	+	20	24
+	+	20	25
+	+	21	37
+	+	20	47
+	+	20	49
+	+	21	70
+	+	40	0
+	+	43	5
+	+	38	4
+	+	40	4
+	+	43	4
+	+	43	0
+	+	39	0
+	+	40	0
+	+	43	0
+	+	43	4
+	+	43	0
+	+	40	0
+	+	43	0
+	+	40	0
+	+	62	0
+	+	63	0
+	+	51	0
+	+	49	39
+	+	51	0
+	+	53	58
+	+	56	0
+	+	53	0
+	+	56	0
+	+	53	28
+	+	11	0
+	+	64	0
+	+	44	0
+	+	47	0
+	+	60	32
+	+	20	0
+	+	31	0
+	+	60	0
+	+	10	20
+	+	60	38
+	+	54	27
+	+	55	52
+	+	54	54
+	+	55	55
+	+	54	55
+	+	55	56
+	+	29	22
+	+	40	0
+	+	41	0
+
+> O:\code\NERD_tree_4
+	*	1582546112	0
+	"	16	0
 	.	1	0
 	+	1	0
+
+> O:\uppLib\math\matrices.hpp
+	*	1582546109	0
+	"	204	0
+	^	134	23
+	.	134	22
+	+	198	46
+	+	198	0
+	+	198	11
+	+	198	42
+	+	198	53
+	+	198	54
+	+	198	53
+	+	198	13
+	+	198	0
+	+	198	60
+	+	198	57
+	+	197	20
+	+	197	7
+	+	197	0
+	+	198	0
+	+	197	0
+	+	195	0
+	+	197	0
+	+	198	0
+	+	196	0
+	+	195	13
+	+	197	0
+	+	193	27
+	+	195	36
+	+	196	17
+	+	199	28
+	+	174	0
+	+	179	0
+	+	173	0
+	+	171	14
+	+	173	8
+	+	173	0
+	+	178	0
+	+	176	19
+	+	177	17
+	+	173	20
+	+	177	20
+	+	173	20
+	+	177	20
+	+	179	0
+	+	72	0
+	+	72	73
+	+	72	0
+	+	72	16
+	+	72	68
+	+	71	0
+	+	72	0
+	+	68	0
+	+	72	0
+	+	68	50
+	+	69	50
+	+	70	50
+	+	139	0
+	+	137	0
+	+	135	0
+	+	134	15
+	+	136	0
+	+	134	22
+
+> O:\code\utils\flyCameraController.hpp
+	*	1582545771	0
+	"	28	4
+	^	40	25
+	.	28	0
+	+	1	36
+	+	2	6
+	+	66	5
+	+	4	0
+	+	6	0
+	+	13	0
+	+	15	10
+	+	6	25
+	+	15	66
+	+	18	0
+	+	19	0
+	+	22	0
+	+	24	33
+	+	28	64
+	+	29	40
+	+	30	28
+	+	32	4
+	+	32	0
+	+	33	39
+	+	53	8
+	+	56	27
+	+	35	30
+	+	52	0
+	+	35	30
+	+	38	0
+	+	39	0
+	+	42	0
+	+	45	0
+	+	39	31
+	+	42	31
+	+	45	31
+	+	39	0
+	+	37	13
+	+	11	15
+	+	12	20
+	+	15	96
+	+	20	20
+	+	21	30
+	+	37	37
+	+	40	0
+	+	43	0
+	+	46	0
+	+	40	34
+	+	43	34
+	+	46	28
+	+	51	0
+	+	49	36
+	+	50	18
+	+	48	36
+	+	50	22
+	+	48	19
+	+	50	36
+	+	52	32
+	+	13	0
+	+	19	0
+	+	53	19
+	+	56	0
+	+	55	0
+	+	56	42
+	+	53	39
+	+	33	0
+	+	54	0
+	+	33	0
+	+	46	24
+	+	40	24
+	+	46	24
+	+	28	0
+	+	31	0
+	+	28	0
+
+> P:\Programme\Vim 8.1\Vim\vim81\doc\help.txt
+	*	1582545730	0
+	"	1	0
+
+> O:\code\win32\main.cpp
+	*	1582544224	0
+	"	1033	30
+	^	1033	31
+	.	1033	30
+	+	1077	8
+	+	1035	0
+	+	1035	12
+	+	1035	0
+	+	1035	19
+	+	1035	24
+	+	1035	28
+	+	1035	29
+	+	960	0
+	+	866	36
+	+	866	0
+	+	1026	0
+	+	1026	39
+	+	1026	37
+	+	1026	62
+	+	1026	63
+	+	1026	0
+	+	1035	0
+	+	1077	20
+	+	1087	24
+	+	1097	20
+	+	1111	0
+	+	1109	0
+	+	1116	0
+	+	1116	45
+	+	880	0
+	+	840	0
+	+	863	0
+	+	852	8
+	+	850	20
+	+	852	19
+	+	851	39
+	+	862	0
+	+	856	0
+	+	854	33
+	+	852	0
+	+	862	0
+	+	852	0
+	+	855	28
+	+	857	34
+	+	858	11
+	+	859	11
+	+	858	18
+	+	859	18
+	+	860	18
+	+	866	0
+	+	868	0
+	+	867	22
+	+	840	22
+	+	864	22
+	+	840	32
+	+	867	25
+	+	1026	0
+	+	1025	32
+	+	1034	0
+	+	1035	0
+	+	1028	0
+	+	1077	0
+	+	1076	28
+	+	850	22
+	+	852	18
+	+	857	14
+	+	864	20
+	+	867	21
+	+	1025	34
+	+	1076	31
+	+	1087	24
+	+	1097	20
+	+	1116	0
+	+	1097	0
+	+	967	0
+	+	973	0
+	+	1017	0
+	+	1063	104
+	+	1273	13
+	+	1274	5
+	+	1273	5
+	+	523	24
+	+	1015	31
+	+	1013	38
+	+	1039	0
+	+	510	29
+	+	521	0
+	+	523	0
+	+	515	0
+	+	520	27
+	+	515	0
+	+	513	27
+	+	1235	31
+	+	509	20
+	+	523	0
+	+	513	0
+	+	522	0
+	+	513	45
+	+	522	39
+	+	1064	57
+	+	1064	0
+	+	519	0
+	+	1032	32
+	+	1033	30
+	t	1100	5
+
+> O:\code\win32\win32_fileListener.cpp
+	*	1582543166	0
+	"	51	4
+	^	272	14
+	.	272	13
+	+	13	18
+	+	13	12
+	+	44	0
+	+	48	0
+	+	47	0
+	+	55	0
+	+	50	34
+	+	51	13
+	+	50	33
+	+	53	0
+	+	52	31
+	+	272	71
+	+	273	13
+	+	240	9
+	+	241	0
+	+	272	13
+	+	273	12
+	+	52	93
+	+	53	0
+	+	53	69
+	+	181	36
+	+	30	0
+	+	52	24
+	+	53	0
+	+	52	60
+	+	137	0
+	+	181	0
+	+	181	33
+	+	261	0
+	+	271	38
+	+	275	0
+	+	41	0
+	+	80	0
+	+	214	0
+	+	260	0
+	+	135	34
+	+	181	43
+	+	192	19
+	+	192	0
+	+	192	21
+	+	189	30
+	+	182	0
+	+	184	20
+	+	181	0
+	+	180	25
+	+	187	0
+	+	185	26
+	+	186	14
+	+	183	18
+	+	188	0
+	+	192	29
+	+	190	11
+	+	189	11
+	+	190	35
+	+	192	0
+	+	191	35
+	+	185	22
+	+	190	54
+	+	276	0
+	+	265	0
+	+	260	0
+	+	65	0
+	+	135	0
+	+	48	22
+	+	52	25
+	+	272	12
+	+	52	93
+	+	88	26
+	+	89	86
+	+	90	84
+	+	90	0
+	+	91	0
+	+	90	64
+	+	14	23
+	+	89	26
+	+	90	68
+	+	273	12
+	+	14	18
+	+	87	0
+	+	121	0
+	+	123	0
+	+	121	0
+	+	123	12
+	+	123	0
+	+	122	90
+	+	123	0
+	+	13	0
+	+	272	13
 
 > O:\code\platform.hpp
-	*	1582464305	0
-	"	1	0
+	*	1582542115	0
+	"	2	0
 	^	37	16
 	.	44	0
 	+	53	23
@@ -1201,6 +1445,327 @@ $renderState
 	+	35	0
 	+	37	15
 	+	44	0
+
+> O:\code\NERD_tree_3
+	*	1582542114	0
+	"	14	0
+	.	1	0
+	+	1	0
+
+> O:\code\NERD_tree_2
+	*	1582541984	0
+	"	6	0
+	.	1	0
+	+	1	0
+
+> O:\code\materialRenderer\materialRenderer.hpp
+	*	1582494743	0
+	"	5	0
+	^	68	34
+	.	68	33
+	+	23	0
+	+	6	30
+	+	23	0
+	+	53	1
+	+	48	36
+	+	69	0
+	+	57	17
+	+	55	28
+	+	57	77
+	+	55	46
+	+	57	82
+	+	74	0
+	+	72	32
+	+	76	20
+	+	49	18
+	+	55	46
+	+	59	22
+	+	78	0
+	+	76	40
+	+	78	0
+	+	76	30
+	+	78	15
+	+	49	11
+	+	55	38
+	+	78	28
+	+	76	62
+	+	78	12
+	+	57	31
+	+	50	19
+	+	44	1
+	+	37	17
+	+	43	23
+	+	50	36
+	+	76	44
+	+	58	36
+	+	73	30
+	+	77	29
+	+	41	31
+	+	39	14
+	+	77	61
+	+	78	0
+	+	79	0
+	+	93	0
+	+	91	0
+	+	80	52
+	+	93	0
+	+	90	24
+	+	92	27
+	+	58	25
+	+	73	0
+	+	90	64
+	+	53	0
+	+	33	20
+	+	34	25
+	+	51	21
+	+	62	66
+	+	63	38
+	+	64	39
+	+	85	28
+	+	86	68
+	+	88	43
+	+	52	28
+	+	66	45
+	+	67	38
+	+	88	71
+	+	86	46
+	+	89	0
+	+	87	85
+	+	64	37
+	+	82	0
+	+	80	55
+	+	84	0
+	+	90	66
+	+	82	7
+	+	83	18
+	+	21	25
+	+	22	20
+	+	9	22
+	+	10	15
+	+	9	24
+	+	10	25
+	+	11	21
+	+	9	20
+	+	10	20
+	+	12	21
+	+	21	0
+	+	8	5
+	+	20	5
+	+	13	21
+	+	14	21
+	+	15	18
+	+	16	18
+	+	17	26
+	+	20	0
+	+	17	7
+	+	18	23
+	+	20	0
+	+	19	23
+	+	67	38
+	+	68	33
+
+> O:\code\NERD_tree_6
+	*	1582494304	0
+	"	16	0
+	.	1	0
+	+	1	0
+
+> O:\code\NERD_tree_5
+	*	1582494302	0
+	"	8	0
+	.	1	0
+	+	1	0
+
+> O:\code\utils\transform.hpp
+	*	1582493947	0
+	"	13	21
+	^	13	23
+	.	13	22
+	+	1	24
+	+	2	24
+	+	22	5
+	+	4	0
+	+	14	0
+	+	13	22
+
+> O:\code\rendering\autoMesh.hpp
+	*	1582493660	0
+	"	10	0
+	^	120	45
+	.	120	0
+	+	41	0
+	+	44	0
+	+	27	0
+	+	41	28
+	+	55	81
+	+	56	55
+	+	35	20
+	+	36	17
+	+	38	23
+	+	39	23
+	+	41	23
+	+	37	32
+	+	56	23
+	+	42	31
+	+	51	28
+	+	55	5
+	+	56	5
+	+	42	0
+	+	30	0
+	+	51	0
+	+	27	0
+	+	14	30
+	+	15	52
+	+	27	0
+	+	12	24
+	+	17	0
+	+	27	0
+	+	17	33
+	+	22	0
+	+	18	57
+	+	17	16
+	+	18	16
+	+	19	51
+	+	23	0
+	+	20	59
+	+	21	56
+	+	16	21
+	+	17	32
+	+	18	44
+	+	19	41
+	+	27	0
+	+	24	0
+	+	110	0
+	+	113	33
+	+	114	0
+	+	111	0
+	+	112	0
+	+	110	0
+	+	113	0
+	+	113	68
+	+	113	0
+	+	113	81
+	+	113	61
+	+	116	15
+	+	113	0
+	+	116	0
+	+	116	16
+	+	116	0
+	+	105	0
+	+	102	39
+	+	105	0
+	+	105	12
+	+	105	0
+	+	105	13
+	+	105	75
+	+	105	23
+	+	105	12
+	+	105	13
+	+	105	0
+	+	104	0
+	+	105	12
+	+	105	18
+	+	105	51
+	+	105	26
+	+	105	62
+	+	105	60
+	+	105	12
+	+	105	48
+	+	105	83
+	+	105	14
+	+	105	37
+	+	105	0
+	+	105	115
+	+	105	48
+	+	105	29
+	+	105	59
+	+	105	0
+	+	104	12
+	+	118	86
+	+	122	0
+	+	118	22
+	+	120	47
+	+	121	14
+	+	123	0
+	+	123	90
+	+	123	0
+	+	118	80
+	+	120	44
+	+	120	0
+
+> O:\ressources\shaders\test\test.vert
+	*	1582493308	0
+	"	5	0
+	^	8	31
+	.	8	30
+	+	6	0
+	+	3	0
+	+	3	13
+	+	5	0
+	+	3	0
+	+	8	35
+	+	2	0
+	+	4	13
+	+	9	16
+	+	8	30
+
+> O:\code\utils\camera.hpp
+	*	1582493132	0
+	"	13	34
+	.	17	0
+	+	1	21
+	+	2	21
+	+	25	5
+	+	4	0
+	+	17	0
+	+	12	33
+	+	14	31
+	+	17	50
+	+	17	0
+	+	17	37
+	+	17	0
+	+	12	52
+	+	13	66
+	+	17	37
+	+	17	31
+	+	12	44
+	+	13	62
+	+	14	61
+	+	17	10
+	+	17	66
+	+	17	62
+	+	10	6
+	+	17	35
+	+	12	45
+	+	14	29
+	+	17	36
+	+	17	32
+	+	13	90
+	+	12	45
+	+	13	76
+	+	14	52
+	+	4	35
+	+	4	0
+	+	4	33
+	+	17	25
+	+	17	0
+	+	10	0
+	+	4	0
+	+	14	0
+	+	10	0
+	+	17	0
+
+> O:\code\NERD_tree_8
+	*	1582464637	0
+	"	11	0
+	.	1	0
+	+	1	0
+
+> O:\code\NERD_tree_12
+	*	1582464462	0
+	"	8	0
+	.	1	0
+	+	1	0
 
 > O:\code\rendering\renderState.hpp
 	*	1582464194	0
@@ -1328,52 +1893,6 @@ $renderState
 	+	102	8
 	+	103	0
 
-> O:\code\utils\camera.hpp
-	*	1582459505	0
-	"	2	0
-	.	17	0
-	+	1	21
-	+	2	21
-	+	25	5
-	+	4	0
-	+	17	0
-	+	12	33
-	+	14	31
-	+	17	50
-	+	17	0
-	+	17	37
-	+	17	0
-	+	12	52
-	+	13	66
-	+	17	37
-	+	17	31
-	+	12	44
-	+	13	62
-	+	14	61
-	+	17	10
-	+	17	66
-	+	17	62
-	+	10	6
-	+	17	35
-	+	12	45
-	+	14	29
-	+	17	36
-	+	17	32
-	+	13	90
-	+	12	45
-	+	13	76
-	+	14	52
-	+	4	35
-	+	4	0
-	+	4	33
-	+	17	25
-	+	17	0
-	+	10	0
-	+	4	0
-	+	14	0
-	+	10	0
-	+	17	0
-
 > O:\code\NERD_tree_9
 	*	1582459090	0
 	"	4	0
@@ -1481,12 +2000,6 @@ $renderState
 	+	98	29
 	+	84	0
 	+	54	8
-
-> O:\code\NERD_tree_4
-	*	1582457233	0
-	"	14	0
-	.	1	0
-	+	1	0
 
 > O:\ressources\shaders\image.vert
 	*	1582457232	0
@@ -1597,12 +2110,6 @@ $renderState
 	+	18	5
 	+	19	26
 
-> O:\code\NERD_tree_3
-	*	1582457211	0
-	"	10	0
-	.	1	0
-	+	1	0
-
 > O:\code\rendering\framebuffer.hpp
 	*	1582457207	0
 	"	124	0
@@ -1641,96 +2148,6 @@ $renderState
 	+	127	30
 	+	128	14
 	+	125	26
-
-> O:\code\win32\main.cpp
-	*	1582457203	0
-	"	1004	4
-	^	1002	30
-	.	1002	29
-	+	970	31
-	+	554	4
-	+	1235	12
-	+	1239	0
-	+	1233	60
-	+	554	0
-	+	970	31
-	+	1233	12
-	+	1239	0
-	+	1232	38
-	+	1234	12
-	+	1233	27
-	+	1236	0
-	+	1239	0
-	+	1237	0
-	+	716	46
-	+	715	97
-	+	38	26
-	+	850	42
-	+	38	16
-	+	850	25
-	+	872	39
-	+	873	59
-	+	1060	60
-	+	1060	0
-	+	1060	56
-	+	1060	59
-	+	1060	0
-	+	1060	48
-	+	1060	0
-	+	1060	37
-	+	1060	41
-	+	1060	0
-	+	38	0
-	+	850	0
-	+	873	0
-	+	233	17
-	+	233	0
-	+	294	0
-	+	296	37
-	+	296	72
-	+	296	38
-	+	296	26
-	+	296	0
-	+	295	59
-	+	296	68
-	+	296	0
-	+	296	69
-	+	296	0
-	+	295	0
-	+	296	0
-	+	295	0
-	+	942	0
-	+	941	0
-	+	1060	0
-	+	1060	26
-	+	1060	0
-	+	1060	39
-	+	1060	0
-	+	1060	16
-	+	1060	31
-	+	1060	10
-	+	1060	0
-	+	1060	22
-	+	1060	38
-	+	1060	39
-	+	1060	0
-	+	1006	0
-	+	977	3
-	+	1060	0
-	+	978	0
-	+	1060	0
-	+	984	50
-	+	1010	0
-	+	1048	8
-	+	1003	0
-	+	999	12
-	+	1000	0
-	+	999	19
-	+	1000	24
-	+	999	24
-	+	1001	28
-	+	1002	29
-	t	1088	5
 
 > O:\ressources\shaders\postProcess.frag
 	*	1582456618	0
@@ -1783,18 +2200,6 @@ $renderState
 	+	16	6
 	+	15	17
 
-> O:\code\NERD_tree_5
-	*	1582456532	0
-	"	14	0
-	.	1	0
-	+	1	0
-
-> O:\code\NERD_tree_6
-	*	1582456474	0
-	"	10	0
-	.	1	0
-	+	1	0
-
 > O:\ressources\shaders\color.frag
 	*	1582455754	0
 	"	6	0
@@ -1835,12 +2240,6 @@ $renderState
 	+	18	28
 	+	19	5
 	+	20	5
-
-> O:\code\NERD_tree_2
-	*	1582454435	0
-	"	11	0
-	.	1	0
-	+	1	0
 
 > O:\code\rendering\texture.hpp
 	*	1582417202	0
@@ -2260,47 +2659,6 @@ $renderState
 	+	339	0
 	+	343	0
 
-> O:\code\utils\arcBallController.hpp
-	*	1582403621	0
-	"	18	0
-	^	54	51
-	.	54	50
-	+	1	32
-	+	2	6
-	+	72	5
-	+	6	0
-	+	3	0
-	+	4	35
-	+	26	45
-	+	30	0
-	+	29	0
-	+	54	36
-	+	54	0
-	+	50	0
-	+	54	20
-	+	54	27
-	+	50	18
-	+	54	0
-	+	53	0
-	+	52	20
-	+	51	26
-	+	30	20
-	+	58	20
-	+	60	0
-	+	60	33
-	+	62	25
-	+	58	20
-	+	62	25
-	+	39	36
-	+	42	24
-	+	39	36
-	+	45	36
-	+	48	24
-	+	60	0
-	+	26	49
-	+	28	19
-	+	54	50
-
 > O:\code\win32\win32_gameHooks.cpp
 	*	1582402760	0
 	"	106	19
@@ -2676,100 +3034,6 @@ $renderState
 	+	8	0
 	+	7	19
 
-> O:\code\win32\win32_fileListener.cpp
-	*	1582299432	0
-	"	272	13
-	^	272	14
-	.	272	13
-	+	13	18
-	+	13	12
-	+	44	0
-	+	48	0
-	+	47	0
-	+	55	0
-	+	50	34
-	+	51	13
-	+	50	33
-	+	53	0
-	+	52	31
-	+	272	71
-	+	273	13
-	+	240	9
-	+	241	0
-	+	272	13
-	+	273	12
-	+	52	93
-	+	53	0
-	+	53	69
-	+	181	36
-	+	30	0
-	+	52	24
-	+	53	0
-	+	52	60
-	+	137	0
-	+	181	0
-	+	181	33
-	+	261	0
-	+	271	38
-	+	275	0
-	+	41	0
-	+	80	0
-	+	214	0
-	+	260	0
-	+	135	34
-	+	181	43
-	+	192	19
-	+	192	0
-	+	192	21
-	+	189	30
-	+	182	0
-	+	184	20
-	+	181	0
-	+	180	25
-	+	187	0
-	+	185	26
-	+	186	14
-	+	183	18
-	+	188	0
-	+	192	29
-	+	190	11
-	+	189	11
-	+	190	35
-	+	192	0
-	+	191	35
-	+	185	22
-	+	190	54
-	+	276	0
-	+	265	0
-	+	260	0
-	+	65	0
-	+	135	0
-	+	48	22
-	+	52	25
-	+	272	12
-	+	52	93
-	+	88	26
-	+	89	86
-	+	90	84
-	+	90	0
-	+	91	0
-	+	90	64
-	+	14	23
-	+	89	26
-	+	90	68
-	+	273	12
-	+	14	18
-	+	87	0
-	+	121	0
-	+	123	0
-	+	121	0
-	+	123	12
-	+	123	0
-	+	122	90
-	+	123	0
-	+	13	0
-	+	272	13
-
 > O:\code\win32\win32_glFunctions.hpp
 	*	1582289431	0
 	"	221	0
@@ -3037,16 +3301,6 @@ $renderState
 	+	82	33
 	+	79	43
 
-> O:\code\utils\transform.hpp
-	*	1582155591	0
-	"	7	0
-	^	18	6
-	.	4	0
-	+	1	24
-	+	2	24
-	+	18	5
-	+	4	0
-
 > O:\ressources\shaders\testShader.vert
 	*	1582155386	0
 	"	5	0
@@ -3173,38 +3427,6 @@ $renderState
 	"	6	0
 	.	1	0
 	+	1	0
-
-> O:\uppLib\math\matrices.hpp
-	*	1582054017	0
-	"	183	28
-	^	183	29
-	.	183	28
-	+	182	46
-	+	182	0
-	+	182	11
-	+	182	42
-	+	182	53
-	+	182	54
-	+	182	53
-	+	182	13
-	+	182	0
-	+	182	60
-	+	182	57
-	+	181	20
-	+	181	7
-	+	181	0
-	+	182	0
-	+	181	0
-	+	179	0
-	+	181	0
-	+	182	0
-	+	180	0
-	+	179	13
-	+	181	0
-	+	177	27
-	+	179	36
-	+	180	17
-	+	183	28
 
 > O:\uppLib\allocators\allocator.hpp
 	*	1582053135	0

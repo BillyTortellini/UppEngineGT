@@ -10,6 +10,8 @@ namespace AutoUniformType
     {
         MODEL_MATRIX = 0,
         VIEW_MATRIX,
+        INVERSE_VIEW_MATRIX,
+        NORMAL_MATRIX,
         PROJECTION_MATRIX,
         MVP_MATRIX,
         VP_MATRIX,
@@ -31,12 +33,16 @@ const char* toStr(AutoUniformType::ENUM type)
             return "MODEL_MATRIX";
         case VIEW_MATRIX:
             return "VIEW_MATRIX";
+        case INVERSE_VIEW_MATRIX:
+            return "INVERSE_VIEW_MATRIX";
         case PROJECTION_MATRIX:
             return "PROJECTION_MATRIX";
         case MVP_MATRIX:
             return "MVP_MATRIX";
         case VP_MATRIX:
             return "VP_MATRIX";
+        case NORMAL_MATRIX:
+            return "NORMAL_MATRIX";
         case CAMERA_POS:
             return "CAMERA_POS";
         case TIME:
@@ -80,6 +86,11 @@ SupportedAutoUniform supportedAutoUniforms[] = {
     SupportedAutoUniform("u_viewmat", AutoUniformType::VIEW_MATRIX, GL_FLOAT_MAT4, true), 
     SupportedAutoUniform("u_viewmatrix", AutoUniformType::VIEW_MATRIX, GL_FLOAT_MAT4, true), 
 
+    SupportedAutoUniform("u_inverseview", AutoUniformType::INVERSE_VIEW_MATRIX, GL_FLOAT_MAT3, true), 
+    SupportedAutoUniform("u_invview", AutoUniformType::INVERSE_VIEW_MATRIX, GL_FLOAT_MAT3, true), 
+    SupportedAutoUniform("u_invviewmat", AutoUniformType::INVERSE_VIEW_MATRIX, GL_FLOAT_MAT3, true), 
+    SupportedAutoUniform("u_invviewmatrix", AutoUniformType::INVERSE_VIEW_MATRIX, GL_FLOAT_MAT3, true), 
+
     SupportedAutoUniform("u_projection", AutoUniformType::PROJECTION_MATRIX, GL_FLOAT_MAT4, true), 
     SupportedAutoUniform("u_p", AutoUniformType::PROJECTION_MATRIX, GL_FLOAT_MAT4, true), 
     SupportedAutoUniform("u_projectionmat", AutoUniformType::PROJECTION_MATRIX, GL_FLOAT_MAT4, true), 
@@ -92,6 +103,11 @@ SupportedAutoUniform supportedAutoUniforms[] = {
     SupportedAutoUniform("u_vp", AutoUniformType::VP_MATRIX, GL_FLOAT_MAT4, true), 
     SupportedAutoUniform("u_vpmat", AutoUniformType::VP_MATRIX, GL_FLOAT_MAT4, true), 
     SupportedAutoUniform("u_vpmatrix", AutoUniformType::VP_MATRIX, GL_FLOAT_MAT4, true), 
+
+    SupportedAutoUniform("u_normal", AutoUniformType::NORMAL_MATRIX, GL_FLOAT_MAT3, false), 
+    SupportedAutoUniform("u_normalmat", AutoUniformType::NORMAL_MATRIX, GL_FLOAT_MAT3, false), 
+    SupportedAutoUniform("u_normalmatrix", AutoUniformType::NORMAL_MATRIX, GL_FLOAT_MAT3, false), 
+    SupportedAutoUniform("u_nmat", AutoUniformType::NORMAL_MATRIX, GL_FLOAT_MAT3, false), 
 
     SupportedAutoUniform("u_campos", AutoUniformType::CAMERA_POS, GL_FLOAT_VEC3, true), 
     SupportedAutoUniform("u_cam", AutoUniformType::CAMERA_POS, GL_FLOAT_VEC3, true), 
@@ -330,12 +346,19 @@ void updatePerFrameUniforms(AutoShaderProgram* program, Camera3D* cam, const vec
     program->lastUpdateFrame = renderState.frameCounter;
 
     mat4 vp = cam->projection * cam->view;
+    mat3 inverseView = mat3(vec3(cam->view.columns[0].x, cam->view.columns[0].y, cam->view.columns[0].z),
+                            vec3(cam->view.columns[1].x, cam->view.columns[1].y, cam->view.columns[1].z),
+                            vec3(cam->view.columns[2].x, cam->view.columns[2].y, cam->view.columns[2].z));
+    inverseView = transpose(inverseView);
     for (AutoUniform& u : program->perFrame) 
     {
         switch (u.type)
         {
             case AutoUniformType::VIEW_MATRIX:
                 glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &cam->view);
+                break;
+            case AutoUniformType::INVERSE_VIEW_MATRIX:
+                glUniformMatrix3fv(u.location, 1, GL_FALSE, (GLfloat*) &inverseView);
                 break;
             case AutoUniformType::PROJECTION_MATRIX:
                 glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &cam->projection);
@@ -374,6 +397,8 @@ void updatePerModelUniforms(AutoShaderProgram* program, Camera3D* cam, const Tra
 
     mat4 model = transform.toModelMat();
     mat4 mvp = cam->projection * cam->view * model;
+    mat3 normalView = mat3(cam->view.getDataPtr()); // This is wrong, because it is wrong
+    mat3 normal = normalView * transform.toNormalMat();
     for (AutoUniform& u : program->perModel) 
     {
         switch (u.type)
@@ -383,6 +408,10 @@ void updatePerModelUniforms(AutoShaderProgram* program, Camera3D* cam, const Tra
                 break;
             case AutoUniformType::MVP_MATRIX:
                 glUniformMatrix4fv(u.location, 1, GL_FALSE, (GLfloat*) &mvp);
+                break;
+            case AutoUniformType::NORMAL_MATRIX:
+                invalid_path("Normal matrix not yet defined\n");
+                glUniformMatrix3fv(u.location, 1, GL_FALSE, (GLfloat*) &normal);
                 break;
             default:
                 invalid_path("ERROR");
